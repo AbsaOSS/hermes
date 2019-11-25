@@ -7,7 +7,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 import za.co.absa.hermes.utils.HelperFunctions
 
 object DatasetComparisonJob {
-  private val conf: Config = ConfigFactory.load
+  private val conf: Config = ConfigFactory.load()
   private val errorColumnName: String = conf.getString("dataset-comparison.errColumn")
   private val tmpColumnName: String = conf.getString("dataset-comparison.tmpColumn")
   private val comparisonUniqueId: String = conf.getString("dataset-comparison.comparisonUniqueId")
@@ -63,7 +63,7 @@ object DatasetComparisonJob {
   }
 
   /**
-    * Renames all columns expect the keys and append prefix to them.
+    * Renames all columns expect the keys and appends prefix to them.
     *
     * @param dataSet Dataset that needs columns renamed
     * @param keys Keys that are not to be renamed
@@ -114,7 +114,7 @@ object DatasetComparisonJob {
   }
 
   /**
-    * Creates and write a parquet that has the original data and differences that were found.
+    * Creates and writes a parquet file that has the original data and differences that were found.
     *
     * @param keys Unique keys of the data frames
     * @param path Path where the difference will be written to

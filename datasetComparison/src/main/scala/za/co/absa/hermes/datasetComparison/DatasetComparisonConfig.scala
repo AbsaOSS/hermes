@@ -18,7 +18,7 @@ case class DatasetComparisonConfig(rawFormat: String = "xml",
                                    keys: Option[Seq[String]] = None) {
   /**
     * Checks if keys are defined
-    * @return True or false if the keys are defined
+    * @return True if the keys are defined
     */
   def hasKeysDefined: Boolean = keys.isDefined
 

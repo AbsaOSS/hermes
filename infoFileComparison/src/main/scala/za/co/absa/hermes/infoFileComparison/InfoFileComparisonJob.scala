@@ -39,7 +39,7 @@ object InfoFileComparisonJob {
     val diff: List[ModelDifference[_]] = refControlMeasure.compareWith(newControlMeasure)
 
     if (diff.nonEmpty) {
-      val serializedData: String = ModelDifferenceParser.asJson(diff)
+      val serializedData = ModelDifferenceParser.asJson(diff)
       saveDataToFile(serializedData, cmd.outPath)
 
       throw InfoFilesDifferException(cmd.refPath, cmd.newPath, cmd.outPath)
