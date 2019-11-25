@@ -11,24 +11,23 @@ val baseDependencies = List(
 )
 
 val datasetComparisonDependencies = List(
-  "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-  "org.apache.spark" %% "spark-sql" % "2.4.4" % Provided,
-  "com.databricks" %% "spark-xml" % "0.5.0",
-  "org.apache.hadoop" % "hadoop-hdfs" % "2.7.7" % Provided,
-  "org.apache.hadoop" % "hadoop-client" % "2.7.7" % Provided,
-  "io.netty" % "netty-all" % "4.1.36.Final"
+  "org.apache.spark"  %% "spark-core"    % "2.4.4"        % Provided,
+  "org.apache.spark"  %% "spark-sql"     % "2.4.4"        % Provided,
+  "com.databricks"    %% "spark-xml"     % "0.5.0",
+  "org.apache.hadoop" %  "hadoop-hdfs"   % "2.7.7"        % Provided,
+  "org.apache.hadoop" %  "hadoop-client" % "2.7.7"        % Provided,
+  "io.netty"          %  "netty-all"     % "4.1.36.Final"
 )
 
 val compareInfoFileDependencies = List(
-  "za.co.absa" % "atum" % "0.2.5",
+  "za.co.absa"           %  "atum"         % "0.2.5",
   "com.github.pathikrit" %% "better-files" % "3.8.0"
-
 )
 
 val utilsDependencies = List(
   "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-  "org.apache.spark" %% "spark-sql" % "2.4.4" % Provided,
-  "com.databricks" %% "spark-xml" % "0.5.0"
+  "org.apache.spark" %% "spark-sql"  % "2.4.4" % Provided,
+  "com.databricks"   %% "spark-xml"  % "0.5.0"
 )
 
 lazy val datasetComparison = project
