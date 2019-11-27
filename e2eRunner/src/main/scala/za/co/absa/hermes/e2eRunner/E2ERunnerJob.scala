@@ -72,7 +72,7 @@ object E2ERunnerJob {
   }
 
   def main(args: Array[String]): Unit = {
-    val cmd = E2ERunnerConfig.getCmdLineArguments(args)
+    val cmd = E2ERunnerConfig.getCmdLineArguments(args, stdParamsOverride, confParamsOverride)
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(s"End2End test of ${cmd.datasetName} (v.${cmd.datasetVersion}) " +

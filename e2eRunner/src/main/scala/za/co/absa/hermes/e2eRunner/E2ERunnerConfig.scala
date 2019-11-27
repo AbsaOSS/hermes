@@ -77,15 +77,36 @@ case class E2ERunnerConfig(rawFormat: String = "parquet",
 
 object E2ERunnerConfig {
 
+  private def mergeConf(args: Array[String], maybeConf: Option[String]): Array[String] = {
+    if (maybeConf.isEmpty) {
+      args
+    } else {
+      val argsInPairs = arrayToMap(args)
+      val confInPairs = arrayToMap(maybeConf.get.split(" ").filter(_.nonEmpty))
+
+      (argsInPairs ++ confInPairs).flatMap{ case (k, v) => Array(k, v) }.toArray
+    }
+  }
+
+  private def arrayToMap[T](arr: Array[T]): Map[T, T] = {
+    arr.grouped(2).map { case Array(key, value) => (key, value)}.toMap
+  }
+
   /**
     * Parses and validates an Array of input parameters and creates an instance of CmdConfig case class
+    *
     * @param args Array of argument to be parsed
     * @return Returns a CmdConfig instance holding parameters passed
     */
-  def getCmdLineArguments(args: Array[String]): E2ERunnerConfig = {
+  def getCmdLineArguments(args: Array[String],
+                          maybeStdConf: Option[String] = None,
+                          maybeConfConf: Option[String] = None): E2ERunnerConfig = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
-    parser.parse(args, E2ERunnerConfig()) match {
+    val argsWithStdConf = mergeConf(args, maybeStdConf)
+    val argsWithConfConf = mergeConf(argsWithStdConf, maybeConfConf)
+
+    parser.parse(argsWithConfConf, E2ERunnerConfig()) match {
       case Some(config) => config
       case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
     }
