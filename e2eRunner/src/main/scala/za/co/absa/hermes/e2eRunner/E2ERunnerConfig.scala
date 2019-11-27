@@ -87,12 +87,10 @@ object E2ERunnerConfig {
   def getCmdLineArguments(args: Array[String]): E2ERunnerConfig = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
-    val optionCmd = parser.parse(args, E2ERunnerConfig())
-    if (optionCmd.isEmpty) {
-      // Wrong arguments provided, the message is already displayed
-      System.exit(1)
+    parser.parse(args, E2ERunnerConfig()) match {
+      case Some(config) => config
+      case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
     }
-    optionCmd.get
   }
 
   private class CmdParser(programName: String) extends OptionParser[E2ERunnerConfig](programName) {

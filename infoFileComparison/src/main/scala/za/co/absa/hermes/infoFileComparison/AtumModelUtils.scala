@@ -50,23 +50,21 @@ object AtumModelUtils {
       * @return               Returns a list of model differences
       */
     def compareWith(otherMetadata: ControlMeasureMetadata, curPath: String): List[ModelDifference[_]] = {
-      val diffs = simpleCompare(
-          metadata.sourceApplication,
-          otherMetadata.sourceApplication, s"$curPath.sourceApplication"
-        ) ::
-        simpleCompare(metadata.country, otherMetadata.country, s"$curPath.country") ::
-        simpleCompare(metadata.historyType, otherMetadata.historyType, s"$curPath.historyType") ::
-        simpleCompare(metadata.dataFilename, otherMetadata.dataFilename, s"$curPath.dataFilename") ::
-        simpleCompare(metadata.sourceType, otherMetadata.sourceType, s"$curPath.sourceType") ::
-        simpleCompare(metadata.version, otherMetadata.version, s"$curPath.version") ::
-        simpleCompare(metadata.informationDate, otherMetadata.informationDate, s"$curPath.informationDate") ::
-        Nil
+      val diffs = List(
+        simpleCompare(metadata.sourceApplication, otherMetadata.sourceApplication, s"$curPath.sourceApplication"),
+        simpleCompare(metadata.country, otherMetadata.country, s"$curPath.country"),
+        simpleCompare(metadata.historyType, otherMetadata.historyType, s"$curPath.historyType"),
+        simpleCompare(metadata.dataFilename, otherMetadata.dataFilename, s"$curPath.dataFilename"),
+        simpleCompare(metadata.sourceType, otherMetadata.sourceType, s"$curPath.sourceType"),
+        simpleCompare(metadata.version, otherMetadata.version, s"$curPath.version"),
+        simpleCompare(metadata.informationDate, otherMetadata.informationDate, s"$curPath.informationDate")
+      ).flatten
 
       val additionalInfoDiff = additionalInfoComparison(metadata.additionalInfo,
         otherMetadata.additionalInfo,
         s"$curPath.additionalInfo")
 
-      diffs.flatten ::: additionalInfoDiff
+      diffs ::: additionalInfoDiff
     }
 
     /**
@@ -89,11 +87,11 @@ object AtumModelUtils {
       )
 
       was.flatMap {
-        case (wasKey, wasValue) if wasKey == confVersionKey =>
-          logVersionAndContinue(confNameKey, wasValue, is.get(wasKey))
+        case (`confVersionKey`, wasValue) =>
+          logVersionAndContinue(confNameKey, wasValue, is.get(confVersionKey))
           None
-        case (wasKey, wasValue) if wasKey == stdVersionKey =>
-          logVersionAndContinue(stdNameKey, wasValue, is.get(wasKey))
+        case (`stdVersionKey`, wasValue) =>
+          logVersionAndContinue(stdNameKey, wasValue, is.get(stdVersionKey))
           None
         case (wasKey, _) if wasKey == stdAppIdKey || wasKey == confAppIdKey =>
           None

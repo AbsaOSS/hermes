@@ -17,12 +17,10 @@ object InfoComparisonConfig {
   def getCmdLineArguments(args: Array[String]): InfoComparisonConfig = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
-    val optionCmd = parser.parse(args, InfoComparisonConfig())
-    if (optionCmd.isEmpty) {
-      // Wrong arguments provided, the message is already displayed
-      System.exit(1)
+    parser.parse(args, InfoComparisonConfig())  match {
+      case Some(config) => config
+      case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
     }
-    optionCmd.get
   }
 
   private class CmdParser(programName: String) extends OptionParser[InfoComparisonConfig](programName) {

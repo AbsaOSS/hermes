@@ -30,11 +30,11 @@ object DatasetComparisonJob {
     * @param sparkSession Implicit spark session
     */
   def execute(cmd: DatasetComparisonConfig)(implicit sparkSession: SparkSession): Unit = {
-    val dfReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
-    val expectedDf = dfReader.load(cmd.refPath)
-    val actualDf = dfReader.load(cmd.newPath)
-    val expectedSchema = getSchemaWithoutMetadata(expectedDf.schema)
-    val actualSchema = getSchemaWithoutMetadata(actualDf.schema)
+    val dfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
+    val expectedDf: DataFrame = dfReader.load(cmd.refPath)
+    val actualDf: DataFrame = dfReader.load(cmd.newPath)
+    val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 
     if (cmd.hasKeysDefined) {
       checkForDuplicateRows(actualDf, cmd.getKeys, cmd.outPath)
@@ -70,7 +70,7 @@ object DatasetComparisonJob {
     * @param prefix Prefix that will be put in front of column names
     * @return New DataFrame with renamed columns
     */
-  private def prefixColumns(dataSet: DataFrame, keys: Seq[String], prefix: String): DataFrame = {
+  private def renameColumns(dataSet: DataFrame, keys: Seq[String], prefix: String): DataFrame = {
     val renamedColumns = dataSet.columns.map { column =>
       if (keys.contains(column)) {
         dataSet(column)
@@ -92,8 +92,8 @@ object DatasetComparisonJob {
     * @return Returns new data frame containing both data frames with renamed columns and joined on keys.
     */
   private def joinTwoDataFrames(expected: DataFrame, actual: DataFrame, keys: Seq[String]): DataFrame = {
-    val dfNewExpected = prefixColumns(expected, keys, expectedPrefix)
-    val dfNewColumnsActual = prefixColumns(actual, keys, actualPrefix)
+    val dfNewExpected = renameColumns(expected, keys, expectedPrefix)
+    val dfNewColumnsActual = renameColumns(actual, keys, actualPrefix)
     dfNewExpected.join(dfNewColumnsActual, keys,"full")
   }
 

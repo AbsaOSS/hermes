@@ -9,6 +9,7 @@ import za.co.absa.hermes.utils.HelperFunctions
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.sys.process._
+import scala.util.Try
 
 object E2ERunnerJob {
   private val conf: Config = ConfigFactory.load
@@ -27,23 +28,13 @@ object E2ERunnerJob {
 
   private val sparkSubmitOptions = conf.getString("e2e-runner.sparkSubmitOptions")
 
-  private val confExtraJavaOpts: ConfigObject = conf.getObject("e2e-runner.sparkConf.extraJavaOptions")
+  private val confExtraJavaOpts = conf.getObject("e2e-runner.sparkConf.extraJavaOptions")
 
-  private val stdFullJarPath: String = s"$dceJarPath/$dceStdName"
-  private val confFullJarPath: String = s"$dceJarPath/$dceConfName"
+  private val stdFullJarPath = s"$dceJarPath/$dceStdName"
+  private val confFullJarPath = s"$dceJarPath/$dceConfName"
 
-  private val stdParamsOverride: Option[String] = if (conf.hasPath("e2e-runner.stdParams") &&
-                                                      conf.getString("e2e-runner.stdParams").nonEmpty) {
-    Some(conf.getString("e2e-runner.stdParams"))
-  } else {
-    None
-  }
-  private val confParamsOverride: Option[String] = if (conf.hasPath("e2e-runner.confParams") &&
-                                                       conf.getString("e2e-runner.confParams").nonEmpty) {
-    Some(conf.getString("e2e-runner.confParams"))
-  } else {
-    None
-  }
+  private val stdParamsOverride = Try(conf.getString("e2e-runner.stdParams")).filter(_.nonEmpty).toOption
+  private val confParamsOverride = Try(conf.getString("e2e-runner.confParams")).filter(_.nonEmpty).toOption
 
   private def runBashCmd(bashCmd: String): String = {
     (s"echo $bashCmd" #| "bash").!!

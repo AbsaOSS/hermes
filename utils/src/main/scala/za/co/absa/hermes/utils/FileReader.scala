@@ -3,23 +3,11 @@ package za.co.absa.hermes.utils
 import scala.io.Source
 
 object FileReader {
-  def readFileAsListOfLines(filename: String): List[String] = {
-    val sourceFile = Source.fromFile(filename)
-    try {
-      sourceFile.getLines().toList // making it a List to copy the content of the file into memory before it's closed
-    } finally {
-      sourceFile.close()
-    }
-  }
+  def readFileAsListOfLines(filename: String): List[String] =
+    usingFile(Source.fromFile(filename)) { _.getLines().toList }
 
-  def readFileAsString(filename: String, lineSeparator: String = "\n"): String = {
-    val sourceFile = Source.fromFile(filename)
-    try {
-      sourceFile.getLines().mkString(lineSeparator)
-    } finally {
-      sourceFile.close()
-    }
-  }
+  def readFileAsString(filename: String, lineSeparator: String = "\n"): String =
+    usingFile(Source.fromFile(filename)) { _.getLines().mkString(lineSeparator) }
 
   /**
     * Performs an operation using a resource, and then closes the resource, even if the operation throws an exception.
