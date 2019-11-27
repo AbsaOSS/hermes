@@ -30,8 +30,7 @@ case class E2ERunnerConfig(rawFormat: String = "parquet",
     } else if (menasCredentialsFile.isEmpty && menasAuthKeytab.isDefined) {
       s"--menas-auth-keytab ${menasAuthKeytab.get}"
     } else {
-      //TODO
-      throw new IllegalArgumentException
+      throw new IllegalArgumentException("Either keytab or credentials file has to be set")
     }
   }
 
@@ -39,8 +38,7 @@ case class E2ERunnerConfig(rawFormat: String = "parquet",
     if (rowTag.isDefined) {
       s"--raw-format xml --row-tag $rowTag"
     } else {
-      //TODO
-      throw new IllegalArgumentException
+      throw new IllegalArgumentException("RowTag is a mandatory parameter for xml raw format")
     }
   }
 
