@@ -17,6 +17,8 @@ package za.co.absa.hermes.datasetComparison
 
 import scopt.OptionParser
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * This is a class for configuration provided by the command line parameters
   *
@@ -46,12 +48,12 @@ case class DatasetComparisonConfig(rawFormat: String = "xml",
 
 object DatasetComparisonConfig {
 
-  def getCmdLineArguments(args: Array[String]): DatasetComparisonConfig = {
+  def getCmdLineArguments(args: Array[String]): Try[DatasetComparisonConfig] = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
     parser.parse(args, DatasetComparisonConfig()) match {
-      case Some(config) => config
-      case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
+      case Some(config) => Success(config)
+      case _            => Failure(new IllegalArgumentException("Wrong options provided. List can be found above"))
     }
   }
 

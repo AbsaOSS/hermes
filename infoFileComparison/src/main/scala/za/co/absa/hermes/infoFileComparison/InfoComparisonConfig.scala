@@ -17,6 +17,8 @@ package za.co.absa.hermes.infoFileComparison
 
 import scopt.OptionParser
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * This is a class for configuration provided by the command line parameters
   *
@@ -29,12 +31,12 @@ case class InfoComparisonConfig(newPath: String = "",
 
 object InfoComparisonConfig {
 
-  def getCmdLineArguments(args: Array[String]): InfoComparisonConfig = {
+  def getCmdLineArguments(args: Array[String]): Try[InfoComparisonConfig] = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
     parser.parse(args, InfoComparisonConfig())  match {
-      case Some(config) => config
-      case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
+      case Some(config) => Success(config)
+      case _            => Failure(new IllegalArgumentException("Wrong options provided. List can be found above"))
     }
   }
 

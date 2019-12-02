@@ -21,6 +21,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import za.co.absa.hermes.utils.HelperFunctions
 
+import scala.util.{Failure, Success}
+
 object DatasetComparisonJob {
   private val conf: Config = ConfigFactory.load()
   private val errorColumnName: String = conf.getString("dataset-comparison.errColumn")
@@ -30,7 +32,11 @@ object DatasetComparisonJob {
   private val expectedPrefix: String = conf.getString("dataset-comparison.expectedPrefix")
 
   def main(args: Array[String]): Unit = {
-    val cmd = DatasetComparisonConfig.getCmdLineArguments(args)
+    val cmd = DatasetComparisonConfig.getCmdLineArguments(args)  match {
+      case Success(value) => value
+      case Failure(exception) => throw exception
+    }
+
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(s"Dataset comparison - '${cmd.newPath}' and '${cmd.refPath}'")
       .getOrCreate()

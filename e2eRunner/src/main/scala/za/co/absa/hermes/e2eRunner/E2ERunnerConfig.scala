@@ -17,6 +17,7 @@ package za.co.absa.hermes.e2eRunner
 
 import scopt.OptionParser
 
+import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex
 
 /**
@@ -115,15 +116,15 @@ object E2ERunnerConfig {
     */
   def getCmdLineArguments(args: Array[String],
                           maybeStdConf: Option[String] = None,
-                          maybeConfConf: Option[String] = None): E2ERunnerConfig = {
+                          maybeConfConf: Option[String] = None): Try[E2ERunnerConfig] = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
     val argsWithStdConf = mergeConf(args, maybeStdConf)
     val argsWithConfConf = mergeConf(argsWithStdConf, maybeConfConf)
 
     parser.parse(argsWithConfConf, E2ERunnerConfig()) match {
-      case Some(config) => config
-      case _            => throw new IllegalArgumentException("Wrong options provided. List can be found above")
+      case Some(config) => Success(config)
+      case _            => Failure(new IllegalArgumentException("Wrong options provided. List can be found above"))
     }
   }
 

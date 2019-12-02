@@ -29,6 +29,7 @@ import za.co.absa.atum.utils.ARMImplicits
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success}
 
 object InfoFileComparisonJob {
   private val conf: Config = ConfigFactory.load
@@ -37,7 +38,10 @@ object InfoFileComparisonJob {
   private lazy val hadoopConfiguration = getHadoopConfiguration
 
   def main(args: Array[String]): Unit = {
-    val cmd = InfoComparisonConfig.getCmdLineArguments(args)
+    val cmd = InfoComparisonConfig.getCmdLineArguments(args) match {
+      case Success(value) => value
+      case Failure(exception) => throw exception
+    }
 
     execute(cmd)
   }

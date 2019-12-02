@@ -24,7 +24,7 @@ import za.co.absa.hermes.utils.HelperFunctions
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.sys.process._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object E2ERunnerJob {
   private val conf: Config = ConfigFactory.load
@@ -87,7 +87,10 @@ object E2ERunnerJob {
   }
 
   def main(args: Array[String]): Unit = {
-    val cmd = E2ERunnerConfig.getCmdLineArguments(args, stdParamsOverride, confParamsOverride)
+    val cmd = E2ERunnerConfig.getCmdLineArguments(args, stdParamsOverride, confParamsOverride) match {
+      case Success(value) => value
+      case Failure(exception) => throw exception
+    }
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(s"End2End test of ${cmd.datasetName} (v.${cmd.datasetVersion}) " +

@@ -2,6 +2,8 @@ package za.co.absa.hermes.datasetComparison
 
 import org.scalatest.FunSuite
 
+import scala.util.{Failure, Success}
+
 class ConfigSuite extends FunSuite {
 
   private val newPath = "/tmp/standardized_out"
@@ -22,7 +24,10 @@ class ConfigSuite extends FunSuite {
         "--out-path", outPath,
         "--keys", "id"
       )
-    )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
 
     assert(cmdConfig.rawFormat == parquetFormat)
     assert(cmdConfig.newPath == newPath)
@@ -41,7 +46,10 @@ class ConfigSuite extends FunSuite {
         "--out-path", outPath,
         "--keys", "id,alfa"
       )
-    )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
 
     assert(cmdConfig.rawFormat == csvFormat)
     assert(cmdConfig.csvDelimiter == delimiter)
@@ -62,7 +70,10 @@ class ConfigSuite extends FunSuite {
         "--ref-path", refPath,
         "--out-path", outPath
       )
-    )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
 
     assert(cmdConfig.rawFormat == csvFormat)
     assert(cmdConfig.csvDelimiter == delimiter)
@@ -81,7 +92,10 @@ class ConfigSuite extends FunSuite {
         "--ref-path", refPath,
         "--out-path", outPath
       )
-    )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
 
     assert(cmdConfig.rawFormat == xmlFormat)
     assert(cmdConfig.rowTag == Option(rowTag))
@@ -89,5 +103,16 @@ class ConfigSuite extends FunSuite {
     assert(cmdConfig.refPath == refPath)
     assert(cmdConfig.outPath == outPath)
   }
-}
 
+  test("Missing mandatory options") {
+    val cmdConfig = DatasetComparisonConfig.getCmdLineArguments(
+      Array(
+        "--new-path", newPath,
+        "--out-path", outPath
+      )
+    ) match {
+      case Success(value) => fail("DatasetComparisonConfig returned while it should have thrown an error")
+      case Failure(exception) => succeed
+    }
+  }
+}

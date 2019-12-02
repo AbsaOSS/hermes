@@ -2,6 +2,8 @@ package za.co.absa.hermes.infoFileComparison
 
 import org.scalatest.FunSuite
 
+import scala.util.{Failure, Success}
+
 class ConfigSuite extends FunSuite {
   private val newPath = "/tmp/standardized_out"
   private val refPath = "/tmp/reference_data"
@@ -16,10 +18,38 @@ class ConfigSuite extends FunSuite {
         "--ref-path", refPath,
         "--out-path", outPath
       )
-    )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
 
     assert(cmdConfig.newPath == newPath)
     assert(cmdConfig.refPath == refPath)
     assert(cmdConfig.outPath == outPath)
+  }
+
+  test("Missing mandatory options") {
+    val cmdConfig = InfoComparisonConfig.getCmdLineArguments(
+      Array(
+        "--new-path", newPath,
+        "--out-path", outPath
+      )
+    ) match {
+      case Success(value) => fail("InfoComparisonConfig returned while it should have thrown an error")
+      case Failure(exception) => succeed
+    }
+  }
+
+  test("Ref and New path are the same") {
+    val cmdConfig = InfoComparisonConfig.getCmdLineArguments(
+      Array(
+        "--new-path", newPath,
+        "--ref-path", newPath,
+        "--out-path", outPath
+      )
+    ) match {
+      case Success(value) => fail("InfoComparisonConfig returned while it should have thrown an error")
+      case Failure(exception) => succeed
+    }
   }
 }
