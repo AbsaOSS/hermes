@@ -35,8 +35,8 @@ class ConfigSuite extends FunSuite {
         "--out-path", outPath
       )
     ) match {
-      case Success(value) => fail("InfoComparisonConfig returned while it should have thrown an error")
-      case Failure(exception) => succeed
+      case Success(_) => fail("InfoComparisonConfig returned while it should have thrown an error")
+      case Failure(_) => succeed
     }
   }
 
@@ -48,8 +48,8 @@ class ConfigSuite extends FunSuite {
         "--out-path", outPath
       )
     ) match {
-      case Success(value) => fail("InfoComparisonConfig returned while it should have thrown an error")
-      case Failure(exception) => succeed
+      case Success(_) => fail("InfoComparisonConfig returned while it should have thrown an error")
+      case Failure(_) => succeed
     }
   }
 }

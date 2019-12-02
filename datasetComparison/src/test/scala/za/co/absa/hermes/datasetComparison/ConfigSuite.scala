@@ -111,8 +111,8 @@ class ConfigSuite extends FunSuite {
         "--out-path", outPath
       )
     ) match {
-      case Success(value) => fail("DatasetComparisonConfig returned while it should have thrown an error")
-      case Failure(exception) => succeed
+      case Success(_) => fail("DatasetComparisonConfig returned while it should have thrown an error")
+      case Failure(_) => succeed
     }
   }
 }
