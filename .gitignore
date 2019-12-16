@@ -45,21 +45,10 @@ build.log
 .cache*
 dependency-reduced-pom.xml
 
-_testOutput
-_tradeOutput
-_tradeData
-_countryMT
-_currencyMT
-_productMT
-_nestedStructs
-myTestCheckpoints
-
 **/main/resources/application.properties
 **/main/resources/application.conf
 **/main/resources/application.yaml
 **/main/resources/application.yml
-**/main/resources/spline.properties
-**/main/resources/kafka.properties
 **/enceladus_env.sh
 *.config
 *.keytab
