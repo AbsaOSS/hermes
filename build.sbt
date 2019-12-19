@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-ThisBuild / organization := "za.co.absa"
+ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
-ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := "2.11.12"
 
 import Dependencies._
@@ -26,9 +25,20 @@ val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly :=
   case _                       => MergeStrategy.first
 }
 
+lazy val hermes = (project in file("."))
+  .settings(
+    name := "hermes",
+
+    // No need to publish the aggregation [empty] artifact
+    publishArtifact := false,
+    publish := {},
+    publishLocal := {}
+  ).aggregate(datasetComparison, e2eRunner, infoFileComparison, utils)
+
 lazy val datasetComparison = project
   .dependsOn(utils)
   .settings(
+    name := "dataset-comparison",
     libraryDependencies ++= baseDependencies,
     libraryDependencies ++= datasetComparisonDependencies,
     mainClass in assembly := Some("za.co.absa.hermes.datasetComparison.datasetComparisonJob"),
@@ -39,6 +49,7 @@ lazy val datasetComparison = project
 lazy val e2eRunner = project
   .dependsOn(datasetComparison, infoFileComparison)
   .settings(
+    name := "e2e-runner",
     mainClass in assembly := Some("za.co.absa.hermes.e2eRunner.E2ERunnerJob"),
     test in assembly := {},
     mergeStrategy
@@ -46,6 +57,7 @@ lazy val e2eRunner = project
 
 lazy val infoFileComparison = project
   .settings(
+    name := "info-file-comparison",
     libraryDependencies ++= baseDependencies,
     libraryDependencies ++= compareInfoFileDependencies,
     mainClass in assembly := Some("za.co.absa.hermes.infoFileComparison.InfoFileComparisonJob"),
