@@ -18,6 +18,8 @@ ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
 import Dependencies._
+import sbtrelease._
+import ReleaseTransformations._
 
 val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly := {
   case PathList("META-INF", _) => MergeStrategy.discard
@@ -25,10 +27,25 @@ val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly :=
   case _                       => MergeStrategy.first
 }
 
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommand("publishSigned"),
+  //  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
+
 lazy val hermes = (project in file("."))
   .settings(
     name := "hermes",
-
+    releaseVersionBump := sbtrelease.Version.Bump.Minor,
     // No need to publish the aggregation [empty] artifact
     publishArtifact := false,
     publish := {},
@@ -72,3 +89,7 @@ lazy val utils = project
     test in assembly := {},
     mergeStrategy
   )
+
+ThisBuild / releaseNextVersion := {
+  ver => Version(ver).map(_.bump(releaseVersionBump.value).asSnapshot.string).getOrElse(versionFormatError(ver))
+}
