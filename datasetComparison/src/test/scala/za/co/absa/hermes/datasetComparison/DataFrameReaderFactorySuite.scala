@@ -68,7 +68,7 @@ class DataFrameReaderFactorySuite extends FunSuite with SparkTestBase {
     val reader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
     val df = reader.load(getClass.getResource("/json_orig").getPath)
 
-    Console.withOut(outCapture) { df.show(false) }
+    Console.withOut(outCapture) { df.orderBy("id").show(false) }
     val result = new String(outCapture.toByteArray).replace("\r\n", "\n").split("\n").toList
     assert(lines == result)
   }
