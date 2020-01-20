@@ -25,7 +25,7 @@ A Spark job for comparing two data sets.
 Basic running example
 ```bash
 spark-submit \
---class za.co.absa.hermes.datasetComparison.ComparisonJob \
+--class za.co.absa.hermes.datasetComparison.DatasetComparisonJob \
 --master local \
 --deploy-mode client \
 --executor-memory 2g \
@@ -42,7 +42,7 @@ spark-submit \
 #### Where
 ```bash
 Datasets Comparison 
-Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.ComparisonJob hermes.jar [options]
+Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.DatasetComparisonJob hermes.jar [options]
 
   -f, --raw-format <value> format of the raw data (csv, xml, parquet,fixed-width, etc.)
   --row-tag <value>        use the specific row tag instead of 'ROW' for XML format
