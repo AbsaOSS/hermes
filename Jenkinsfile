@@ -40,7 +40,7 @@ pipeline {
         }
         stage ('Package') {
             steps {
-                sh "sbt -no-colors -batch package"
+                sh "sbt -no-colors -batch assembly"
             }
         }
     }
