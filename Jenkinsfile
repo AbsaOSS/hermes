@@ -15,14 +15,12 @@
 
 def hermesSlaveLabel = getHermesSlaveLabel()
 def toolVersionGit = getToolVersionGit()
-def toolVersionSBT = getToolVersionSBT()
 
 pipeline {
     agent {
         label "${hermesSlaveLabel}"
     }
     tools {
-        sbt "${toolVersionSBT}"
         git "${toolVersionGit}"
     }
     options {
