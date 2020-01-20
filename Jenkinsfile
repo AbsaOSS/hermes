@@ -15,7 +15,7 @@
 
 def hermesSlaveLabel = getHermesSlaveLabel()
 def toolVersionGit = getToolVersionGit()
-def tooVersionSBT = getToolVersionSBT()
+def toolVersionSBT = getToolVersionSBT()
 
 pipeline {
     agent {
