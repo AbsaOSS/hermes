@@ -18,8 +18,7 @@ ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
 import Dependencies._
-import sbtrelease._
-import ReleaseTransformations._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly := {
   case PathList("META-INF", _) => MergeStrategy.discard
@@ -36,7 +35,7 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommand("publishSigned"),
-  //  releaseStepCommand("sonatypeBundleRelease"),
+//  releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   commitNextVersion,
   pushChanges
@@ -89,7 +88,3 @@ lazy val utils = project
     test in assembly := {},
     mergeStrategy
   )
-
-ThisBuild / releaseNextVersion := {
-  ver => Version(ver).map(_.bump(releaseVersionBump.value).asSnapshot.string).getOrElse(versionFormatError(ver))
-}
