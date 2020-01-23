@@ -115,14 +115,18 @@ object E2ERunnerJob {
     val (stdTime, _) = HelperFunctions.calculateTime { runBashCmd(standardization) }
     scribe.info("Standardization Passed")
 
+    scribe.info("Standardization Comparison started")
+    scribe.info("Standardization Comparison of Dataset")
     try {
-      scribe.info("Standardization Comparison started")
-      scribe.info("Standardization Comparison of Dataset")
       DatasetComparisonJob.execute(getDatasetComparisonConfig(cmd, stdPathHDFS))
-      scribe.info("Standardization Comparison of INFO file")
-      InfoFileComparisonJob.execute(getInfoComparisonConfig(cmd, stdPathHDFS))
     } catch {
       case e: DatasetsDifferException => errAccumulator.add(e.getMessage)
+    }
+    
+    scribe.info("Standardization Comparison of INFO file")
+    try {
+      InfoFileComparisonJob.execute(getInfoComparisonConfig(cmd, stdPathHDFS))
+    } catch {
       case e: InfoFilesDifferException => errAccumulator.add(e.getMessage)
     }
 
@@ -130,14 +134,18 @@ object E2ERunnerJob {
     val (confTime, _) = HelperFunctions.calculateTime { runBashCmd(conformance) }
     scribe.info("Conformance Passed")
 
+    scribe.info("Conformance Comparison started")
+    scribe.info("Conformance Comparison of Dataset")
     try {
-      scribe.info("Conformance Comparison started")
-      scribe.info("Conformance Comparison of Dataset")
       DatasetComparisonJob.execute(getDatasetComparisonConfig(cmd, confPathHDFS))
-      scribe.info("Conformance Comparison of INFO file")
-      InfoFileComparisonJob.execute(getInfoComparisonConfig(cmd, confPathHDFS))
     } catch {
       case e: DatasetsDifferException => errAccumulator.add(e.getMessage)
+    }
+
+    scribe.info("Conformance Comparison of INFO file")
+    try {
+      InfoFileComparisonJob.execute(getInfoComparisonConfig(cmd, confPathHDFS))
+    } catch {
       case e: InfoFilesDifferException => errAccumulator.add(e.getMessage)
     }
 
