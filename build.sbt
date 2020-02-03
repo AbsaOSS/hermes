@@ -23,6 +23,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly := {
   case PathList("META-INF", _) => MergeStrategy.discard
   case "application.conf"      => MergeStrategy.concat
+  case "reference.conf"        => MergeStrategy.concat
   case _                       => MergeStrategy.first
 }
 
