@@ -46,15 +46,35 @@ object DatasetComparisonJob {
 
   def getComparisonArguments(format: String, cmd: DatasetComparisonConfig ): FormatComparisonConfig = {
     format match {
-      case "refRawFormat" => new FormatComparisonConfig(
-        rawFormat = cmd.refRawFormat,
-        rowTag = cmd.refRowTag,
-        csvDelimiter = cmd.refCsvDelimiter,
-        csvHeader = cmd.refCsvHeader,
-        path = cmd.refPath,
-        outPath = cmd.outPath,
-        keys = cmd.keys)
-      case "newRawPath" => if (format == "") {
+      case "refRawFormat" => if (cmd.rawFormat != "") {
+        new FormatComparisonConfig(
+          rawFormat = cmd.rawFormat,
+          rowTag = cmd.rowTag,
+          csvDelimiter = cmd.csvDelimiter,
+          csvHeader = cmd.csvHeader,
+          path = cmd.refPath,
+          outPath = cmd.outPath,
+          keys = cmd.keys)
+      } else {
+        new FormatComparisonConfig(
+          rawFormat = cmd.refRawFormat,
+          rowTag = cmd.refRowTag,
+          csvDelimiter = cmd.refCsvDelimiter,
+          csvHeader = cmd.refCsvHeader,
+          path = cmd.refPath,
+          outPath = cmd.outPath,
+          keys = cmd.keys)
+      }
+      case "newRawFormat" => if (cmd.rawFormat != "" && cmd.newRawFormat == "" ) {
+        new FormatComparisonConfig(
+          rawFormat = cmd.rawFormat,
+          rowTag = cmd.rowTag,
+          csvDelimiter = cmd.csvDelimiter,
+          csvHeader = cmd.csvHeader,
+          path = cmd.newPath,
+          outPath = cmd.outPath,
+          keys = cmd.keys)
+      } else if (cmd.newRawFormat == "" && cmd.refRawFormat != "") {
         new FormatComparisonConfig(
           rawFormat = cmd.refRawFormat,
           rowTag = cmd.refRowTag,

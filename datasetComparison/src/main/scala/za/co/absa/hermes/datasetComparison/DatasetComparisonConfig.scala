@@ -25,12 +25,16 @@ import scala.util.{Failure, Success, Try}
   * Note: scopt requires all fields to have default values.
   *       Even if a field is mandatory it needs a default value.
   */
-case class DatasetComparisonConfig(refRawFormat: String = "xml",
+case class DatasetComparisonConfig(rawFormat: String = "",
+                                   rowTag: Option[String] = None,
+                                   csvDelimiter: String = ",",
+                                   csvHeader: Boolean = false,
+                                   refRawFormat: String = "",
                                    refRowTag: Option[String] = None,
                                    refCsvDelimiter: String = ",",
                                    refCsvHeader: Boolean = false,
                                    refPath: String = "",
-                                   newRawFormat: String = "xml",
+                                   newRawFormat: String = "",
                                    newRowTag: Option[String] = None,
                                    newCsvDelimiter: String = ",",
                                    newCsvHeader: Boolean = false,
@@ -63,6 +67,7 @@ object DatasetComparisonConfig {
 
   private class CmdParser(programName: String) extends OptionParser[DatasetComparisonConfig](programName) {
     head("\nDatasets Comparison", "")
+    var rawFormat: Option[String] = None
     var refRawFormat: Option[String] = None
     var newRawFormat: Option[String] = None
     var newPath: Option[String] = None
@@ -77,8 +82,33 @@ object DatasetComparisonConfig {
       }
     }
 
+    opt[String]("raw-format")
+      .optional
+      .action((value, config) => {
+        rawFormat = Some(value)
+        config.copy(rawFormat = value)})
+      .text("format of the raw data (csv, xml, parquet, etc.)")
+
+    opt[String]("row-tag")
+      .optional
+      .action((value, config) => config.copy(rowTag = Some(value)))
+      .text("use the specific row tag instead of 'ROW' for XML format")
+      .validate( _ => validateFormatAndOption(rawFormat ,"row-tag", "xml") )
+
+    opt[String]("delimiter")
+      .optional
+      .action((value, config) => config.copy(csvDelimiter = value))
+      .text("use the specific delimiter instead of ',' for CSV format")
+      .validate( _ => validateFormatAndOption(rawFormat, "delimiter", "csv") )
+
+    opt[Boolean]("header")
+      .optional
+      .action((value, config) => config.copy(csvHeader = value))
+      .text("use the header option to consider CSV header")
+      .validate( _ => validateFormatAndOption(rawFormat,"header", "csv") )
+
     opt[String]("ref-raw-format")
-      .required
+      .optional
       .action((value, config) => {
         refRawFormat = Some(value)
         config.copy(refRawFormat = value)})
@@ -119,7 +149,7 @@ object DatasetComparisonConfig {
       )
 
     opt[String]("new-raw-format")
-      .required
+      .optional
       .action((value, config) => {
         newRawFormat = Some(value)
         config.copy(newRawFormat = value)})

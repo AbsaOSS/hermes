@@ -22,7 +22,7 @@ class DataFrameReaderFactorySuite extends FunSuite with SparkTestBase {
     val path: URL = getClass.getResource("/xml_examples/example1.txt")
     val lines: List[String] = FileReader.usingFile(Source.fromURL(path)) { _.getLines().toList }
 
-    val cmd = DatasetComparisonConfig(xmlFormat, rowTag = Option(rowTag))
+    val cmd = FormatComparisonConfig(xmlFormat, rowTag = Option(rowTag))
     val reader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
     val df = reader.load(getClass.getResource("/xml_examples/example1.xml").getPath)
 
@@ -36,7 +36,7 @@ class DataFrameReaderFactorySuite extends FunSuite with SparkTestBase {
     val path: URL = getClass.getResource("/dataSample1_show_header_false.txt")
     val lines: List[String] = FileReader.usingFile(Source.fromURL(path)) { _.getLines().toList }
 
-    val cmd = DatasetComparisonConfig(csvFormat, csvDelimiter = delimiter)
+    val cmd = FormatComparisonConfig(csvFormat, csvDelimiter = delimiter)
     val reader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
     val df = reader.load(getClass.getResource("/dataSample1.csv").getPath)
 
@@ -50,7 +50,7 @@ class DataFrameReaderFactorySuite extends FunSuite with SparkTestBase {
     val path: URL = getClass.getResource("/dataSample1_show_header_true.txt")
     val lines: List[String] = FileReader.usingFile(Source.fromURL(path)) { _.getLines().toList }
 
-    val cmd = DatasetComparisonConfig(csvFormat, csvDelimiter = delimiter, csvHeader = true)
+    val cmd = FormatComparisonConfig(csvFormat, csvDelimiter = delimiter, csvHeader = true)
     val reader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
     val df = reader.load(getClass.getResource("/dataSample1.csv").getPath)
 
@@ -64,7 +64,7 @@ class DataFrameReaderFactorySuite extends FunSuite with SparkTestBase {
     val path: URL = getClass.getResource("/json_orig_show.txt")
     val lines: List[String] = FileReader.usingFile(Source.fromURL(path)) { _.getLines().toList }
 
-    val cmd = DatasetComparisonConfig(parquetFormat)
+    val cmd = FormatComparisonConfig(parquetFormat)
     val reader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
     val df = reader.load(getClass.getResource("/json_orig").getPath)
 
