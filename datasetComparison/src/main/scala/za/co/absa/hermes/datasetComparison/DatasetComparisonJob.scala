@@ -44,6 +44,38 @@ object DatasetComparisonJob {
     execute(cmd)
   }
 
+  def getComparisonArguments(format: String, cmd: DatasetComparisonConfig ): FormatComparisonConfig = {
+    format match {
+      case "refRawFormat" => new FormatComparisonConfig(
+        rawFormat = cmd.refRawFormat,
+        rowTag = cmd.refRowTag,
+        csvDelimiter = cmd.refCsvDelimiter,
+        csvHeader = cmd.refCsvHeader,
+        path = cmd.refPath,
+        outPath = cmd.outPath,
+        keys = cmd.keys)
+      case "newRawPath" => if (format == "") {
+        new FormatComparisonConfig(
+          rawFormat = cmd.refRawFormat,
+          rowTag = cmd.refRowTag,
+          csvDelimiter = cmd.refCsvDelimiter,
+          csvHeader = cmd.refCsvHeader,
+          path = cmd.newPath,
+          outPath = cmd.outPath,
+          keys = cmd.keys)
+      } else {
+        new FormatComparisonConfig(
+          rawFormat = cmd.newRawFormat,
+          rowTag = cmd.newRowTag,
+          csvDelimiter = cmd.newCsvDelimiter,
+          csvHeader = cmd.newCsvHeader,
+          path = cmd.newPath,
+          outPath = cmd.outPath,
+          keys = cmd.keys)
+      }
+    }
+  }
+
   /**
     * Execute the comparison
     *
@@ -51,9 +83,14 @@ object DatasetComparisonJob {
     * @param sparkSession Implicit spark session
     */
   def execute(cmd: DatasetComparisonConfig)(implicit sparkSession: SparkSession): Unit = {
-    val dfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
-    val expectedDf: DataFrame = dfReader.load(cmd.refPath)
-    val actualDf: DataFrame = dfReader.load(cmd.newPath)
+
+    val refDataOutput: FormatComparisonConfig = getComparisonArguments("refRawFormat", cmd)
+    val newDataOutput: FormatComparisonConfig = getComparisonArguments("newRawFormat", cmd)
+
+    val refDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(refDataOutput)
+    val newDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(newDataOutput)
+    val expectedDf: DataFrame = refDfReader.load(refDataOutput.path)
+    val actualDf: DataFrame = newDfReader.load(newDataOutput.path)
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 
