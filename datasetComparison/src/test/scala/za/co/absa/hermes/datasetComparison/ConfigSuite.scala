@@ -115,4 +115,32 @@ class ConfigSuite extends FunSuite {
       case Failure(_) => succeed
     }
   }
+  test("new and ref files") {
+    val cmdConfig = DatasetComparisonConfig.getCmdLineArguments(
+      Array(
+        "--raw-format", parquetFormat,
+        "--new-raw-format", xmlFormat,
+        "--new-row-tag", rowTag,
+        "--new-path", newPath,
+        "--ref-raw-format", csvFormat,
+        "--ref-delimiter", delimiter,
+        "--ref-header", "true",
+        "--ref-path", refPath,
+        "--out-path", outPath
+      )
+    ) match {
+      case Success(value) => value
+      case Failure(exception) => fail(exception)
+    }
+
+    assert(cmdConfig.rawFormat == parquetFormat)
+    assert(cmdConfig.newRawFormat == xmlFormat)
+    assert(cmdConfig.newRowTag == Option(rowTag))
+    assert(cmdConfig.refRawFormat == csvFormat)
+    assert(cmdConfig.refCsvDelimiter == delimiter)
+    assert(cmdConfig.refCsvHeader)
+    assert(cmdConfig.newPath == newPath)
+    assert(cmdConfig.refPath == refPath)
+    assert(cmdConfig.outPath == outPath)
+  }
 }

@@ -20,7 +20,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     timePrefix = format.format(Calendar.getInstance().getTime)
   }
 
-  test("Compare the same datasets") {
+  test("Compare the same datasets by generic way") {
     val outPath = s"target/test_output/comparison_job/positive/$timePrefix"
 
     val args = Array(
@@ -36,7 +36,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     assert(!Files.exists(Paths.get(outPath)))
   }
 
-  test("Compare different datasets") {
+  test("Compare different datasets by generic way") {
     val refPath = getClass.getResource("/dataSample1.csv").toString
     val newPath = getClass.getResource("/dataSample3.csv").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
@@ -63,7 +63,53 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     assert(2 == Files.list(Paths.get(outPath)).count())
   }
 
-  test("Compare datasets with wrong schemas") {
+//   TODO issue #
+
+
+//  test("Compare different dataset's format") {
+//    val refPath = getClass.getResource("/dataSample1.csv").toString
+//    val newPath = getClass.getResource("/dataSample1.json").toString
+//    val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
+//
+//    val args = Array(
+//      "--ref-raw-format", "csv",
+//      "--ref-delimiter", ",",
+//      "--ref-header", "true",
+//      "--new-raw-format", "json",
+//      "--new-path", newPath,
+//      "--ref-path", refPath,
+//      "--out-path", outPath
+//    )
+//
+//    DatasetComparisonJob.main(args)
+//
+//
+//    assert(!Files.exists(Paths.get(outPath)))
+//  }
+
+  test("Compare ref and new df of the same format.") {
+      val refPath = getClass.getResource("/dataSample1.csv").toString
+      val newPath = getClass.getResource("/copyDataSample1.csv").toString
+      val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
+
+      val args = Array(
+        "--ref-raw-format", "csv",
+        "--ref-delimiter", ",",
+        "--ref-header", "true",
+        "--new-raw-format", "csv",
+        "--new-header", "true",
+        "--new-path", newPath,
+        "--ref-path", refPath,
+        "--out-path", outPath
+      )
+
+      DatasetComparisonJob.main(args)
+
+
+      assert(!Files.exists(Paths.get(outPath)))
+    }
+
+  test("Compare datasets with wrong schemas by generic way") {
     val refPath = getClass.getResource("/dataSample4.csv").toString
     val newPath = getClass.getResource("/dataSample1.csv").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"

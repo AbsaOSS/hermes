@@ -44,58 +44,6 @@ object DatasetComparisonJob {
     execute(cmd)
   }
 
-  def getComparisonArguments(format: String, cmd: DatasetComparisonConfig ): FormatComparisonConfig = {
-    format match {
-      case "refRawFormat" => if (cmd.rawFormat != "") {
-        new FormatComparisonConfig(
-          rawFormat = cmd.rawFormat,
-          rowTag = cmd.rowTag,
-          csvDelimiter = cmd.csvDelimiter,
-          csvHeader = cmd.csvHeader,
-          path = cmd.refPath,
-          outPath = cmd.outPath,
-          keys = cmd.keys)
-      } else {
-        new FormatComparisonConfig(
-          rawFormat = cmd.refRawFormat,
-          rowTag = cmd.refRowTag,
-          csvDelimiter = cmd.refCsvDelimiter,
-          csvHeader = cmd.refCsvHeader,
-          path = cmd.refPath,
-          outPath = cmd.outPath,
-          keys = cmd.keys)
-      }
-      case "newRawFormat" => if (cmd.rawFormat != "" && cmd.newRawFormat == "" ) {
-        new FormatComparisonConfig(
-          rawFormat = cmd.rawFormat,
-          rowTag = cmd.rowTag,
-          csvDelimiter = cmd.csvDelimiter,
-          csvHeader = cmd.csvHeader,
-          path = cmd.newPath,
-          outPath = cmd.outPath,
-          keys = cmd.keys)
-      } else if (cmd.newRawFormat == "" && cmd.refRawFormat != "") {
-        new FormatComparisonConfig(
-          rawFormat = cmd.refRawFormat,
-          rowTag = cmd.refRowTag,
-          csvDelimiter = cmd.refCsvDelimiter,
-          csvHeader = cmd.refCsvHeader,
-          path = cmd.newPath,
-          outPath = cmd.outPath,
-          keys = cmd.keys)
-      } else {
-        new FormatComparisonConfig(
-          rawFormat = cmd.newRawFormat,
-          rowTag = cmd.newRowTag,
-          csvDelimiter = cmd.newCsvDelimiter,
-          csvHeader = cmd.newCsvHeader,
-          path = cmd.newPath,
-          outPath = cmd.outPath,
-          keys = cmd.keys)
-      }
-    }
-  }
-
   /**
     * Execute the comparison
     *
@@ -104,13 +52,14 @@ object DatasetComparisonJob {
     */
   def execute(cmd: DatasetComparisonConfig)(implicit sparkSession: SparkSession): Unit = {
 
-    val refDataOutput: FormatComparisonConfig = getComparisonArguments("refRawFormat", cmd)
-    val newDataOutput: FormatComparisonConfig = getComparisonArguments("newRawFormat", cmd)
+    val refDataOutput: FormatConfig = FormatConfig.getComparisonArguments("refRawFormat", cmd)
+    val newDataOutput: FormatConfig = FormatConfig.getComparisonArguments("newRawFormat", cmd)
 
     val refDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(refDataOutput)
     val newDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(newDataOutput)
-    val expectedDf: DataFrame = refDfReader.load(refDataOutput.path)
-    val actualDf: DataFrame = newDfReader.load(newDataOutput.path)
+    val expectedDf: DataFrame = refDfReader.load(cmd.refPath)
+    val actualDf: DataFrame = newDfReader.load(cmd.newPath)
+
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 

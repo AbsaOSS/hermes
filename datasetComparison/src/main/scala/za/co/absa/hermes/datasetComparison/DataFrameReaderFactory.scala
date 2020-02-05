@@ -19,7 +19,7 @@ import org.apache.spark.sql.{DataFrameReader, SparkSession}
 
 object DataFrameReaderFactory {
 
-  def getDFReaderFromCmdConfig(cmd: FormatComparisonConfig)
+  def getDFReaderFromCmdConfig(cmd: FormatConfig)
                               (implicit sparkSession: SparkSession): DataFrameReader = {
     cmd.rawFormat match {
       case "csv" => getCsvReader(cmd)
@@ -29,22 +29,22 @@ object DataFrameReaderFactory {
     }
   }
 
-  private def getStandardReader(dfReaderOptions: FormatComparisonConfig)
+  private def getStandardReader(dfReaderOptions: FormatConfig)
                                (implicit sparkSession: SparkSession): DataFrameReader = {
     sparkSession.read.format(dfReaderOptions.rawFormat)
   }
 
-  private def getParquetReader(dfReaderOptions: FormatComparisonConfig)
+  private def getParquetReader(dfReaderOptions: FormatConfig)
                               (implicit sparkSession: SparkSession): DataFrameReader = {
     getStandardReader(dfReaderOptions)
   }
 
-  private def getXmlReader(dfReaderOptions: FormatComparisonConfig)
+  private def getXmlReader(dfReaderOptions: FormatConfig)
                           (implicit sparkSession: SparkSession): DataFrameReader = {
     getStandardReader(dfReaderOptions).option("rowTag", dfReaderOptions.rowTag.get)
   }
 
-  private def getCsvReader(dfReaderOptions: FormatComparisonConfig)
+  private def getCsvReader(dfReaderOptions: FormatConfig)
                           (implicit sparkSession: SparkSession): DataFrameReader = {
     getStandardReader(dfReaderOptions)
       .option("delimiter", dfReaderOptions.csvDelimiter)

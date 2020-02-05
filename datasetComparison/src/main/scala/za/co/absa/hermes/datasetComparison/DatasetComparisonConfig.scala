@@ -87,13 +87,13 @@ object DatasetComparisonConfig {
       .action((value, config) => {
         rawFormat = Some(value)
         config.copy(rawFormat = value)})
-      .text("format of the raw data (csv, xml, parquet, etc.)")
+      .text("format of the reference raw data (csv, xml, parquet, etc.)")
 
     opt[String]("row-tag")
       .optional
       .action((value, config) => config.copy(rowTag = Some(value)))
       .text("use the specific row tag instead of 'ROW' for XML format")
-      .validate( _ => validateFormatAndOption(rawFormat ,"row-tag", "xml") )
+      .validate( _ => validateFormatAndOption(rawFormat , "row-tag", "xml") )
 
     opt[String]("delimiter")
       .optional
@@ -105,32 +105,32 @@ object DatasetComparisonConfig {
       .optional
       .action((value, config) => config.copy(csvHeader = value))
       .text("use the header option to consider CSV header")
-      .validate( _ => validateFormatAndOption(rawFormat,"header", "csv") )
+      .validate( _ => validateFormatAndOption(rawFormat, "header", "csv") )
 
     opt[String]("ref-raw-format")
       .optional
       .action((value, config) => {
         refRawFormat = Some(value)
         config.copy(refRawFormat = value)})
-      .text("format of the raw data (csv, xml, parquet, etc.)")
+      .text("format of the reference raw data (csv, xml, parquet, etc.)")
 
     opt[String]("ref-row-tag")
       .optional
       .action((value, config) => config.copy(refRowTag = Some(value)))
-      .text("use the specific row tag instead of 'ROW' for XML format")
-      .validate( _ => validateFormatAndOption(refRawFormat ,"ref-row-tag", "xml") )
+      .text("use the specific reference row tag instead of 'ROW' for XML format")
+      .validate( _ => validateFormatAndOption(refRawFormat ,"row-tag", "xml") )
 
     opt[String]("ref-delimiter")
       .optional
       .action((value, config) => config.copy(refCsvDelimiter = value))
-      .text("use the specific delimiter instead of ',' for CSV format")
+      .text("use the specific reference delimiter instead of ',' for CSV format")
       .validate( _ => validateFormatAndOption(refRawFormat, "delimiter", "csv") )
 
     opt[Boolean]("ref-header")
       .optional
       .action((value, config) => config.copy(refCsvHeader = value))
-      .text("use the header option to consider CSV header")
-      .validate( _ => validateFormatAndOption(refRawFormat,"header", "csv") )
+      .text("use the reference header option to consider CSV header")
+      .validate( _ => validateFormatAndOption(refRawFormat, "header", "csv") )
 
     opt[String]("ref-path")
       .required
@@ -153,25 +153,25 @@ object DatasetComparisonConfig {
       .action((value, config) => {
         newRawFormat = Some(value)
         config.copy(newRawFormat = value)})
-      .text("format of the raw data (csv, xml, parquet, etc.)")
+      .text("format of the new raw data (csv, xml, parquet, etc.)")
 
     opt[String]("new-row-tag")
       .optional
       .action((value, config) => config.copy(newRowTag = Some(value)))
-      .text("use the specific row tag instead of 'ROW' for XML format")
-      .validate( _ => validateFormatAndOption(newRawFormat ,"new-row-tag", "xml") )
+      .text("use the specific new format row tag instead of 'ROW' for XML format")
+      .validate( _ => validateFormatAndOption(newRawFormat , "row-tag", "xml") )
 
     opt[String]("new-delimiter")
       .optional
       .action((value, config) => config.copy(newCsvDelimiter = value))
-      .text("use the specific delimiter instead of ',' for CSV format")
+      .text("use the specific new format delimiter instead of ',' for CSV format")
       .validate( _ => validateFormatAndOption(newRawFormat, "delimiter", "csv") )
 
     opt[Boolean]("new-header")
       .optional
       .action((value, config) => config.copy(newCsvHeader = value))
-      .text("use the header option to consider CSV header")
-      .validate( _ => validateFormatAndOption(newRawFormat,"header", "csv") )
+      .text("use the new format header option to consider CSV header")
+      .validate( _ => validateFormatAndOption(newRawFormat, "header", "csv") )
 
     opt[String]("new-path")
       .required
