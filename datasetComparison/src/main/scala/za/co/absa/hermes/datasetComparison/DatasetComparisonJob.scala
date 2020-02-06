@@ -51,9 +51,15 @@ object DatasetComparisonJob {
     * @param sparkSession Implicit spark session
     */
   def execute(cmd: DatasetComparisonConfig)(implicit sparkSession: SparkSession): Unit = {
-    val dfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(cmd)
-    val expectedDf: DataFrame = dfReader.load(cmd.refPath)
-    val actualDf: DataFrame = dfReader.load(cmd.newPath)
+
+    val refDataOutput: FormatConfig = FormatConfig.getComparisonArguments("refRawFormat", cmd)
+    val newDataOutput: FormatConfig = FormatConfig.getComparisonArguments("newRawFormat", cmd)
+
+    val refDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(refDataOutput)
+    val newDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(newDataOutput)
+    val expectedDf: DataFrame = refDfReader.load(cmd.refPath)
+    val actualDf: DataFrame = newDfReader.load(cmd.newPath)
+
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 

@@ -25,12 +25,20 @@ import scala.util.{Failure, Success, Try}
   * Note: scopt requires all fields to have default values.
   *       Even if a field is mandatory it needs a default value.
   */
-case class DatasetComparisonConfig(rawFormat: String = "xml",
+case class DatasetComparisonConfig(rawFormat: String = "",
                                    rowTag: Option[String] = None,
                                    csvDelimiter: String = ",",
                                    csvHeader: Boolean = false,
-                                   newPath: String = "",
+                                   refRawFormat: String = "",
+                                   refRowTag: Option[String] = None,
+                                   refCsvDelimiter: String = ",",
+                                   refCsvHeader: Boolean = false,
                                    refPath: String = "",
+                                   newRawFormat: String = "",
+                                   newRowTag: Option[String] = None,
+                                   newCsvDelimiter: String = ",",
+                                   newCsvHeader: Boolean = false,
+                                   newPath: String = "",
                                    outPath: String = "",
                                    keys: Option[Seq[String]] = None) {
   /**
@@ -60,11 +68,13 @@ object DatasetComparisonConfig {
   private class CmdParser(programName: String) extends OptionParser[DatasetComparisonConfig](programName) {
     head("\nDatasets Comparison", "")
     var rawFormat: Option[String] = None
+    var refRawFormat: Option[String] = None
+    var newRawFormat: Option[String] = None
     var newPath: Option[String] = None
     var refPath: Option[String] = None
     var outPath: Option[String] = None
 
-    private val validateFormatAndOption = (opt: String, format: String) => {
+    private val validateFormatAndOption = (rawFormat: Option[String], opt: String, format: String) => {
       if (rawFormat.isDefined && rawFormat.get.equalsIgnoreCase(format)) {
         success
       } else {
@@ -73,45 +83,54 @@ object DatasetComparisonConfig {
     }
 
     opt[String]("raw-format")
-      .required
+      .optional
       .action((value, config) => {
         rawFormat = Some(value)
         config.copy(rawFormat = value)})
-      .text("format of the raw data (csv, xml, parquet, etc.)")
+      .text("format of the reference raw data (csv, xml, parquet, etc.)")
 
     opt[String]("row-tag")
       .optional
       .action((value, config) => config.copy(rowTag = Some(value)))
       .text("use the specific row tag instead of 'ROW' for XML format")
-      .validate( _ => validateFormatAndOption("row-tag", "xml") )
+      .validate( _ => validateFormatAndOption(rawFormat , "row-tag", "xml") )
 
     opt[String]("delimiter")
       .optional
       .action((value, config) => config.copy(csvDelimiter = value))
       .text("use the specific delimiter instead of ',' for CSV format")
-      .validate( _ => validateFormatAndOption("delimiter", "csv") )
+      .validate( _ => validateFormatAndOption(rawFormat, "delimiter", "csv") )
 
     opt[Boolean]("header")
       .optional
       .action((value, config) => config.copy(csvHeader = value))
       .text("use the header option to consider CSV header")
-      .validate( _ => validateFormatAndOption("header", "csv") )
+      .validate( _ => validateFormatAndOption(rawFormat, "header", "csv") )
 
-    opt[String]("new-path")
-      .required
+    opt[String]("ref-raw-format")
+      .optional
       .action((value, config) => {
-        newPath = Some(value)
-        config.copy(newPath = value)})
-      .text("Path to the new dataset, just generated and to be tested.")
-      .validate(value =>
-        if (refPath.isDefined && refPath.get.equals(value)) {
-          failure("std-path and ref-path can not be equal")
-        } else if (outPath.isDefined && outPath.get.equals(value)) {
-          failure("std-path and out-path can not be equal")
-        } else {
-          success
-        }
-      )
+        refRawFormat = Some(value)
+        config.copy(refRawFormat = value)})
+      .text("format of the reference raw data (csv, xml, parquet, etc.)")
+
+    opt[String]("ref-row-tag")
+      .optional
+      .action((value, config) => config.copy(refRowTag = Some(value)))
+      .text("use the specific reference row tag instead of 'ROW' for XML format")
+      .validate( _ => validateFormatAndOption(refRawFormat ,"row-tag", "xml") )
+
+    opt[String]("ref-delimiter")
+      .optional
+      .action((value, config) => config.copy(refCsvDelimiter = value))
+      .text("use the specific reference delimiter instead of ',' for CSV format")
+      .validate( _ => validateFormatAndOption(refRawFormat, "delimiter", "csv") )
+
+    opt[Boolean]("ref-header")
+      .optional
+      .action((value, config) => config.copy(refCsvHeader = value))
+      .text("use the reference header option to consider CSV header")
+      .validate( _ => validateFormatAndOption(refRawFormat, "header", "csv") )
 
     opt[String]("ref-path")
       .required
@@ -124,6 +143,47 @@ object DatasetComparisonConfig {
           failure("ref-path and std-path can not be equal")
         } else if (outPath.isDefined && outPath.get.equals(value)) {
           failure("ref-path and out-path can not be equal")
+        } else {
+          success
+        }
+      )
+
+    opt[String]("new-raw-format")
+      .optional
+      .action((value, config) => {
+        newRawFormat = Some(value)
+        config.copy(newRawFormat = value)})
+      .text("format of the new raw data (csv, xml, parquet, etc.)")
+
+    opt[String]("new-row-tag")
+      .optional
+      .action((value, config) => config.copy(newRowTag = Some(value)))
+      .text("use the specific new format row tag instead of 'ROW' for XML format")
+      .validate( _ => validateFormatAndOption(newRawFormat , "row-tag", "xml") )
+
+    opt[String]("new-delimiter")
+      .optional
+      .action((value, config) => config.copy(newCsvDelimiter = value))
+      .text("use the specific new format delimiter instead of ',' for CSV format")
+      .validate( _ => validateFormatAndOption(newRawFormat, "delimiter", "csv") )
+
+    opt[Boolean]("new-header")
+      .optional
+      .action((value, config) => config.copy(newCsvHeader = value))
+      .text("use the new format header option to consider CSV header")
+      .validate( _ => validateFormatAndOption(newRawFormat, "header", "csv") )
+
+    opt[String]("new-path")
+      .required
+      .action((value, config) => {
+        newPath = Some(value)
+        config.copy(newPath = value)})
+      .text("Path to the new dataset, just generated and to be tested.")
+      .validate(value =>
+        if (refPath.isDefined && refPath.get.equals(value)) {
+          failure("std-path and ref-path can not be equal")
+        } else if (outPath.isDefined && outPath.get.equals(value)) {
+          failure("std-path and out-path can not be equal")
         } else {
           success
         }
