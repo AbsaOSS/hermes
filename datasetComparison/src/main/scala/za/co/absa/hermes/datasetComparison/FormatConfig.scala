@@ -15,10 +15,6 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import scopt.OptionParser
-
-import scala.util.{Failure, Success, Try}
-
 /**
   * This is a class for configuration provided by the DatasetComparisonConfig parameters
   *
@@ -26,9 +22,13 @@ import scala.util.{Failure, Success, Try}
   *       Even if a field is mandatory it needs a default value.
   */
 case class FormatConfig(rawFormat: String = "xml",
-                                   rowTag: Option[String] = None,
-                                   csvDelimiter: String = ",",
-                                   csvHeader: Boolean = false)
+                       rowTag: Option[String] = None,
+                       csvDelimiter: String = ",",
+                       csvHeader: Boolean = false,
+                        jdbcUsername: Option[String] = None,
+                        jdbcPassword: Option[String] = Some(""),
+                        jdbcConnectionString: Option[String] = None
+                       )
 
 object FormatConfig {
   def getComparisonArguments(format: String, cmd: DatasetComparisonConfig ): FormatConfig = {
@@ -37,7 +37,10 @@ object FormatConfig {
         rawFormat = cmd.rawFormat,
         rowTag = cmd.rowTag,
         csvDelimiter = cmd.csvDelimiter,
-        csvHeader = cmd.csvHeader)
+        csvHeader = cmd.csvHeader,
+        jdbcUsername = cmd.jdbcUsername,
+        jdbcPassword = cmd.jdbcPassword,
+        jdbcConnectionString = cmd.jdbcConnectionString)
     }
 
     format match {
@@ -48,7 +51,10 @@ object FormatConfig {
           rawFormat = cmd.refRawFormat,
           rowTag = cmd.refRowTag,
           csvDelimiter = cmd.refCsvDelimiter,
-          csvHeader = cmd.refCsvHeader)
+          csvHeader = cmd.refCsvHeader,
+          jdbcUsername = cmd.refJdbcUsername,
+          jdbcPassword = cmd.refJdbcPassword,
+          jdbcConnectionString = cmd.refJdbcConnectionString)
       }
       case "newRawFormat" => if (cmd.rawFormat.nonEmpty && cmd.newRawFormat.isEmpty ) {
         createGenericConfig(cmd)
@@ -57,7 +63,10 @@ object FormatConfig {
           rawFormat = cmd.newRawFormat,
           rowTag = cmd.newRowTag,
           csvDelimiter = cmd.newCsvDelimiter,
-          csvHeader = cmd.newCsvHeader)
+          csvHeader = cmd.newCsvHeader,
+          jdbcUsername = cmd.newJdbcUsername,
+          jdbcPassword = cmd.newJdbcPassword,
+          jdbcConnectionString = cmd.newJdbcConnectionString)
       }
     }
   }

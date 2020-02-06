@@ -57,8 +57,17 @@ object DatasetComparisonJob {
 
     val refDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(refDataOutput)
     val newDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(newDataOutput)
-    val expectedDf: DataFrame = refDfReader.load(cmd.refPath)
-    val actualDf: DataFrame = newDfReader.load(cmd.newPath)
+
+    val expectedDf = if (refDataOutput.rawFormat == "jdbc") {
+      refDfReader.option("dbtable", cmd.refPath).load()
+    } else {
+      refDfReader.load(cmd.refPath)
+    }
+    val actualDf = if (newDataOutput.rawFormat == "jdbc") {
+      newDfReader.option("dbtable", cmd.newPath).load()
+    } else {
+      newDfReader.load(cmd.newPath)
+    }
 
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)

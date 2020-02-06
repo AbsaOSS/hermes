@@ -17,6 +17,8 @@ ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
+ThisBuild / resolvers += ("ICM" at "http://maven.icm.edu.pl/artifactory/repo/").withAllowInsecureProtocol(true)
+
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
@@ -58,7 +60,7 @@ lazy val datasetComparison = project
     name := "dataset-comparison",
     libraryDependencies ++= baseDependencies,
     libraryDependencies ++= datasetComparisonDependencies,
-    mainClass in assembly := Some("za.co.absa.hermes.datasetComparison.datasetComparisonJob"),
+    mainClass in assembly := Some("za.co.absa.hermes.datasetComparison.DatasetComparisonJob"),
     test in assembly := {},
     mergeStrategy
   )

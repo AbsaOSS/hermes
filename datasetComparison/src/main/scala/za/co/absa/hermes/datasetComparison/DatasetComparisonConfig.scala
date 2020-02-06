@@ -38,6 +38,15 @@ case class DatasetComparisonConfig(rawFormat: String = "",
                                    newRowTag: Option[String] = None,
                                    newCsvDelimiter: String = ",",
                                    newCsvHeader: Boolean = false,
+                                   jdbcUsername: Option[String] = None,
+                                   jdbcPassword: Option[String] = Some(""),
+                                   jdbcConnectionString: Option[String] = None,
+                                   refJdbcUsername: Option[String] = None,
+                                   refJdbcPassword: Option[String] = Some(""),
+                                   refJdbcConnectionString: Option[String] = None,
+                                   newJdbcUsername: Option[String] = None,
+                                   newJdbcPassword: Option[String] = Some(""),
+                                   newJdbcConnectionString: Option[String] = None,
                                    newPath: String = "",
                                    outPath: String = "",
                                    keys: Option[Seq[String]] = None) {
@@ -106,6 +115,54 @@ object DatasetComparisonConfig {
       .action((value, config) => config.copy(csvHeader = value))
       .text("use the header option to consider CSV header")
       .validate( _ => validateFormatAndOption(rawFormat, "header", "csv") )
+
+    opt[String]("jdbc-url")
+      .optional
+      .action((value, config) => config.copy(jdbcConnectionString = Some(value)))
+      .text("Database url - jdbc:<TYPE>://<HOSTNAME>:<PORT>/<DATABASE>, " +
+            "e.g. jdbc:postgresql://locahost:5432/myDB")
+
+    opt[String]("jdbc-username")
+      .optional
+      .action((value, config) => config.copy(jdbcUsername = Some(value)))
+      .text("Database username")
+
+    opt[String]("jdbc-password")
+      .optional
+      .action((value, config) => config.copy(jdbcPassword = Some(value)))
+      .text("Database password")
+
+    opt[String]("ref-jdbc-url")
+      .optional
+      .action((value, config) => config.copy(refJdbcConnectionString = Some(value)))
+      .text("Database url - jdbc:<TYPE>://<HOSTNAME>:<PORT>/<DATABASE>, " +
+        "e.g. jdbc:postgresql://locahost:5432/myDB")
+
+    opt[String]("ref-jdbc-username")
+      .optional
+      .action((value, config) => config.copy(refJdbcUsername = Some(value)))
+      .text("Database username")
+
+    opt[String]("ref-jdbc-password")
+      .optional
+      .action((value, config) => config.copy(refJdbcPassword = Some(value)))
+      .text("Database password")
+
+    opt[String]("new-jdbc-url")
+      .optional
+      .action((value, config) => config.copy(newJdbcConnectionString = Some(value)))
+      .text("Database url - jdbc:<TYPE>://<HOSTNAME>:<PORT>/<DATABASE>, " +
+        "e.g. jdbc:postgresql://locahost:5432/myDB")
+
+    opt[String]("new-jdbc-username")
+      .optional
+      .action((value, config) => config.copy(newJdbcUsername = Some(value)))
+      .text("Database username")
+
+    opt[String]("new-jdbc-password")
+      .optional
+      .action((value, config) => config.copy(newJdbcPassword = Some(value)))
+      .text("Database password")
 
     opt[String]("ref-raw-format")
       .optional

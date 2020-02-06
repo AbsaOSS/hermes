@@ -25,7 +25,9 @@ object DataFrameReaderFactory {
       case "csv" => getCsvReader(cmd)
       case "xml" => getXmlReader(cmd)
       case "parquet" => getParquetReader(cmd)
-      case _ => getStandardReader(cmd)
+      case "jdbc" => getJdbcReader(cmd)
+      case "avro" => getAvroReader(cmd)
+      case _ => throw new IllegalArgumentException(s"Unknown raw format ${cmd.rawFormat} specified")
     }
   }
 
@@ -34,8 +36,21 @@ object DataFrameReaderFactory {
     sparkSession.read.format(dfReaderOptions.rawFormat)
   }
 
+  private def getJdbcReader(dfReaderOptions: FormatConfig)
+                           (implicit sparkSession: SparkSession): DataFrameReader = {
+    getStandardReader(dfReaderOptions)
+      .option("url", dfReaderOptions.jdbcConnectionString.get)
+      .option("user", dfReaderOptions.jdbcUsername.get)
+      .option("password", dfReaderOptions.jdbcPassword.get)
+  }
+
   private def getParquetReader(dfReaderOptions: FormatConfig)
                               (implicit sparkSession: SparkSession): DataFrameReader = {
+    getStandardReader(dfReaderOptions)
+  }
+
+  private def getAvroReader(dfReaderOptions: FormatConfig)
+                           (implicit sparkSession: SparkSession): DataFrameReader = {
     getStandardReader(dfReaderOptions)
   }
 
