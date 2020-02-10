@@ -190,7 +190,10 @@ object DatasetComparisonJob {
     columns.foldLeft(joinedFlatDataWithErrCol) { (data, column) =>
       data.withColumnRenamed(errorColumnName, tmpColumnName)
         .withColumn(errorColumnName, concat(
-          when(col(s"${actualPrefix}_$column") === col(s"${expectedPrefix}_$column"), lit(Array[String]()))
+          when(col(s"${actualPrefix}_$column") === col(s"${expectedPrefix}_$column") or
+            (col(s"${expectedPrefix}_$column").isNull and
+              col(s"${actualPrefix}_$column").isNull),
+            lit(Array[String]()))
             .otherwise(array(lit(column))), col(tmpColumnName)))
         .drop(tmpColumnName)
     }
