@@ -20,6 +20,7 @@ object Dependencies {
     "com.github.scopt" %% "scopt"     % "4.0.0-RC2",
     "com.outr"         %% "scribe"    % "2.7.3",
     "com.typesafe"     %  "config"    % "1.3.4",
+    "net.liftweb"      %% "lift-json" % "3.4.1",
     "org.scalatest"    %% "scalatest" % "3.0.5"      % Test
   )
 

@@ -1,6 +1,9 @@
 package za.co.absa.hermes.datasetComparison
 
+import net.liftweb.json.DefaultFormats
 import org.apache.commons.cli.MissingArgumentException
+
+import scala.io.Source
 
 case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
@@ -8,9 +11,21 @@ case class CliOptions(referenceOptions: DataframeOptions,
                       keys: Option[Set[String]])
 
 object CliOptions {
-//  TODO def generateHelp: Unit = ???
+  def generateHelp: Unit = {
+    implicit val formats: DefaultFormats.type = DefaultFormats
+
+    val fileStream = getClass.getResourceAsStream("/cli_options.json")
+    val jsonString = Source.fromInputStream(fileStream).mkString
+    val json = net.liftweb.json.parse(jsonString)
+    println(json.extract[CliHelp])
+  }
 
   def parse(args: Array[String]): CliOptions = {
+    if (args.indexOf("--help") >= 0) {
+      generateHelp
+      System.exit(0)
+    }
+
     val mapOfGroups: Map[String, String] = args.grouped(2).map{ a => (a(0).drop(2) -> a(1)) }.toMap
     val refMap = mapOfGroups.filterKeys(_ matches "ref-.*")
     val newMap = mapOfGroups.filterKeys(_ matches "new-.*")

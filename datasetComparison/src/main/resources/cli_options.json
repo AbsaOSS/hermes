@@ -1,0 +1,37 @@
+{
+  "title": "Dataset Comparison Tool",
+  "example": "spark-submit datasetComparison.jar [OPTIONS]",
+  "description": "Dataset comparison is a command line tool for comparison of two different data sets",
+  "options" : [
+    {
+      "key": "--[ref|new]-format",
+      "optional": "mandatory",
+      "text": "Format of the sources"
+    },
+    {
+      "key": "--outPath",
+      "optional": "mandatory",
+      "text":  "Path where will the difference output will be writen to"
+    },
+    {
+      "key": "--new-path|--new-dbtable",
+      "optional": "mandatory",
+      "text":  "Path to the newly created source or name of the table"
+    },
+    {
+      "key": "--ref-path|--ref-dbtable",
+      "optional": "mandatory",
+      "text":  "Path to the referential source or name of the table"
+    },
+    {
+      "key": "--keys",
+      "optional": "optional",
+      "text":  "Unique columns that will be used as an anchor for data comparison. Without them, the comparison cannot give paths to differences"
+    },
+    {
+      "key": "others",
+      "optional": "optional",
+      "text":  "Options like delimiter, header, rowTag, user, password, url, ... These are the specific options for specific formats used. For more information, check sparks documentation on what all the options for the format you are using"
+    }
+  ]
+}
