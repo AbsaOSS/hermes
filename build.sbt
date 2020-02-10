@@ -18,7 +18,6 @@ ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
 Test / parallelExecution := false
-Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
 
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._

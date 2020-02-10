@@ -8,7 +8,7 @@ case class CliOptions(referenceOptions: DataframeOptions,
                       keys: Option[Set[String]])
 
 object CliOptions {
-//  def generateHelp: Unit = ???
+//  TODO def generateHelp: Unit = ???
 
   def parse(args: Array[String]): CliOptions = {
     val mapOfGroups: Map[String, String] = args.grouped(2).map{ a => (a(0).drop(2) -> a(1)) }.toMap

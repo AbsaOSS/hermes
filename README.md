@@ -32,10 +32,10 @@ spark-submit \
 --name compare \
 --conf "spark.app.id=compare" \
 /path/to/jar/file \
---raw-format <format of the reference and new data sets> \
+--format <format of the reference and new data sets> \
 --new-path /path/to/new/data/set \
 --ref-path /path/to/referential/data/set \
---out-path /path/to/diff/output
+--outPath /path/to/diff/output
 --keys key1,key2,key3
 ```
 
@@ -45,12 +45,12 @@ Datasets Comparison
 Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.DatasetComparisonJob hermes.jar [options]
 
   -f, --raw-format <value> format of the raw data (csv, xml, parquet,fixed-width, etc.)
-  --row-tag <value>        use the specific row tag instead of 'ROW' for XML format
+  --rowTag <value>        use the specific row tag instead of 'ROW' for XML format
   --delimiter <value>      use the specific delimiter instead of ',' for CSV format
   --header <value>         use the header option to consider CSV header
   --new-path <value>       Path to the new dataset, just generated and to be tested.
   --ref-path <value>       Path to supposedly correct data set.
-  --out-path <value>       Path to where the `ComparisonJob` will save the differences. 
+  --outPath <value>       Path to where the `ComparisonJob` will save the differences. 
                                This will efectivly creat a folder in which you will find two 
                                other folders. expected_minus_actual and actual_minus_expected.
                                Both hold parque data sets of differences. (minus as in is 

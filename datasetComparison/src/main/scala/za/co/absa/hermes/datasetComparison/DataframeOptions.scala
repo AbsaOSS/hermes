@@ -1,7 +1,7 @@
 package za.co.absa.hermes.datasetComparison
 
 import org.apache.commons.cli.MissingArgumentException
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql._
 
 case class DataframeOptions(format: String, options: Map[String, String], path: String) {
   def loadDataFrame(implicit spark: SparkSession): DataFrame = {
