@@ -17,7 +17,8 @@ ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
-ThisBuild / resolvers += ("ICM" at "http://maven.icm.edu.pl/artifactory/repo/").withAllowInsecureProtocol(true)
+Test / parallelExecution := false
+Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
 
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._

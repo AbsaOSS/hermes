@@ -24,11 +24,11 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val outPath = s"target/test_output/comparison_job/positive/$timePrefix"
 
     val args = Array(
-      "--raw-format", "csv",
+      "--format", "csv",
       "--delimiter", ",",
       "--new-path", getClass.getResource("/dataSample1.csv").toString,
       "--ref-path", getClass.getResource("/dataSample2.csv").toString,
-      "--out-path", outPath
+      "--outPath", outPath
     )
     DatasetComparisonJob.main(args)
 
@@ -47,11 +47,11 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "Count Expected( 10 ) vs Actual( 11 )"
 
     val args = Array(
-      "--raw-format", "csv",
+      "--format", "csv",
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath
+      "--outPath", outPath
     )
 
     val caught = intercept[DatasetsDifferException] {
@@ -88,26 +88,26 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
 //  }
 
   test("Compare ref and new df of the same format.") {
-      val refPath = getClass.getResource("/dataSample1.csv").toString
-      val newPath = getClass.getResource("/copyDataSample1.csv").toString
-      val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
+    val refPath = getClass.getResource("/dataSample1.csv").toString
+    val newPath = getClass.getResource("/copyDataSample1.csv").toString
+    val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
 
-      val args = Array(
-        "--ref-raw-format", "csv",
-        "--ref-delimiter", ",",
-        "--ref-header", "true",
-        "--new-raw-format", "csv",
-        "--new-header", "true",
-        "--new-path", newPath,
-        "--ref-path", refPath,
-        "--out-path", outPath
-      )
+    val args = Array(
+      "--ref-format", "csv",
+      "--ref-delimiter", ",",
+      "--ref-header", "true",
+      "--new-format", "csv",
+      "--new-header", "true",
+      "--new-path", newPath,
+      "--ref-path", refPath,
+      "--outPath", outPath
+    )
 
-      DatasetComparisonJob.main(args)
+    DatasetComparisonJob.main(args)
 
 
-      assert(!Files.exists(Paths.get(outPath)))
-    }
+    assert(!Files.exists(Paths.get(outPath)))
+  }
 
   test("Compare datasets with wrong schemas by generic way") {
     val refPath = getClass.getResource("/dataSample4.csv").toString
@@ -120,11 +120,11 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       s"Difference is $diff"
 
     val args = Array(
-      "--raw-format", "csv",
+      "--format", "csv",
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath
+      "--outPath", outPath
     )
 
     val caught = intercept[SchemasDifferException] {
@@ -145,12 +145,12 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "Count Expected( 9 ) vs Actual( 10 )"
 
     val args = Array(
-      "--raw-format", "csv",
+      "--format", "csv",
       "--delimiter", ",",
       "--header", "true",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath,
+      "--outPath", outPath,
       "--keys", "id"
     )
 
@@ -169,12 +169,12 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val message = s"Provided dataset has duplicate rows. Specific rows written to $outPath"
 
     val args = Array(
-      "--raw-format", "csv",
+      "--format", "csv",
       "--delimiter", ",",
       "--header", "true",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath,
+      "--outPath", outPath,
       "--keys", "id,first_name"
     )
 
@@ -196,10 +196,10 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
 
     val args = Array(
-      "--raw-format", "parquet",
+      "--format", "parquet",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath,
+      "--outPath", outPath,
       "--keys", "id"
     )
 
@@ -223,11 +223,11 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
 
     val args = Array(
-      "--raw-format", "xml",
-      "--row-tag", "row",
+      "--format", "xml",
+      "--rowTag", "row",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--out-path", outPath,
+      "--outPath", outPath,
       "--keys", "id,id2,ckey.value"
     )
 
