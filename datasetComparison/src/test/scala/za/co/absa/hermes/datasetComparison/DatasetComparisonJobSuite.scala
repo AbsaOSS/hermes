@@ -244,4 +244,20 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
 
     assert(actualDiff == expectedDiff)
   }
+
+//  test("Compare the same datasets with nulls") {
+//    val outPath = s"target/test_output/comparison_job/positive/$timePrefix"
+//
+//    val args = Array(
+//      "--raw-format", "csv",
+//      "--delimiter", ",",
+//      "--new-path", getClass.getResource("/dataSample1.csv").toString,
+//      "--ref-path", getClass.getResource("/dataSample2.csv").toString,
+//      "--out-path", outPath
+//    )
+//    DatasetComparisonJob.main(args)
+//
+//
+//    assert(!Files.exists(Paths.get(outPath)))
+//  }
 }
