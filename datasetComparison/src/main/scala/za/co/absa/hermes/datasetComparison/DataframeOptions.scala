@@ -4,12 +4,18 @@ import org.apache.commons.cli.MissingArgumentException
 import org.apache.spark.sql._
 
 case class DataframeOptions(format: String, options: Map[String, String], path: String) {
+
+  private def setOptions(dfReader: DataFrameReader): DataFrameReader =
+    if ( options.isEmpty ) dfReader else dfReader.options(options)
+
+  private def load(dfReader: DataFrameReader): DataFrame =
+    if (format == "jdbc") { dfReader.load()     }
+    else                  { dfReader.load(path) }
+
   def loadDataFrame(implicit spark: SparkSession): DataFrame = {
     val general = spark.read.format(format)
-    val generalWithOptions = if ( options.isEmpty ) general else general.options(options)
-
-    if (format == "jdbc") { generalWithOptions.load()     }
-    else                  { generalWithOptions.load(path) }
+    val withOptions = setOptions(general)
+    load(withOptions)
   }
 }
 
