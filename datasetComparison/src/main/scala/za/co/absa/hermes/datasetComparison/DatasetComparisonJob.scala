@@ -16,12 +16,10 @@
 package za.co.absa.hermes.datasetComparison
 
 import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import za.co.absa.hermes.utils.HelperFunctions
-
-import scala.util.{Failure, Success}
 
 object DatasetComparisonJob {
   private val conf: Config = ConfigFactory.load()
@@ -32,44 +30,36 @@ object DatasetComparisonJob {
   private val expectedPrefix: String = conf.getString("dataset-comparison.expectedPrefix")
 
   def main(args: Array[String]): Unit = {
-    val cmd = DatasetComparisonConfig.getCmdLineArguments(args)  match {
-      case Success(value) => value
-      case Failure(exception) => throw exception
-    }
+    val cliOptions = CliOptions.parse(args)
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
-      .appName(s"Dataset comparison - '${cmd.newPath}' and '${cmd.refPath}'")
+      .appName(s"Dataset comparison - '${cliOptions.referenceOptions.path}' and " +
+        s"'${cliOptions.newOptions.path}'")
       .getOrCreate()
 
-    execute(cmd)
+    execute(cliOptions)
   }
 
   /**
     * Execute the comparison
     *
-    * @param cmd Provided configuration for the comparison
+    * @param cliOptions Provided configuration for the comparison
     * @param sparkSession Implicit spark session
     */
-  def execute(cmd: DatasetComparisonConfig)(implicit sparkSession: SparkSession): Unit = {
-
-    val refDataOutput: FormatConfig = FormatConfig.getComparisonArguments("refRawFormat", cmd)
-    val newDataOutput: FormatConfig = FormatConfig.getComparisonArguments("newRawFormat", cmd)
-
-    val refDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(refDataOutput)
-    val newDfReader: DataFrameReader = DataFrameReaderFactory.getDFReaderFromCmdConfig(newDataOutput)
-    val expectedDf: DataFrame = refDfReader.load(cmd.refPath)
-    val actualDf: DataFrame = newDfReader.load(cmd.newPath)
+  def execute(cliOptions: CliOptions)(implicit sparkSession: SparkSession): Unit = {
+    val expectedDf = cliOptions.referenceOptions.loadDataFrame
+    val actualDf = cliOptions.newOptions.loadDataFrame
 
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 
-    if (cmd.hasKeysDefined) {
-      checkForDuplicateRows(actualDf, cmd.getKeys, cmd.outPath)
+    if (cliOptions.keys.isDefined) {
+      checkForDuplicateRows(actualDf, cliOptions.keys.get.toSeq, cliOptions.outPath)
     }
 
     if (expectedSchema != actualSchema) {
       val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
-      throw SchemasDifferException(cmd.refPath, cmd.newPath, diffSchema)
+      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
 
     val expectedExceptActual: DataFrame = expectedDf.except(actualDf)
@@ -78,14 +68,18 @@ object DatasetComparisonJob {
     if (expectedExceptActual.count + actualExceptExpected.count == 0) {
       scribe.info("Expected and actual data sets are the same.")
     } else {
-      cmd.keys match {
+      cliOptions.keys match {
         case Some(keys) =>
-          handleKeyBasedErrorsPresent(keys, cmd.outPath, expectedExceptActual, actualExceptExpected)
+          handleKeyBasedErrorsPresent(keys.toSeq, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
         case None =>
-          expectedExceptActual.write.format("parquet").save(s"${cmd.outPath}/expected_minus_actual")
-          actualExceptExpected.write.format("parquet").save(s"${cmd.outPath}/actual_minus_expected")
+          expectedExceptActual.write.format("parquet").save(s"${cliOptions.outPath}/expected_minus_actual")
+          actualExceptExpected.write.format("parquet").save(s"${cliOptions.outPath}/actual_minus_expected")
       }
-      throw DatasetsDifferException(cmd.refPath, cmd.newPath, cmd.outPath, expectedDf.count(), actualDf.count())
+      throw DatasetsDifferException(cliOptions.referenceOptions.path,
+                                    cliOptions.newOptions.path,
+                                    cliOptions.outPath,
+                                    expectedDf.count(),
+                                    actualDf.count())
     }
   }
 
