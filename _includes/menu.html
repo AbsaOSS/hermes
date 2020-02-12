@@ -12,6 +12,10 @@
   {% endfor %}
 
   <li class="nav-item">
+    <a class="nav-link {% if page.title == "Contribute" %}active{% endif %}"
+      href="{{ site.baseurl }}/contribute">Contribute</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if page.title == "News" or page.title == "Search news" %}active{% endif %}"
       href="{{ site.baseurl }}/blog/">News</a>
   </li>
