@@ -19,7 +19,7 @@ import java.util.Locale
 
 import org.apache.spark.sql.functions.{expr, max}
 import org.apache.spark.sql.types.{ArrayType, StructField, StructType}
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
 import scala.collection.mutable
 
@@ -129,6 +129,17 @@ object HelperFunctions {
   def flattenDataFrame(df: DataFrame): DataFrame = {
     val flatteningFormula: List[Column] = flattenSchema(df)
     df.select(flatteningFormula: _*)
+  }
+
+  /**
+   * Creates a Spark DataFrame from a JSON document(s).
+   *
+   * @param json A json string to convert to a DataFrame
+   * @return A data frame
+   */
+  def getDataFrameFromJson(spark: SparkSession, json: Seq[String]): DataFrame = {
+    import spark.implicits._
+    spark.read.json(json.toDS)
   }
 
   /**
