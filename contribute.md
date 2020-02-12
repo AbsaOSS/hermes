@@ -3,19 +3,17 @@ layout: default
 title: Contribute
 ---
 
-# How to contribute to Hermes?
-
-## **Did you find a bug?**
+### **Did you find a bug?**
 
 * **Ensure the bug has not already been reported** by searching our **[GitHub Issues](https://github.com/AbsaOSS/hermes/issues)**.
 * If you are unable to find an open issue describing the problem, use the **Bug report** template to open a new one. Tag it with the **bug** label.
 
-## **Do you want to request a new feature?**
+### **Do you want to request a new feature?**
 
 * **Ensure the feature has not already been requested** by searching our **[GitHub Issues](https://github.com/AbsaOSS/hermes/issues)**.
 * If you are unable to find the feature request, create a new one. Tag it with the **request** label.
 
-## **Do you want to implement a new feature or fix a bug?**
+### **Do you want to implement a new feature or fix a bug?**
 
 * Check logs for the feature/bug. Check if someone isn't already working on it.
   * If the feature/bug is not yet filed, please write it up first:
@@ -34,6 +32,6 @@ title: Contribute
     * **"42 Life, the universe and everything"**
   * Ensure the Pull Request description clearly describes the solution.
 
-#### Thanks!
+##### Thanks!
 
 The AbsaOSS team
