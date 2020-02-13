@@ -57,13 +57,15 @@ object DatasetComparisonJob {
       checkForDuplicateRows(actualDf, cliOptions.keys.get.toSeq, cliOptions.outPath)
     }
 
-    if (expectedSchema != actualSchema) {
+    if (!SchemaComparison.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
 
-    val expectedExceptActual: DataFrame = expectedDf.except(actualDf)
-    val actualExceptExpected: DataFrame = actualDf.except(expectedDf)
+    val columns = expectedDf.columns
+    val actualDFSorted = actualDf.select(columns.head, columns.tail: _*)
+    val expectedExceptActual: DataFrame = expectedDf.except(actualDFSorted)
+    val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDf)
 
     if (expectedExceptActual.count + actualExceptExpected.count == 0) {
       scribe.info("Expected and actual data sets are the same.")
@@ -75,6 +77,8 @@ object DatasetComparisonJob {
           expectedExceptActual.write.format("parquet").save(s"${cliOptions.outPath}/expected_minus_actual")
           actualExceptExpected.write.format("parquet").save(s"${cliOptions.outPath}/actual_minus_expected")
       }
+      expectedExceptActual.show(false)
+      actualExceptExpected.show(false)
       throw DatasetsDifferException(cliOptions.referenceOptions.path,
                                     cliOptions.newOptions.path,
                                     cliOptions.outPath,
