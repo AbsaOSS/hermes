@@ -38,18 +38,18 @@ object DataframeOptions {
   def validateAndCreate(options: Map[String, String]): DataframeOptions = {
     val format = options.getOrElse("format", throw new MissingArgumentException(
       """Format is mandatory option. Use
-        |"--format", "--ref-format" or "--new-format".
-        |""".stripMargin))
+        | "--format", "--ref-format" or "--new-format".
+        |""".stripMargin.replaceAll("[\\r\\n]", "")))
     val path = if (format == "jdbc") {
       options.getOrElse("dbtable", throw new MissingArgumentException(
         """DB table name is mandatory option for format
-          |type jdbc. Use "--dbtable", "--ref-dbtable" or "--new-dbtable".
-          |""".stripMargin))
+          | type jdbc. Use "--dbtable", "--ref-dbtable" or "--new-dbtable".
+          |""".stripMargin.replaceAll("[\\r\\n]", "")))
     } else {
       options.getOrElse("path", throw new MissingArgumentException(
         """Path is mandatory option for format type jdbc.
-          |Use "--path", "--ref-path" or "--new-path".
-          |""".stripMargin))
+          | Use "--path", "--ref-path" or "--new-path".
+          |""".stripMargin.replaceAll("[\\r\\n]", "")))
     }
     val otherOptions = options -- Set("format", "path")
     DataframeOptions(format, otherOptions, path)

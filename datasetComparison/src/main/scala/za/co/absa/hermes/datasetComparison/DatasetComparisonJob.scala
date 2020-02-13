@@ -35,8 +35,9 @@ object DatasetComparisonJob {
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(
         s"""Dataset comparison - '${cliOptions.referenceOptions.path}' and
-           |'${cliOptions.newOptions.path}'
-           |""".stripMargin)
+           | '${cliOptions.newOptions.path}'
+           |""".stripMargin.replaceAll("[\\r\\n]", "")
+      )
       .getOrCreate()
 
     execute(cliOptions)
