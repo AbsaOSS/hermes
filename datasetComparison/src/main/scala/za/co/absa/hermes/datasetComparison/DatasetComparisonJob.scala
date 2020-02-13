@@ -77,8 +77,7 @@ object DatasetComparisonJob {
           expectedExceptActual.write.format("parquet").save(s"${cliOptions.outPath}/expected_minus_actual")
           actualExceptExpected.write.format("parquet").save(s"${cliOptions.outPath}/actual_minus_expected")
       }
-      expectedExceptActual.show(false)
-      actualExceptExpected.show(false)
+
       throw DatasetsDifferException(cliOptions.referenceOptions.path,
                                     cliOptions.newOptions.path,
                                     cliOptions.outPath,
