@@ -52,7 +52,7 @@ class SchemaUtilsSuite extends FunSuite with SparkTestBase  {
     val dfA = getDataFrameFromJson(spark, Seq(schemaA))
     val dfC = getDataFrameFromJson(spark, Seq(schemaC)).select("legs", "id", "key")
 
-    val dfA2Aligned = alignSchemas(dfC, getDataframeSelector(dfA.schema))
+    val dfA2Aligned = alignSchema(dfC, getDataFrameSelector(dfA.schema))
 
     assert(dfA.columns.toSeq.equals(dfA2Aligned.columns.toSeq))
     assert(dfA.select("key").columns.toSeq.equals(dfA2Aligned.select("key").columns.toSeq))
@@ -63,7 +63,7 @@ class SchemaUtilsSuite extends FunSuite with SparkTestBase  {
     val dfB = getDataFrameFromJson(spark, Seq(schemaB))
 
     intercept[AnalysisException] {
-      alignSchemas(dfA, getDataframeSelector(dfB.schema))
+      alignSchema(dfA, getDataFrameSelector(dfB.schema))
     }
   }
 }

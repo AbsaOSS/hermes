@@ -68,12 +68,11 @@ object SchemaUtils {
   }
 
   /**
-   * Return a second data frame with sorted columns to conform to the first data frame.
-   * The data frames need to have the same schema otherwise it throws AnalysisException.
+   * Returns data selector that can be used to align schema of a data frame.
    * @param schema Schema that serves as the model of column order
    * @return Sorted DF to conform to schema
    */
-  def getDataframeSelector(schema: StructType): List[Column] = {
+  def getDataFrameSelector(schema: StructType): List[Column] = {
     import za.co.absa.spark.hofs._
 
     def processArray(arrType: ArrayType, column: Column, name: String): Column = {
@@ -103,7 +102,7 @@ object SchemaUtils {
     processStruct(schema, None)
   }
 
-  def alignSchemas(df: DataFrame, selector: List[Column]): DataFrame = df.select(selector: _*)
+  def alignSchema(df: DataFrame, selector: List[Column]): DataFrame = df.select(selector: _*)
 
   /**
    * Compares 2 dataframe schemas.

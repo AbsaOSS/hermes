@@ -62,9 +62,9 @@ object DatasetComparisonJob {
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
 
-    val selector: List[Column] = SchemaUtils.getDataframeSelector(expectedSchema)
-    val actualDFSorted = SchemaUtils.alignSchemas(actualDf, selector)
-    val expectedDFSorted = SchemaUtils.alignSchemas(expectedDf, selector)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedSchema)
+    val actualDFSorted = SchemaUtils.alignSchema(actualDf, selector)
+    val expectedDFSorted = SchemaUtils.alignSchema(expectedDf, selector)
 
     val expectedExceptActual: DataFrame = expectedDFSorted.except(actualDFSorted)
     val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDFSorted)
