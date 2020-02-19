@@ -18,7 +18,7 @@ package za.co.absa.hermes.datasetComparison
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.utils.HelperFunctions
 
 object DatasetComparisonJob {
@@ -57,17 +57,19 @@ object DatasetComparisonJob {
       checkForDuplicateRows(actualDf, cliOptions.keys.get.toSeq, cliOptions.outPath)
     }
 
-    if (!SchemaComparison.isSameSchema(expectedSchema, actualSchema)) {
+    if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
 
-    val columns = expectedDf.columns
-    val actualDFSorted = actualDf.select(columns.head, columns.tail: _*)
-    val expectedExceptActual: DataFrame = expectedDf.except(actualDFSorted)
-    val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDf)
+    val selector: List[Column] = SchemaUtils.getDataframeSelector(expectedSchema)
+    val actualDFSorted = SchemaUtils.alignSchemas(actualDf, selector)
+    val expectedDFSorted = SchemaUtils.alignSchemas(expectedDf, selector)
 
-    if (expectedExceptActual.count + actualExceptExpected.count == 0) {
+    val expectedExceptActual: DataFrame = expectedDFSorted.except(actualDFSorted)
+    val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDFSorted)
+
+    if ((expectedExceptActual.count() + actualExceptExpected.count()) == 0) {
       scribe.info("Expected and actual data sets are the same.")
     } else {
       cliOptions.keys match {

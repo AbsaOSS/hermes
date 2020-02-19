@@ -36,7 +36,8 @@ object Dependencies {
     "mysql"             %  "mysql-connector-java" % "8.0.19"       % Provided,
     "com.oracle.ojdbc"  %  "ojdbc8"               % "19.3.0.0"     % Provided,
     "org.apache.hive"   %  "hive-jdbc"            % "1.2.1"        % Provided,
-    "org.apache.spark"  %% "spark-avro"           % "2.4.4"
+    "org.apache.spark"  %% "spark-avro"           % "2.4.4",
+    "za.co.absa"        %% "spark-hofs"           % "0.4.0"
   )
 
   val compareInfoFileDependencies = List(

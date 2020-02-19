@@ -15,15 +15,17 @@
 
 package za.co.absa.hermes.datasetComparison
 
+import org.apache.spark.sql.AnalysisException
 import org.scalatest.FunSuite
-import za.co.absa.hermes.datasetComparison.SchemaComparison._
+import za.co.absa.hermes.datasetComparison.SchemaUtils._
 import za.co.absa.hermes.utils.HelperFunctions._
 import za.co.absa.hermes.utils.SparkTestBase
 
-class SchemaComparisonSuite extends FunSuite with SparkTestBase  {
+class SchemaUtilsSuite extends FunSuite with SparkTestBase  {
 
-  val schemaA = """[{"id":1,"legs":[{"legid":100,"conditions":[{"checks":[{"checkNums":["1","2","3b","4","5c","6"]}],"amount":100}]}]}]"""
-  val schemaB = """[{"id":1,"legs":[{"legid":100,"conditions":[{"checks":[{"checkNums":["1","2","3b","4","5c","6"]}],"amount":100,"price":10}]}]}]"""
+  val schemaA = """[{"id":1,"legs":[{"legid":100,"conditions":[{"checks":[{"checkNums":["1","2","3b","4","5c","6"]}],"amount":100}]}], "key" : {"alfa": "1", "beta": {"beta2": "2"}} }]"""
+  val schemaB = """[{"id":1"legs":[{"legid":100,"conditions":[{"checks":[{"checkNums":["1","2","3b","4","5c","6"]}],"amount":100,"price":10}]}]}]"""
+  val schemaC = """[{"legs":[{"legid":100,"conditions":[{"amount":100,"checks":[{"checkNums":["1","2","3b","4","5c","6"]}]}]}],"id":1, "key" : {"beta": {"beta2": "2"}, "alfa": "1"} }]"""
 
   test("Test the case when schemas are equal") {
     val dfA1 = getDataFrameFromJson(spark, Seq(schemaA))
@@ -44,5 +46,24 @@ class SchemaComparisonSuite extends FunSuite with SparkTestBase  {
     val dfB = getDataFrameFromJson(spark, Seq(schemaB))
 
     assert(!isSameSchema(dfB.schema, dfA.schema))
+  }
+
+  test("Test aligning of schemas") {
+    val dfA = getDataFrameFromJson(spark, Seq(schemaA))
+    val dfC = getDataFrameFromJson(spark, Seq(schemaC)).select("legs", "id", "key")
+
+    val dfA2Aligned = alignSchemas(dfC, getDataframeSelector(dfA.schema))
+
+    assert(dfA.columns.toSeq.equals(dfA2Aligned.columns.toSeq))
+    assert(dfA.select("key").columns.toSeq.equals(dfA2Aligned.select("key").columns.toSeq))
+  }
+
+  test("Test aligning of different schemas") {
+    val dfA = getDataFrameFromJson(spark, Seq(schemaA))
+    val dfB = getDataFrameFromJson(spark, Seq(schemaB))
+
+    intercept[AnalysisException] {
+      alignSchemas(dfA, getDataframeSelector(dfB.schema))
+    }
   }
 }

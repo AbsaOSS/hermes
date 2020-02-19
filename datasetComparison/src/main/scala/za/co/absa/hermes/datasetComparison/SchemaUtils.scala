@@ -15,9 +15,11 @@
 
 package za.co.absa.hermes.datasetComparison
 
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ArrayType, StructField, StructType}
+import org.apache.spark.sql.{Column, DataFrame}
 
-object SchemaComparison {
+object SchemaUtils {
   /**
    * Compares 2 array fields of a dataframe schema.
    *
@@ -49,7 +51,7 @@ object SchemaComparison {
    * @param field2 The second field to compare
    * @return true if provided fields are the same ignoring nullability
    */
-  def isSameField(field1: StructField, field2: StructField): Boolean = {
+  private def isSameField(field1: StructField, field2: StructField): Boolean = {
     field1.dataType match {
       case arrayType1: ArrayType =>
         field2.dataType match {
@@ -65,6 +67,43 @@ object SchemaComparison {
     }
   }
 
+  /**
+   * Return a second data frame with sorted columns to conform to the first data frame.
+   * The data frames need to have the same schema otherwise it throws AnalysisException.
+   * @param schema Schema that serves as the model of column order
+   * @return Sorted DF to conform to schema
+   */
+  def getDataframeSelector(schema: StructType): List[Column] = {
+    import za.co.absa.spark.hofs._
+
+    def processArray(arrType: ArrayType, column: Column, name: String): Column = {
+      arrType.elementType match {
+        case arrType: ArrayType =>
+          transform(column, x => processArray(arrType, x, name)).as(name)
+        case nestedStructType: StructType =>
+          transform(column, x => struct(processStruct(nestedStructType, Some(x)): _*)).as(name)
+        case _ => column
+      }
+    }
+
+    def processStruct(curSchema: StructType, parent: Option[Column]): List[Column] = {
+      curSchema.foldRight(List.empty[Column])((field, acc) => {
+        val currentCol: Column = parent match {
+          case Some(x) => x.getField(field.name).as(field.name)
+          case None    => col(field.name)
+        }
+        field.dataType match {
+          case arrType: ArrayType     => processArray(arrType, currentCol, field.name) :: acc
+          case structType: StructType => struct(processStruct(structType, Some(currentCol)): _*).as(field.name) :: acc
+          case _                      =>  currentCol :: acc
+        }
+      })
+    }
+
+    processStruct(schema, None)
+  }
+
+  def alignSchemas(df: DataFrame, selector: List[Column]): DataFrame = df.select(selector: _*)
 
   /**
    * Compares 2 dataframe schemas.

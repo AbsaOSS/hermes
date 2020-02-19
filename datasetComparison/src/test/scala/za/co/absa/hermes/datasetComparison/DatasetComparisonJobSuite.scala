@@ -47,7 +47,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     )
     DatasetComparisonJob.main(args)
 
-
     assert(!Files.exists(Paths.get(outPath)))
   }
 
@@ -95,7 +94,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
 
     DatasetComparisonJob.main(args)
 
-
     assert(!Files.exists(Paths.get(outPath)))
   }
 
@@ -116,7 +114,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     )
 
     DatasetComparisonJob.main(args)
-
 
     assert(!Files.exists(Paths.get(outPath)))
   }
