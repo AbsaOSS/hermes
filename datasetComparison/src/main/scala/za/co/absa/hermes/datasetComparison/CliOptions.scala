@@ -36,7 +36,7 @@ object CliOptions {
   }
 
   def parse(args: Array[String]): CliOptions = {
-    if (args.indexOf("--help") >= 0) {
+    if (args.contains("--help")) {
       generateHelp
       System.exit(0)
     }

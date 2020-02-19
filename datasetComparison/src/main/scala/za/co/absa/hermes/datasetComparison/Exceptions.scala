@@ -23,20 +23,24 @@ final case class DatasetsDifferException(refPath: String,
                                          expectedCount: Long,
                                          actualCount: Long,
                                          cause: Throwable = None.orNull)
-  extends Exception("Expected and actual datasets differ.\n" +
-    s"Reference path: $refPath\n" +
-    s"Actual dataset path: $stdPath\n" +
-    s"Difference written to: $outPath\n" +
-    s"Count Expected( $expectedCount ) vs Actual( $actualCount )", cause)
+  extends Exception(
+    s"""Expected and actual datasets differ.
+       |Reference path: $refPath
+       |Actual dataset path: $stdPath
+       |Difference written to: $outPath
+       |Count Expected( $expectedCount ) vs Actual( $actualCount )""".stripMargin,
+    cause)
 
 final case class SchemasDifferException(refPath: String,
                                         stdPath: String,
                                         diffSchema: Seq[StructField],
                                         cause: Throwable = None.orNull)
-  extends Exception("Expected and actual datasets differ in schemas.\n" +
-    s"Reference path: $refPath\n" +
-    s"Actual dataset path: $stdPath\n" +
-    s"Difference is $diffSchema", cause)
+  extends Exception(
+    s"""Expected and actual datasets differ in schemas.
+       |Reference path: $refPath
+       |Actual dataset path: $stdPath
+       |Difference is $diffSchema""".stripMargin,
+    cause)
 
 
 final case class DuplicateRowsInDF(path: String)
