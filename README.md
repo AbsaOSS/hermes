@@ -3,8 +3,8 @@ ___
 <!-- toc -->
 
 - [Dataset Comparison](#dataset-comparison)
-- [Rest Runner](#rest-runner)
-- [E2E Spark Runner](#e2e-spark-runner)
+- [Info Comparison](#info-comparison)
+- [E2E Runner](#e2e-runner)
 
 <!-- tocstop -->
 ## Build
@@ -25,12 +25,6 @@ A Spark job for comparing two data sets.
 Basic running example
 ```bash
 spark-submit \
---class za.co.absa.hermes.datasetComparison.DatasetComparisonJob \
---master local \
---deploy-mode client \
---executor-memory 2g \
---name compare \
---conf "spark.app.id=compare" \
 /path/to/jar/file \
 --format <format of the reference and new data sets> \
 --new-path /path/to/new/data/set \
@@ -63,16 +57,17 @@ Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.
 
 Other configurations are Spark dependant and are out of scope of this README.
 
-##  <a name="rest-runner" />Rest Runner
-In progress. Framework for running REST API test.
+##  <a name="info-comparison" />Info File Comparison
+Autm's Info file comparison. Ran as part of the E2E Runner. Can be run as a spark job or a plain old jar file.
 
-##  <a name="e2e-spark-runner" />E2E Spark Runner
+##  <a name="e2e-runner" />E2E Runner
 Runs both Standardization and Conformance on the data provided. After each, a comparison job is run 
 to check the results against expected reference data.
 
 Basic running example:
 ```bash
-java -cp hermes.jar za.co.absa.hermes.e2eRunner.E2ERunnerJob \
+spark-submit \
+/path/to/jar/file \
 --menas-credentials-file /path/to/credentials/file \
 --dataset-name <datasetName> \
 --dataset-version <datasetVersion> \
