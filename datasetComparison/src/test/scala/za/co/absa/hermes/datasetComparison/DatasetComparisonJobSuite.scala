@@ -47,7 +47,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     )
     DatasetComparisonJob.main(args)
 
-
     assert(!Files.exists(Paths.get(outPath)))
   }
 
@@ -78,29 +77,25 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     assert(2 == Files.list(Paths.get(outPath)).count())
   }
 
-//   TODO issue #24
+  test("Compare different dataset's format") {
+    val refPath = getClass.getResource("/dataSample1.csv").toString
+    val newPath = getClass.getResource("/dataSample1.json").toString
+    val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
 
+    val args = Array(
+      "--ref-format", "csv",
+      "--ref-delimiter", ",",
+      "--ref-header", "true",
+      "--new-format", "json",
+      "--new-path", newPath,
+      "--ref-path", refPath,
+      "--outPath", outPath
+    )
 
-//  test("Compare different dataset's format") {
-//    val refPath = getClass.getResource("/dataSample1.csv").toString
-//    val newPath = getClass.getResource("/dataSample1.json").toString
-//    val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
-//
-//    val args = Array(
-//      "--ref-raw-format", "csv",
-//      "--ref-delimiter", ",",
-//      "--ref-header", "true",
-//      "--new-raw-format", "json",
-//      "--new-path", newPath,
-//      "--ref-path", refPath,
-//      "--out-path", outPath
-//    )
-//
-//    DatasetComparisonJob.main(args)
-//
-//
-//    assert(!Files.exists(Paths.get(outPath)))
-//  }
+    DatasetComparisonJob.main(args)
+
+    assert(!Files.exists(Paths.get(outPath)))
+  }
 
   test("Compare ref and new df of the same format.") {
     val refPath = getClass.getResource("/dataSample1.csv").toString
@@ -119,7 +114,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     )
 
     DatasetComparisonJob.main(args)
-
 
     assert(!Files.exists(Paths.get(outPath)))
   }

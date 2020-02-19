@@ -18,7 +18,7 @@ package za.co.absa.hermes.datasetComparison
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.utils.HelperFunctions
 
 object DatasetComparisonJob {
@@ -60,15 +60,19 @@ object DatasetComparisonJob {
       checkForDuplicateRows(actualDf, cliOptions.keys.get.toSeq, cliOptions.outPath)
     }
 
-    if (expectedSchema != actualSchema) {
+    if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
 
-    val expectedExceptActual: DataFrame = expectedDf.except(actualDf)
-    val actualExceptExpected: DataFrame = actualDf.except(expectedDf)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedSchema)
+    val actualDFSorted = SchemaUtils.alignSchema(actualDf, selector)
+    val expectedDFSorted = SchemaUtils.alignSchema(expectedDf, selector)
 
-    if (expectedExceptActual.count + actualExceptExpected.count == 0) {
+    val expectedExceptActual: DataFrame = expectedDFSorted.except(actualDFSorted)
+    val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDFSorted)
+
+    if ((expectedExceptActual.count() + actualExceptExpected.count()) == 0) {
       scribe.info("Expected and actual data sets are the same.")
     } else {
       cliOptions.keys match {
@@ -78,6 +82,7 @@ object DatasetComparisonJob {
           expectedExceptActual.write.format("parquet").save(s"${cliOptions.outPath}/expected_minus_actual")
           actualExceptExpected.write.format("parquet").save(s"${cliOptions.outPath}/actual_minus_expected")
       }
+
       throw DatasetsDifferException(
         cliOptions.referenceOptions.path,
         cliOptions.newOptions.path,
