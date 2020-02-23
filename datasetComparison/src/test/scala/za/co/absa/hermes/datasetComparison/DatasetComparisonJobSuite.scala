@@ -74,7 +74,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
 
     assert(caught.getMessage == message)
     assert(Files.exists(Paths.get(outPath)))
-    assert(2 == Files.list(Paths.get(outPath)).count())
   }
 
   test("Compare different dataset's format") {
