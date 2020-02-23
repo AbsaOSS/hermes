@@ -52,7 +52,7 @@ object DatasetComparisonJob {
   def execute(cliOptions: CliOptions)(implicit sparkSession: SparkSession): Unit = {
     val expectedDf = cliOptions.referenceOptions.loadDataFrame
     val actualDf = cliOptions.newOptions.loadDataFrame
-    val keys = if (cliOptions.keys.isDefined) cliOptions.keys.get else Set(comparisonUniqueId)
+    val keys = if (cliOptions.keys.isDefined) cliOptions.keys.get.toSeq else Seq(comparisonUniqueId)
 
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
@@ -69,7 +69,7 @@ object DatasetComparisonJob {
     val actualWithKey = addKeyColumn(cliOptions.keys, selector, actualDFSorted)
     val expectedWithKey = addKeyColumn(cliOptions.keys, selector, expectedDFSorted)
 
-    checkForDuplicateRows(actualWithKey, keys.toSeq, cliOptions.outPath)
+    checkForDuplicateRows(actualWithKey, keys, cliOptions.outPath)
 
     val expectedExceptActual: DataFrame = expectedWithKey.except(actualWithKey)
     val actualExceptExpected: DataFrame = actualWithKey.except(expectedWithKey)
@@ -77,7 +77,7 @@ object DatasetComparisonJob {
     if ((expectedExceptActual.count() + actualExceptExpected.count()) == 0) {
       scribe.info("Expected and actual data sets are the same.")
     } else {
-      createDiffDataFrame(keys.toSeq, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
+      createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
 
       throw DatasetsDifferException(
         cliOptions.referenceOptions.path,
