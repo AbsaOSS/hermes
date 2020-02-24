@@ -90,8 +90,8 @@ object DatasetComparisonJob {
   }
 
   private def addKeyColumn(keys: Option[Set[String]], selector: List[Column], df: DataFrame): DataFrame = {
-    if (keys.isDefined) { df.withColumn(comparisonUniqueId, hash(concat(keys.get.toSeq.map(col): _*))) }
-    else { df.withColumn(comparisonUniqueId, hash(selector: _*)) }
+    if (keys.isDefined) { df.withColumn(comparisonUniqueId, md5(concat(keys.get.toSeq.map(col): _*))) }
+    else { df.withColumn(comparisonUniqueId, md5(concat(selector: _*))) }
   }
 
   /**
