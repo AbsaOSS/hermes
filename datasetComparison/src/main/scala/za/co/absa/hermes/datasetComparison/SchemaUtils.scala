@@ -47,11 +47,11 @@ object SchemaUtils {
   private def diffArray(array1: ArrayType, array2: ArrayType, parent: String): Seq[String] = {
     array1.elementType match {
       case _ if array1.elementType.typeName != array2.elementType.typeName =>
-        Seq(s"$parent data type doesn't match ")
+        Seq(s"$parent data type doesn't match (${array1.elementType.typeName}) vs (${array2.elementType.typeName})")
       case arrayType1: ArrayType =>
-        diffArray(arrayType1, array2.elementType.asInstanceOf[ArrayType], s"$parent[${arrayType1.elementType}]")
+        diffArray(arrayType1, array2.elementType.asInstanceOf[ArrayType], s"$parent")
       case structType1: StructType =>
-        diffSchema(structType1, array2.elementType.asInstanceOf[StructType], s"$parent[StructType]")
+        diffSchema(structType1, array2.elementType.asInstanceOf[StructType], s"$parent")
       case _ => Seq.empty[String]
     }
 
@@ -83,7 +83,7 @@ object SchemaUtils {
   private def diffField(field1: StructField, field2: StructField, parent: String): Seq[String] = {
     field1.dataType match {
       case _ if field1.dataType.typeName != field2.dataType.typeName =>
-        Seq(s"$parent${field1.name} data type doesn't match ")
+        Seq(s"$parent.${field1.name} data type doesn't match (${field1.dataType.typeName}) vs (${field2.dataType.typeName})")
       case arrayType1: ArrayType =>
         diffArray(arrayType1, field2.dataType.asInstanceOf[ArrayType], s"$parent.${field1.name}")
       case structType1: StructType =>
@@ -169,16 +169,16 @@ object SchemaUtils {
     val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
     val fields2 = schema2.map(field => field.name.toLowerCase() -> field).toMap
 
-    val same1 = fields1.values.foldLeft(Seq.empty[String])((difference, field1) => {
+    val diff = fields1.values.foldLeft(Seq.empty[String])((difference, field1) => {
       val field1NameLc = field1.name.toLowerCase()
       if (fields2.contains(field1NameLc)) {
         val field2 = fields2(field1NameLc)
         difference ++ diffField(field1, field2, parent)
       } else {
-        difference ++ Seq(s"$parent.${field1.name} cannot be found in second schema")
+        difference ++ Seq(s"$parent.${field1.name} cannot be found in both schemas")
       }
     })
 
-    same1.map(_.stripPrefix("."))
+    diff.map(_.stripPrefix("."))
   }
 }

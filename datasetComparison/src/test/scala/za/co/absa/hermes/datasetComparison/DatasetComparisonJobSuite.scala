@@ -126,7 +126,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
          |Reference path: $refPath
          |Actual dataset path: $newPath
          |Difference is:
-         |_c5 cannot be found in second schema""".stripMargin
+         |_c5 cannot be found in both schemas""".stripMargin
 
     val args = Array(
       "--format", "csv",
