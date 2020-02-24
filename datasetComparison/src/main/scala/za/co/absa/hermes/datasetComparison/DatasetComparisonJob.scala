@@ -52,13 +52,10 @@ object DatasetComparisonJob {
   def execute(cliOptions: CliOptions)(implicit sparkSession: SparkSession): Unit = {
     val expectedDf = cliOptions.referenceOptions.loadDataFrame
     val actualDf = cliOptions.newOptions.loadDataFrame
+    val keys = if (cliOptions.keys.isDefined) cliOptions.keys.get.toSeq else Seq(comparisonUniqueId)
 
     val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
-
-    if (cliOptions.keys.isDefined) {
-      checkForDuplicateRows(actualDf, cliOptions.keys.get.toSeq, cliOptions.outPath)
-    }
 
     if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
@@ -69,19 +66,18 @@ object DatasetComparisonJob {
     val actualDFSorted = SchemaUtils.alignSchema(actualDf, selector)
     val expectedDFSorted = SchemaUtils.alignSchema(expectedDf, selector)
 
-    val expectedExceptActual: DataFrame = expectedDFSorted.except(actualDFSorted)
-    val actualExceptExpected: DataFrame = actualDFSorted.except(expectedDFSorted)
+    val actualWithKey = addKeyColumn(cliOptions.keys, selector, actualDFSorted)
+    val expectedWithKey = addKeyColumn(cliOptions.keys, selector, expectedDFSorted)
+
+    checkForDuplicateRows(actualWithKey, keys, cliOptions.outPath)
+
+    val expectedExceptActual: DataFrame = expectedWithKey.except(actualWithKey)
+    val actualExceptExpected: DataFrame = actualWithKey.except(expectedWithKey)
 
     if ((expectedExceptActual.count() + actualExceptExpected.count()) == 0) {
       scribe.info("Expected and actual data sets are the same.")
     } else {
-      cliOptions.keys match {
-        case Some(keys) =>
-          handleKeyBasedErrorsPresent(keys.toSeq, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
-        case None =>
-          expectedExceptActual.write.format("parquet").save(s"${cliOptions.outPath}/expected_minus_actual")
-          actualExceptExpected.write.format("parquet").save(s"${cliOptions.outPath}/actual_minus_expected")
-      }
+      createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
 
       throw DatasetsDifferException(
         cliOptions.referenceOptions.path,
@@ -91,6 +87,11 @@ object DatasetComparisonJob {
         actualDf.count()
       )
     }
+  }
+
+  private def addKeyColumn(keys: Option[Set[String]], selector: List[Column], df: DataFrame): DataFrame = {
+    if (keys.isDefined) { df.withColumn(comparisonUniqueId, md5(concat(keys.get.toSeq.map(col): _*))) }
+    else { df.withColumn(comparisonUniqueId, md5(concat(selector: _*))) }
   }
 
   /**
@@ -152,20 +153,16 @@ object DatasetComparisonJob {
     * @param expectedMinusActual Relative complement of expected and actual data sets
     * @param actualMinusExpected Relative complement of actual and expected data sets
     */
-  private def handleKeyBasedErrorsPresent(keys: Seq[String],
+  private def createDiffDataFrame(keys: Seq[String],
                                           path: String,
                                           expectedMinusActual: DataFrame,
                                           actualMinusExpected: DataFrame): Unit = {
-    // Create a unique hash key from keys specified
-    val expectedWithHashKey = expectedMinusActual.withColumn(comparisonUniqueId, md5(concat(keys.map(col): _*)))
-    val actualWithHashKey = actualMinusExpected.withColumn(comparisonUniqueId, md5(concat(keys.map(col): _*)))
-
-    val joinedData: DataFrame = joinTwoDataFrames(expectedWithHashKey, actualWithHashKey, Seq(comparisonUniqueId))
+    val joinedData: DataFrame = joinTwoDataFrames(expectedMinusActual, actualMinusExpected, Seq(comparisonUniqueId))
 
     // Flatten data
-    val flatteningFormula = HelperFunctions.flattenSchema(expectedWithHashKey)
-    val flatExpected: DataFrame = expectedWithHashKey.select(flatteningFormula: _*)
-    val flatActual: DataFrame = actualWithHashKey.select(flatteningFormula: _*)
+    val flatteningFormula = HelperFunctions.flattenSchema(expectedMinusActual)
+    val flatExpected: DataFrame = expectedMinusActual.select(flatteningFormula: _*)
+    val flatActual: DataFrame = actualMinusExpected.select(flatteningFormula: _*)
 
     val joinedFlatDataWithoutErrCol: DataFrame = joinTwoDataFrames(flatExpected, flatActual, Seq(comparisonUniqueId))
     val joinedFlatDataWithErrCol = joinedFlatDataWithoutErrCol.withColumn(errorColumnName, lit(Array[String]()))
