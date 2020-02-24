@@ -15,8 +15,6 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import org.apache.spark.sql.types.StructField
-
 final case class DatasetsDifferException(refPath: String,
                                          stdPath: String,
                                          outPath: String,
@@ -33,13 +31,14 @@ final case class DatasetsDifferException(refPath: String,
 
 final case class SchemasDifferException(refPath: String,
                                         stdPath: String,
-                                        diffSchema: Seq[StructField],
+                                        diffSchema: String,
                                         cause: Throwable = None.orNull)
   extends Exception(
     s"""Expected and actual datasets differ in schemas.
        |Reference path: $refPath
        |Actual dataset path: $stdPath
-       |Difference is $diffSchema""".stripMargin,
+       |Difference is:
+       |$diffSchema""".stripMargin,
     cause)
 
 

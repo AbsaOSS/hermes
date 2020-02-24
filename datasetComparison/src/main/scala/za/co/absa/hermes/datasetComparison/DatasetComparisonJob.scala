@@ -58,8 +58,9 @@ object DatasetComparisonJob {
     val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
 
     if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
-      val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
-      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
+      val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
+        SchemaUtils.diffSchema(actualSchema, expectedSchema)
+      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
     }
 
     val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedSchema)

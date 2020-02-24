@@ -44,6 +44,19 @@ object SchemaUtils {
 
   }
 
+  private def diffArray(array1: ArrayType, array2: ArrayType, parent: String): Seq[String] = {
+    array1.elementType match {
+      case _ if array1.elementType.typeName != array2.elementType.typeName =>
+        Seq(s"$parent data type doesn't match (${array1.elementType.typeName}) vs (${array2.elementType.typeName})")
+      case arrayType1: ArrayType =>
+        diffArray(arrayType1, array2.elementType.asInstanceOf[ArrayType], s"$parent")
+      case structType1: StructType =>
+        diffSchema(structType1, array2.elementType.asInstanceOf[StructType], s"$parent")
+      case _ => Seq.empty[String]
+    }
+
+  }
+
   /**
    * Compares 2 fields of a dataframe schema.
    *
@@ -64,6 +77,19 @@ object SchemaUtils {
           case _ => false
         }
       case _ => field1.dataType == field2.dataType
+    }
+  }
+
+  private def diffField(field1: StructField, field2: StructField, parent: String): Seq[String] = {
+    field1.dataType match {
+      case _ if field1.dataType.typeName != field2.dataType.typeName =>
+        Seq(s"$parent.${field1.name} data type doesn't match (${field1.dataType.typeName}) vs (${field2.dataType.typeName})")
+      case arrayType1: ArrayType =>
+        diffArray(arrayType1, field2.dataType.asInstanceOf[ArrayType], s"$parent.${field1.name}")
+      case structType1: StructType =>
+        diffSchema(structType1, field2.dataType.asInstanceOf[StructType], s"$parent.${field1.name}")
+      case _ =>
+        Seq.empty[String]
     }
   }
 
@@ -137,5 +163,22 @@ object SchemaUtils {
       }
     })
     same1 && same2
+  }
+
+  def diffSchema(schema1: StructType, schema2: StructType, parent: String = ""): Seq[String] = {
+    val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
+    val fields2 = schema2.map(field => field.name.toLowerCase() -> field).toMap
+
+    val diff = fields1.values.foldLeft(Seq.empty[String])((difference, field1) => {
+      val field1NameLc = field1.name.toLowerCase()
+      if (fields2.contains(field1NameLc)) {
+        val field2 = fields2(field1NameLc)
+        difference ++ diffField(field1, field2, parent)
+      } else {
+        difference ++ Seq(s"$parent.${field1.name} cannot be found in both schemas")
+      }
+    })
+
+    diff.map(_.stripPrefix("."))
   }
 }
