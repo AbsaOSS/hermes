@@ -80,5 +80,6 @@ class SchemaUtilsSuite extends FunSuite with SparkTestBase  {
     val dfB = getDataFrameFromJson(spark, Seq(schemaA)).schema
 
     assert(diffSchema(dfA, dfB).isEmpty)
+    assert(diffSchema(dfB, dfA).isEmpty)
   }
 }
