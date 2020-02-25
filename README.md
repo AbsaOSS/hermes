@@ -9,7 +9,7 @@ ___
 <!-- tocstop -->
 ## Build
 ```bash
-sbt assebmly
+sbt assembly
 ```
 
 Known to work with: 
@@ -38,13 +38,13 @@ spark-submit \
 Datasets Comparison 
 Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.DatasetComparisonJob hermes.jar [options]
 
-  -f, --raw-format <value> format of the raw data (csv, xml, parquet,fixed-width, etc.)
-  --rowTag <value>        use the specific row tag instead of 'ROW' for XML format
-  --delimiter <value>      use the specific delimiter instead of ',' for CSV format
-  --header <value>         use the header option to consider CSV header
+  -f, --format <value>     format of the raw data (csv, xml, parquet,fixed-width, etc.).
+  --rowTag <value>         use the specific row tag instead of 'ROW' for XML format.
+  --delimiter <value>      use the specific delimiter instead of ',' for CSV format.
+  --header <value>         use the header option to consider CSV header.
   --new-path <value>       Path to the new dataset, just generated and to be tested.
   --ref-path <value>       Path to supposedly correct data set.
-  --outPath <value>       Path to where the `ComparisonJob` will save the differences. 
+  --outPath <value>        Path to where the `ComparisonJob` will save the differences. 
                                This will efectivly creat a folder in which you will find two 
                                other folders. expected_minus_actual and actual_minus_expected.
                                Both hold parque data sets of differences. (minus as in is 
@@ -52,7 +52,18 @@ Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.
   --keys                   If there are know unique keys, they can be specified for better
                                output. Keys should be specified one by one, with , (comma) 
                                between them.
-  --help                   prints this usage text
+  --help                   prints this usage text.
+  
+  In case comparison of two different formats use these keys instead of the simple ones (--format, --header, --delimiter, --row-tag):
+  
+  --ref-format <value>     format of the reference raw data (csv, xml, parquet,fixed-width, etc.).
+  --ref-delimiter <value>  use the specific delimiter of reference data instead of ',' for CSV format.
+  --ref-header <value>     use the header option to consider CSV header of reference data.
+  --ref-rowTag <value>     use the specific row tag of reference data instead of 'ROW' for XML format.
+  --new-format <value>     format of the new raw data (csv, xml, parquet,fixed-width, etc.).
+  --new-delimiter <value>  use the specific delimiter of new data instead of ',' for CSV format.
+  --new-header <value>     use the header option to consider CSV header of new data.
+  --new-rowTag <value>     use the specific row tag of new data instead of 'ROW' for XML format.
 ```
 
 Other configurations are Spark dependant and are out of scope of this README.
