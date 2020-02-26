@@ -63,3 +63,9 @@ _site
 .jekyll-metadata
 
 .metals
+
+datasetComparison
+e2eRunner
+infoFileComparison
+project
+utils
