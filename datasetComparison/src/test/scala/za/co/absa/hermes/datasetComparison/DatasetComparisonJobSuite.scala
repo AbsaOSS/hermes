@@ -45,9 +45,17 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--ref-path", getClass.getResource("/dataSample2.csv").toString,
       "--outPath", outPath
     )
+    val metrics = """{
+                    |  "passed":"true",
+                    |  "numberOfDuplicates":"0",
+                    |  "referenceRowCount":"10",
+                    |  "newRowCount":"10",
+                    |  "numberOfDifferences":"0"
+                    |}""".stripMargin
+
     DatasetComparisonJob.main(args)
 
-    assert(!Files.exists(Paths.get(outPath)))
+    assert(metrics == FileReader.readFileAsString(s"$outPath/_METRICS"))
   }
 
   test("Compare different datasets by generic way") {
@@ -91,9 +99,17 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--outPath", outPath
     )
 
+    val metrics = """{
+                    |  "passed":"true",
+                    |  "numberOfDuplicates":"0",
+                    |  "referenceRowCount":"9",
+                    |  "newRowCount":"9",
+                    |  "numberOfDifferences":"0"
+                    |}""".stripMargin
+
     DatasetComparisonJob.main(args)
 
-    assert(!Files.exists(Paths.get(outPath)))
+    assert(metrics == FileReader.readFileAsString(s"$outPath/_METRICS"))
   }
 
   test("Compare ref and new df of the same format.") {
@@ -112,9 +128,17 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--outPath", outPath
     )
 
+    val metrics = """{
+                    |  "passed":"true",
+                    |  "numberOfDuplicates":"0",
+                    |  "referenceRowCount":"9",
+                    |  "newRowCount":"9",
+                    |  "numberOfDifferences":"0"
+                    |}""".stripMargin
+
     DatasetComparisonJob.main(args)
 
-    assert(!Files.exists(Paths.get(outPath)))
+    assert(metrics == FileReader.readFileAsString(s"$outPath/_METRICS"))
   }
 
   test("Compare datasets with wrong schemas by generic way") {

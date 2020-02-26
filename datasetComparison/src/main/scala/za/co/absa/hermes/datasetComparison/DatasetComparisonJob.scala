@@ -15,6 +15,8 @@
 
 package za.co.absa.hermes.datasetComparison
 
+import java.io.{File, PrintWriter}
+
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
@@ -40,7 +42,7 @@ object DatasetComparisonJob {
       )
       .getOrCreate()
 
-    execute(cliOptions)
+    execute(cliOptions, args.mkString(" "))
   }
 
   /**
@@ -49,20 +51,38 @@ object DatasetComparisonJob {
     * @param cliOptions Provided configuration for the comparison
     * @param sparkSession Implicit spark session
     */
-  def execute(cliOptions: CliOptions)(implicit sparkSession: SparkSession): Unit = {
+  def execute(cliOptions: CliOptions, rawOptions: String = "")(implicit sparkSession: SparkSession): Unit = {
+    val result = compare(cliOptions)
+    val resultWithRawOpts = result.copy(passedOptions = rawOptions)
+
+    if (resultWithRawOpts.resultDF.isDefined) {
+      resultWithRawOpts.resultDF.get.write.format("parquet").save(cliOptions.outPath)
+    }
+    writeMetricsToFile(resultWithRawOpts, cliOptions.outPath)
+
+    if (resultWithRawOpts.diffCount > 0) {
+      throw DatasetsDifferException(
+          cliOptions.referenceOptions.path,
+          cliOptions.newOptions.path,
+          cliOptions.outPath,
+          resultWithRawOpts.refRowCount,
+          resultWithRawOpts.newRowCount
+      )
+    } else {
+      scribe.info("Expected and actual data sets are the same.")
+    }
+  }
+
+  def compare(cliOptions: CliOptions)(implicit sparkSession: SparkSession): ComparisonResult = {
     val expectedDf = cliOptions.referenceOptions.loadDataFrame
+    val expectedDfRowCount = expectedDf.count()
     val actualDf = cliOptions.newOptions.loadDataFrame
+    val actualDfRowCount = actualDf.count()
     val keys = if (cliOptions.keys.isDefined) cliOptions.keys.get.toSeq else Seq(comparisonUniqueId)
 
-    val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
-    val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
+    checkSchemas(cliOptions, expectedDf, actualDf)
 
-    if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
-      val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
-      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
-    }
-
-    val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedSchema)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedDf.schema)
     val actualDFSorted = SchemaUtils.alignSchema(actualDf, selector)
     val expectedDFSorted = SchemaUtils.alignSchema(expectedDf, selector)
 
@@ -74,18 +94,33 @@ object DatasetComparisonJob {
     val expectedExceptActual: DataFrame = expectedWithKey.except(actualWithKey)
     val actualExceptExpected: DataFrame = actualWithKey.except(expectedWithKey)
 
-    if ((expectedExceptActual.count() + actualExceptExpected.count()) == 0) {
-      scribe.info("Expected and actual data sets are the same.")
-    } else {
-      createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected)
+    val resultDF: Option[DataFrame] = (expectedExceptActual.count() + actualExceptExpected.count()) match {
+      case 0 => None
+      case _ => Some(createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected))
+    }
+    val diffCount: Long = if (resultDF.isDefined) resultDF.get.count() else 0
 
-      throw DatasetsDifferException(
-        cliOptions.referenceOptions.path,
-        cliOptions.newOptions.path,
-        cliOptions.outPath,
-        expectedDf.count(),
-        actualDf.count()
-      )
+    ComparisonResult(expectedDfRowCount, actualDfRowCount, 0, selector, resultDF, diffCount)
+  }
+
+  private def writeMetricsToFile(result: ComparisonResult, fileName: String): Unit = {
+    new File(fileName).mkdirs()
+    val writer = new PrintWriter(s"$fileName/_METRICS")
+//    val writer = new FileOutputStream(fileName);
+    try {
+      writer.write(result.getJsonMetadata)
+    } finally {
+      writer.close()
+    }
+  }
+
+  private def checkSchemas(cliOptions: CliOptions, expectedDf: DataFrame, actualDf: DataFrame): Unit = {
+    val expectedSchema: StructType = getSchemaWithoutMetadata(expectedDf.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(actualDf.schema)
+
+    if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
+      val diffSchema = actualSchema.diff(expectedSchema) ++ expectedSchema.diff(actualSchema)
+      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema)
     }
   }
 
@@ -156,7 +191,7 @@ object DatasetComparisonJob {
   private def createDiffDataFrame(keys: Seq[String],
                                           path: String,
                                           expectedMinusActual: DataFrame,
-                                          actualMinusExpected: DataFrame): Unit = {
+                                          actualMinusExpected: DataFrame): DataFrame = {
     val joinedData: DataFrame = joinTwoDataFrames(expectedMinusActual, actualMinusExpected, Seq(comparisonUniqueId))
 
     // Flatten data
@@ -171,12 +206,10 @@ object DatasetComparisonJob {
     val flatDataWithErrors: DataFrame = findErrorsInDataSets(columns, joinedFlatDataWithErrCol)
 
     // Using the hash key, join the original data and error column from the flat data.
-    val outputData: DataFrame = joinedData.as("df1")
+    joinedData.as("df1")
       .join(flatDataWithErrors.as("df2"), Seq(comparisonUniqueId))
       .select("df1.*", s"df2.${errorColumnName}")
       .drop(comparisonUniqueId)
-
-    outputData.write.format("parquet").save(path)
   }
 
   /**
