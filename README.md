@@ -9,7 +9,7 @@ ___
 <!-- tocstop -->
 ## Build
 ```bash
-sbt assebmly
+sbt assembly
 ```
 
 Known to work with: 
@@ -38,21 +38,25 @@ spark-submit \
 Datasets Comparison 
 Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.DatasetComparisonJob hermes.jar [options]
 
-  -f, --raw-format <value> format of the raw data (csv, xml, parquet,fixed-width, etc.)
-  --rowTag <value>        use the specific row tag instead of 'ROW' for XML format
-  --delimiter <value>      use the specific delimiter instead of ',' for CSV format
-  --header <value>         use the header option to consider CSV header
-  --new-path <value>       Path to the new dataset, just generated and to be tested.
-  --ref-path <value>       Path to supposedly correct data set.
-  --outPath <value>       Path to where the `ComparisonJob` will save the differences. 
-                               This will efectivly creat a folder in which you will find two 
-                               other folders. expected_minus_actual and actual_minus_expected.
-                               Both hold parque data sets of differences. (minus as in is 
-                               relative complement
-  --keys                   If there are know unique keys, they can be specified for better
-                               output. Keys should be specified one by one, with , (comma) 
-                               between them.
-  --help                   prints this usage text
+  --[ref|new]-format            Format of the raw data (csv, xml, parquet,fixed-width, etc.). Use prefix only in case
+                                    comparison of two different formats. Mandatory.
+  --new-path|--new-dbtable      Path to the new dataset or dbtable (jdbc), just generated and to be tested. Mandatory.
+  --ref-path|--ref-dbtable      Path to supposedly correct data set or dbtable (jdbc). Mandatory.
+  --outPath.                    Path to where the `ComparisonJob` will save the differences. 
+                                    This will efectivly creat a folder in which you will find two 
+                                    other folders. expected_minus_actual and actual_minus_expected.
+                                    Both hold parque data sets of differences. (minus as in is 
+                                    relative complement. Mandatory.
+  --keys                        If there are know unique keys, they can be specified for better
+                                   output. Keys should be specified one by one, with , (comma) 
+                                   between them. Optional.
+  others                        Other options depends on selected format specifications (e.g. --delimiter and --header for
+                                   csv, --rowTag for xml). For case comparison of two different formats use prefix ref|new
+                                   for each of this options. For more information, check sparks documentation on what all
+                                   the options for the format you are using. Optional.
+  
+  --help                   prints similar text to this one.
+  
 ```
 
 Other configurations are Spark dependant and are out of scope of this README.
