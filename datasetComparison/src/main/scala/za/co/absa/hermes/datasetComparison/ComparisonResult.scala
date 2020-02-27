@@ -30,7 +30,8 @@ case class ComparisonResult(refRowCount: Long,
       "newRowCount" -> newRowCount.toString,
       "numberOfDuplicates" -> duplicitiesCount.toString,
       "passed" -> (diffCount == 0).toString,
-      "numberOfDifferences" -> diffCount.toString
+      "numberOfDifferences" -> diffCount.toString,
+      "passedOptions" -> passedOptions
     )
 }
 

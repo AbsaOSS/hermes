@@ -106,7 +106,6 @@ object DatasetComparisonJob {
   private def writeMetricsToFile(result: ComparisonResult, fileName: String): Unit = {
     new File(fileName).mkdirs()
     val writer = new PrintWriter(s"$fileName/_METRICS")
-//    val writer = new FileOutputStream(fileName);
     try {
       writer.write(result.getJsonMetadata)
     } finally {
