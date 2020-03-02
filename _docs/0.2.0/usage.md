@@ -109,7 +109,7 @@ E2E Runner requires the same input as an Enceladus spark job + `keys` argument. 
 ##### Properties
 Default properties in use are:
 
-```
+```json
 e2e-runner {
   stdPath = "/std/{datasetName}/{datasetVersion}/{reportYear}/{reportMonth}/{reportDay}/{reportVersion}"
   confPath = "/publish/{datasetName}/enceladus_info_date={reportYear}-{reportMonth}-{reportDay}/enceladus_info_version={reportVersion}"
