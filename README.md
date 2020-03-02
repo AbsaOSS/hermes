@@ -29,7 +29,7 @@ spark-submit \
 --format <format of the reference and new data sets> \
 --new-path /path/to/new/data/set \
 --ref-path /path/to/referential/data/set \
---outPath /path/to/diff/output
+--out-path /path/to/diff/output
 --keys key1,key2,key3
 ```
 
@@ -42,7 +42,7 @@ Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.
                                     comparison of two different formats. Mandatory.
   --new-path|--new-dbtable      Path to the new dataset or dbtable (jdbc), just generated and to be tested. Mandatory.
   --ref-path|--ref-dbtable      Path to supposedly correct data set or dbtable (jdbc). Mandatory.
-  --outPath.                    Path to where the `ComparisonJob` will save the differences. 
+  --out-path.                    Path to where the `ComparisonJob` will save the differences. 
                                     This will efectivly creat a folder in which you will find two 
                                     other folders. expected_minus_actual and actual_minus_expected.
                                     Both hold parque data sets of differences. (minus as in is 
