@@ -55,9 +55,8 @@ object DatasetComparisonJob {
     val result = compare(cliOptions)
     val resultWithRawOpts = result.copy(passedOptions = rawOptions)
 
-    if (resultWithRawOpts.resultDF.isDefined) {
-      resultWithRawOpts.resultDF.get.write.format("parquet").save(cliOptions.outPath)
-    }
+    resultWithRawOpts.resultDF.foreach { df => df.write.format("parquet").save(cliOptions.outPath) }
+
     writeMetricsToFile(resultWithRawOpts, cliOptions.outPath)
 
     if (resultWithRawOpts.diffCount > 0) {
@@ -98,7 +97,7 @@ object DatasetComparisonJob {
       case 0 => None
       case _ => Some(createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected))
     }
-    val diffCount: Long = if (resultDF.isDefined) resultDF.get.count() else 0
+    val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
     ComparisonResult(expectedDfRowCount, actualDfRowCount, 0, selector, resultDF, diffCount)
   }
@@ -189,9 +188,9 @@ object DatasetComparisonJob {
     * @param actualMinusExpected Relative complement of actual and expected data sets
     */
   private def createDiffDataFrame(keys: Seq[String],
-                                          path: String,
-                                          expectedMinusActual: DataFrame,
-                                          actualMinusExpected: DataFrame): DataFrame = {
+                                  path: String,
+                                  expectedMinusActual: DataFrame,
+                                  actualMinusExpected: DataFrame): DataFrame = {
     val joinedData: DataFrame = joinTwoDataFrames(expectedMinusActual, actualMinusExpected, Seq(comparisonUniqueId))
 
     // Flatten data
