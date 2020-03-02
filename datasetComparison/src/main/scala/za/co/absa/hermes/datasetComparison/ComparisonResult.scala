@@ -15,6 +15,7 @@ import org.apache.spark.sql.{Column, DataFrame}
  */
 case class ComparisonResult(refRowCount: Long,
                             newRowCount: Long,
+                            passedCount: Long,
                             duplicitiesCount: Long,
                             usedSchemaSelector: List[Column],
                             resultDF: Option[DataFrame],
@@ -31,6 +32,7 @@ case class ComparisonResult(refRowCount: Long,
       "numberOfDuplicates" -> duplicitiesCount.toString,
       "passed" -> (diffCount == 0).toString,
       "numberOfDifferences" -> diffCount.toString,
+      "passedRowsCount" -> passedCount.toString,
       "passedOptions" -> passedOptions
     )
 }
