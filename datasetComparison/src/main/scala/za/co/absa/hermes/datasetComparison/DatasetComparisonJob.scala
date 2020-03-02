@@ -93,13 +93,23 @@ object DatasetComparisonJob {
     val expectedExceptActual: DataFrame = expectedWithKey.except(actualWithKey)
     val actualExceptExpected: DataFrame = actualWithKey.except(expectedWithKey)
 
+    val passedCount = expectedDfRowCount - expectedExceptActual.count()
+
     val resultDF: Option[DataFrame] = (expectedExceptActual.count() + actualExceptExpected.count()) match {
       case 0 => None
       case _ => Some(createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected))
     }
     val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
-    ComparisonResult(expectedDfRowCount, actualDfRowCount, 0, selector, resultDF, diffCount)
+    ComparisonResult(
+      expectedDfRowCount,
+      actualDfRowCount,
+      passedCount,
+      0,
+      selector,
+      resultDF,
+      diffCount
+    )
   }
 
   private def writeMetricsToFile(result: ComparisonResult, fileName: String): Unit = {

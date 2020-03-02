@@ -48,13 +48,13 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
 
     DatasetComparisonJob.main(args)
 
-//    assert(metrics == FileReader.readFileAsString(s"$outPath/_METRICS"))
     val metricsRead = FileReader.readFileAsListOfLines(s"$outPath/_METRICS")
     assert(metricsRead(1) == """  "passed":"true",""")
     assert(metricsRead(2) == """  "numberOfDuplicates":"0",""")
     assert(metricsRead(3) == """  "referenceRowCount":"10",""")
     assert(metricsRead(4) == """  "newRowCount":"10",""")
-    assert(metricsRead(5) == """  "numberOfDifferences":"0",""")
+    assert(metricsRead(5) == """  "passedRowsCount":"10",""")
+    assert(metricsRead(6) == """  "numberOfDifferences":"0",""")
   }
 
   test("Compare different datasets by generic way") {
@@ -105,7 +105,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     assert(metricsRead(2) == """  "numberOfDuplicates":"0",""")
     assert(metricsRead(3) == """  "referenceRowCount":"9",""")
     assert(metricsRead(4) == """  "newRowCount":"9",""")
-    assert(metricsRead(5) == """  "numberOfDifferences":"0",""")
+    assert(metricsRead(5) == """  "passedRowsCount":"9",""")
+    assert(metricsRead(6) == """  "numberOfDifferences":"0",""")
   }
 
   test("Compare ref and new df of the same format.") {
@@ -131,7 +132,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     assert(metricsRead(2) == """  "numberOfDuplicates":"0",""")
     assert(metricsRead(3) == """  "referenceRowCount":"9",""")
     assert(metricsRead(4) == """  "newRowCount":"9",""")
-    assert(metricsRead(5) == """  "numberOfDifferences":"0",""")
+    assert(metricsRead(5) == """  "passedRowsCount":"9",""")
+    assert(metricsRead(6) == """  "numberOfDifferences":"0",""")
   }
 
   test("Compare datasets with wrong schemas by generic way") {
