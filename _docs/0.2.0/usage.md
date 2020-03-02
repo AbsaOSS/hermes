@@ -15,7 +15,7 @@ Example:
 spark-submit dataset-comparison.jar \
     --ref-format csv \
     --ref-path /path/to/csv \
-    --ref-header true \git chec
+    --ref-header true \
     --new-format parquet \
     --new-path /path/to/parquet \
     --keys ID \
