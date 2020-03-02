@@ -43,7 +43,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--delimiter", ",",
       "--new-path", getClass.getResource("/dataSample1.csv").toString,
       "--ref-path", getClass.getResource("/dataSample2.csv").toString,
-      "--outPath", outPath
+      "--out-path", outPath
     )
 
     DatasetComparisonJob.main(args)
@@ -72,7 +72,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath
+      "--out-path", outPath
     )
 
     val caught = intercept[DatasetsDifferException] {
@@ -95,7 +95,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--new-format", "json",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath
+      "--out-path", outPath
     )
 
     DatasetComparisonJob.main(args)
@@ -121,7 +121,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--new-header", "true",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath
+      "--out-path", outPath
     )
 
     DatasetComparisonJob.main(args)
@@ -150,7 +150,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath
+      "--out-path", outPath
     )
 
     val caught = intercept[SchemasDifferException] {
@@ -176,7 +176,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--header", "true",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath,
+      "--out-path", outPath,
       "--keys", "id"
     )
 
@@ -200,7 +200,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--header", "true",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath,
+      "--out-path", outPath,
       "--keys", "id,first_name"
     )
 
@@ -225,7 +225,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--format", "parquet",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath,
+      "--out-path", outPath,
       "--keys", "id"
     )
 
@@ -253,7 +253,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--rowTag", "row",
       "--new-path", newPath,
       "--ref-path", refPath,
-      "--outPath", outPath,
+      "--out-path", outPath,
       "--keys", "id,id2,ckey.value"
     )
 

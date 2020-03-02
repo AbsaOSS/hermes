@@ -45,8 +45,8 @@ object CliOptions {
     val refMap = mapOfGroups.filterKeys(_ matches "ref-.*")
     val newMap = mapOfGroups.filterKeys(_ matches "new-.*")
     val keys = mapOfGroups.get("keys").map { x => x.split(",").toSet }
-    val outPath = mapOfGroups.getOrElse("outPath", throw new MissingArgumentException("""outPath is mandatory option. Use "--outPath"."""))
-    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "outPath")
+    val outPath = mapOfGroups.getOrElse("out-path", throw new MissingArgumentException("""out-path is mandatory option. Use "--out-path"."""))
+    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "out-path")
 
     val refMapWithoutPrefix = refMap.map { case (key, value) => (key.drop(4), value) }
     val newMapWithoutPrefix = newMap.map { case (key, value) => (key.drop(4), value) }
