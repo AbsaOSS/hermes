@@ -19,7 +19,7 @@ spark-submit dataset-comparison.jar \
     --new-format parquet \
     --new-path /path/to/parquet \
     --keys ID \
-    --outPath /path/to/results
+    --out-path /path/to/results
 ```
 
 This little example would produce a folder `/path/to/results` which would hold the parquet with differences, if there were any and
