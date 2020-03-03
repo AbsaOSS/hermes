@@ -89,9 +89,40 @@ Now how to use it all together:
 
 #### Info File Comparison
 
+Atum's Info file comparison. Ran as part of the E2E Runner but it can be run as a spark job or a plain old jar file.
+
+```shell
+spark-submit info-file-comparison.jar \
+    --ref-path /path/to/reference/data/_INFO/file \
+    --new-path /path/to/new/data/_INFO/file \
+    --out-path /path/to/results
+```
+
+For _INFO file placed in Hadoop use this format of path `hdfs://path/to/_INFO/file`.
+
+##### Properties
+
+Default properties in use are:
+
+```json
+info-file-comparison {
+  atum-models {
+    stdVersionKey = "std_enceladus_version"
+    confVersionKey = "conform_enceladus_version"
+    stdNameKey = "Standartization"
+    confNameKey = "Conformance"
+    stdAppIdKey = "std_application_id"
+    confAppIdKey = "conform_application_id"
+  }
+  comparison-job {
+    bufferSizeDefaultValue = 4096
+  }
+}
+```
+
 #### E2E Runner
 
-E2E Runner is a spark job to to test end to end data transformations (standardization and conformance from [Enceladus](https://github.com/AbsaOSS/enceladus) project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
+E2E Runner is a spark job to test end to end data transformations (standardization and conformance from [Enceladus](https://github.com/AbsaOSS/enceladus) project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
 
 ```shell
 spark-submit e2e-runner.jar \
