@@ -89,16 +89,16 @@ Now how to use it all together:
 
 #### Info File Comparison
 
-Atum's Info file comparison. Ran as part of the E2E Runner but it can be run as a spark job or a plain old jar file.
+Atum's Info file comparison. Ran as part of the E2E Runner but it can be run as a plain old jar file.
 
 ```shell
-spark-submit info-file-comparison.jar \
+java -jar info-file-comparison.jar \
     --ref-path /path/to/reference/data/_INFO/file \
     --new-path /path/to/new/data/_INFO/file \
     --out-path /path/to/results
 ```
 
-For _INFO file placed in Hadoop use this format of path `hdfs://path/to/_INFO/file`.
+For _INFO file placed in local repository use format of path `file://path/to/_INFO/file`.
 
 ##### Properties
 
