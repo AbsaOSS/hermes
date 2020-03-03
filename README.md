@@ -62,12 +62,12 @@ Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.
 Other configurations are Spark dependant and are out of scope of this README.
 
 ##  <a name="info-comparison" />Info File Comparison
-Autm's Info file comparison. Ran as part of the E2E Runner. Can be run as a spark job or a plain old jar file.
+Autm's Info file comparison. Ran as part of the E2E Runner. Can be run as a plain old jar file.
 
 ### Running
 Basic running example
 ```bash
-spark-submit \
+java -jar \
 /path/to/jar/file \
 --new-path /path/to/new/data/set \
 --ref-path /path/to/referential/data/set \
