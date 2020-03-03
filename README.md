@@ -64,6 +64,16 @@ Other configurations are Spark dependant and are out of scope of this README.
 ##  <a name="info-comparison" />Info File Comparison
 Autm's Info file comparison. Ran as part of the E2E Runner. Can be run as a spark job or a plain old jar file.
 
+### Running
+Basic running example
+```bash
+spark-submit \
+/path/to/jar/file \
+--new-path /path/to/new/data/set \
+--ref-path /path/to/referential/data/set \
+--out-path /path/to/diff/output
+```
+
 ##  <a name="e2e-runner" />E2E Runner
 Runs both Standardization and Conformance on the data provided. After each, a comparison job is run 
 to check the results against expected reference data.
