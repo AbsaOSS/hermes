@@ -30,5 +30,6 @@ trait SparkTestBase { self =>
     .config("spark.driver.bindAddress", "127.0.0.1")
     .config("spark.driver.host", "127.0.0.1")
     .config("spark.sql.hive.convertMetastoreParquet", false)
+    .config("fs.defaultFS","file:/")
     .getOrCreate()
 }
