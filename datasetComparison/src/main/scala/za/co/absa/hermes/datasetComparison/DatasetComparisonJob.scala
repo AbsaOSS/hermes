@@ -15,6 +15,8 @@
 
 package za.co.absa.hermes.datasetComparison
 
+import java.io.PrintWriter
+
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
@@ -112,12 +114,17 @@ object DatasetComparisonJob {
   }
 
   private def writeMetricsToFile(result: ComparisonResult, fileName: String)(implicit sparkSession: SparkSession): Unit = {
-    val path = new Path(s"$fileName/_METRICS")
+    val path = new Path(fileName, "_METRICS")
     val fs = FileSystem.get(sparkSession.sparkContext.hadoopConfiguration)
+    val fsOut = fs.create(path)
 
-    val v = fs.create(path)
-    try { v.write(result.getJsonMetadata.getBytes) }
-    finally { v.close() }
+    try {
+      val pw = new PrintWriter(fsOut, true)
+      pw.print(result.getJsonMetadata)
+      pw.close()
+    } finally {
+      fsOut.close()
+    }
   }
 
   private def checkSchemas(cliOptions: CliOptions, expectedDf: DataFrame, actualDf: DataFrame): Unit = {
