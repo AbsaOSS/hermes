@@ -22,8 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
-import za.co.absa.hermes.utils.FileReader
-import za.co.absa.hermes.utils.SparkTestBase
+import za.co.absa.hermes.utils.{FileReader, SparkTestBase}
 
 import scala.io.Source
 

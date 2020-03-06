@@ -15,9 +15,10 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import java.io.{File, PrintWriter}
+import java.io.PrintWriter
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
@@ -112,13 +113,17 @@ object DatasetComparisonJob {
     )
   }
 
-  private def writeMetricsToFile(result: ComparisonResult, fileName: String): Unit = {
-    new File(fileName).mkdirs()
-    val writer = new PrintWriter(s"$fileName/_METRICS")
+  private def writeMetricsToFile(result: ComparisonResult, fileName: String)(implicit sparkSession: SparkSession): Unit = {
+    val path = new Path(fileName, "_METRICS")
+    val fs = FileSystem.get(sparkSession.sparkContext.hadoopConfiguration)
+    val fsOut = fs.create(path)
+
     try {
-      writer.write(result.getJsonMetadata)
+      val pw = new PrintWriter(fsOut, true)
+      pw.print(result.getJsonMetadata)
+      pw.close()
     } finally {
-      writer.close()
+      fsOut.close()
     }
   }
 
