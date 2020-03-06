@@ -25,12 +25,16 @@ import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.utils.HelperFunctions
 
 object DatasetComparisonJob {
+  case class GenericPair[+T](reference: T, actual: T)
+
   private val conf: Config = ConfigFactory.load()
   private val errorColumnName: String = conf.getString("dataset-comparison.errColumn")
   private val tmpColumnName: String = conf.getString("dataset-comparison.tmpColumn")
   private val comparisonUniqueId: String = conf.getString("dataset-comparison.comparisonUniqueId")
   private val actualPrefix: String = conf.getString("dataset-comparison.actualPrefix")
   private val expectedPrefix: String = conf.getString("dataset-comparison.expectedPrefix")
+  private val allowDuplicates: Boolean = conf.getBoolean("dataset-comparison.allowDuplicates")
+  private val deduplicate: Boolean = conf.getBoolean("dataset-comparison.deduplicate")
 
   def main(args: Array[String]): Unit = {
     val cliOptions = CliOptions.parse(args)
@@ -74,39 +78,44 @@ object DatasetComparisonJob {
   }
 
   def compare(cliOptions: CliOptions)(implicit sparkSession: SparkSession): ComparisonResult = {
-    val expectedDf = cliOptions.referenceOptions.loadDataFrame
-    val expectedDfRowCount = expectedDf.count()
-    val actualDf = cliOptions.newOptions.loadDataFrame
-    val actualDfRowCount = actualDf.count()
-    val keys = if (cliOptions.keys.isDefined) cliOptions.keys.get.toSeq else Seq(comparisonUniqueId)
+    val testedDF = GenericPair(cliOptions.referenceOptions.loadDataFrame, cliOptions.newOptions.loadDataFrame)
+    val rowCounts = GenericPair(testedDF.reference.count(), testedDF.actual.count())
 
-    checkSchemas(cliOptions, expectedDf, actualDf)
+    checkSchemas(cliOptions, testedDF.reference, testedDF.actual)
 
-    val selector: List[Column] = SchemaUtils.getDataFrameSelector(expectedDf.schema)
-    val actualDFSorted = SchemaUtils.alignSchema(actualDf, selector)
-    val expectedDFSorted = SchemaUtils.alignSchema(expectedDf, selector)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(testedDF.reference.schema)
+    val dfsSorted = GenericPair(
+      SchemaUtils.alignSchema(testedDF.reference, selector),
+      SchemaUtils.alignSchema(testedDF.actual, selector)
+    )
 
-    val actualWithKey = addKeyColumn(cliOptions.keys, selector, actualDFSorted)
-    val expectedWithKey = addKeyColumn(cliOptions.keys, selector, expectedDFSorted)
+    val dfsWithKey = GenericPair(
+      addKeyColumn(cliOptions.keys, selector, dfsSorted.reference),
+      addKeyColumn(cliOptions.keys, selector, dfsSorted.actual)
+    )
 
-    checkForDuplicateRows(actualWithKey, keys, cliOptions.outPath)
+    val (duplicateCounts, dfsDeduplicated) = handleDuplicates(cliOptions.outPath, dfsWithKey)
 
-    val expectedExceptActual: DataFrame = expectedWithKey.except(actualWithKey)
-    val actualExceptExpected: DataFrame = actualWithKey.except(expectedWithKey)
+    val dfsExcepted = GenericPair(
+      dfsDeduplicated.reference.except(dfsDeduplicated.actual),
+      dfsDeduplicated.actual.except(dfsDeduplicated.reference)
+    )
 
-    val passedCount = expectedDfRowCount - expectedExceptActual.count()
+    val exceptedCount = GenericPair(dfsExcepted.reference.count(), dfsExcepted.actual.count())
+    val passedCount = rowCounts.reference - exceptedCount.reference
 
-    val resultDF: Option[DataFrame] = (expectedExceptActual.count() + actualExceptExpected.count()) match {
+    val resultDF: Option[DataFrame] = (exceptedCount.reference + exceptedCount.actual) match {
       case 0 => None
-      case _ => Some(createDiffDataFrame(keys, cliOptions.outPath, expectedExceptActual, actualExceptExpected))
+      case _ => Some(createDiffDataFrame(cliOptions.outPath, dfsExcepted.reference, dfsExcepted.actual))
     }
     val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
     ComparisonResult(
-      expectedDfRowCount,
-      actualDfRowCount,
+      rowCounts.reference,
+      rowCounts.actual,
+      duplicateCounts.reference,
+      duplicateCounts.actual,
       passedCount,
-      0,
       selector,
       resultDF,
       diffCount
@@ -125,6 +134,45 @@ object DatasetComparisonJob {
     } finally {
       fsOut.close()
     }
+  }
+
+  private def handleDuplicates(outPath: String,
+                               dfsWithKey: GenericPair[DataFrame]): (GenericPair[Long], GenericPair[DataFrame]) = {
+    def writeDown(df: DataFrame, duplicates: DataFrame, path: String): Unit = {
+      df.alias("original")
+        .join(duplicates, Seq(comparisonUniqueId), "left_outer")
+        .select("original.*")
+        .write
+        .format("parquet")
+        .save(path)
+    }
+
+    val dfsDuplicates: GenericPair[Option[DataFrame]] = GenericPair(
+      checkForDuplicateRows(dfsWithKey.reference),
+      checkForDuplicateRows(dfsWithKey.actual)
+    )
+
+    val duplicateCounts: GenericPair[Long] = GenericPair(
+      dfsDuplicates.reference.map(_.count()).getOrElse(0),
+      dfsDuplicates.actual.map(_.count()).getOrElse(0)
+    )
+
+    if ((duplicateCounts.reference + duplicateCounts.actual) > 0 && !allowDuplicates) {
+      dfsDuplicates.reference.foreach(x => writeDown(dfsWithKey.actual, x, s"$outPath/newDuplicates"))
+      dfsDuplicates.actual.foreach(x => writeDown(dfsWithKey.actual, x, s"$outPath/newDuplicates"))
+
+      throw DuplicateRowsInDF(outPath)
+    }
+
+    val dfsDeduplicated = if (duplicateCounts.reference + duplicateCounts.actual > 0 && deduplicate) {
+      GenericPair(
+        dfsWithKey.reference.dropDuplicates(comparisonUniqueId),
+        dfsWithKey.actual.dropDuplicates(comparisonUniqueId)
+      )
+    } else {
+      GenericPair(dfsWithKey.reference, dfsWithKey.actual)
+    }
+    (duplicateCounts, dfsDeduplicated)
   }
 
   private def checkSchemas(cliOptions: CliOptions, expectedDf: DataFrame, actualDf: DataFrame): Unit = {
@@ -147,13 +195,12 @@ object DatasetComparisonJob {
     * Renames all columns expect the keys and appends prefix to them.
     *
     * @param dataSet Dataset that needs columns renamed
-    * @param keys Keys that are not to be renamed
     * @param prefix Prefix that will be put in front of column names
     * @return New DataFrame with renamed columns
     */
-  private def renameColumns(dataSet: DataFrame, keys: Seq[String], prefix: String): DataFrame = {
+  private def renameColumns(dataSet: DataFrame, prefix: String): DataFrame = {
     val renamedColumns = dataSet.columns.map { column =>
-      if (keys.contains(column)) {
+      if (comparisonUniqueId.equals(column)) {
         dataSet(column)
       } else {
         dataSet(column).as(s"${prefix}_$column")
@@ -169,13 +216,12 @@ object DatasetComparisonJob {
     *
     * @param expected Expected data frame
     * @param actual Actual data frame
-    * @param keys Keys on which data sets are joined
     * @return Returns new data frame containing both data frames with renamed columns and joined on keys.
     */
-  private def joinTwoDataFrames(expected: DataFrame, actual: DataFrame, keys: Seq[String]): DataFrame = {
-    val dfNewExpected = renameColumns(expected, keys, expectedPrefix)
-    val dfNewColumnsActual = renameColumns(actual, keys, actualPrefix)
-    dfNewExpected.join(dfNewColumnsActual, keys,"full")
+  private def joinTwoDataFrames(expected: DataFrame, actual: DataFrame): DataFrame = {
+    val dfNewExpected = renameColumns(expected, expectedPrefix)
+    val dfNewColumnsActual = renameColumns(actual, actualPrefix)
+    dfNewExpected.join(dfNewColumnsActual, Seq(comparisonUniqueId),"full")
   }
 
   /**
@@ -183,37 +229,35 @@ object DatasetComparisonJob {
     * is evaluated as having duplicates and error is thrown.
     *
     * @param df Data frame that will be evaluated for duplicate rows
-    * @param keys Set of keys that will be checked
-    * @param path Path where the duplicate rows will be written to
     */
-  private def checkForDuplicateRows(df: DataFrame, keys: Seq[String], path: String): Unit = {
-    val duplicates = df.groupBy(keys.head, keys.tail: _*).count().filter("`count` >= 2")
-    if (duplicates.count() > 0) {
-      duplicates.write.format("parquet").save(path)
-      throw DuplicateRowsInDF(path)
+  private def checkForDuplicateRows(df: DataFrame): Option[DataFrame] = {
+    val duplicates = df.groupBy(comparisonUniqueId).count().filter("`count` >= 2")
+
+    if (duplicates.count() == 0) {
+      None
+    } else {
+      Some(duplicates)
     }
   }
 
   /**
     * Creates and writes a parquet file that has the original data and differences that were found.
     *
-    * @param keys Unique keys of the data frames
     * @param path Path where the difference will be written to
     * @param expectedMinusActual Relative complement of expected and actual data sets
     * @param actualMinusExpected Relative complement of actual and expected data sets
     */
-  private def createDiffDataFrame(keys: Seq[String],
-                                  path: String,
+  private def createDiffDataFrame(path: String,
                                   expectedMinusActual: DataFrame,
                                   actualMinusExpected: DataFrame): DataFrame = {
-    val joinedData: DataFrame = joinTwoDataFrames(expectedMinusActual, actualMinusExpected, Seq(comparisonUniqueId))
+    val joinedData: DataFrame = joinTwoDataFrames(expectedMinusActual, actualMinusExpected)
 
     // Flatten data
     val flatteningFormula = HelperFunctions.flattenSchema(expectedMinusActual)
     val flatExpected: DataFrame = expectedMinusActual.select(flatteningFormula: _*)
     val flatActual: DataFrame = actualMinusExpected.select(flatteningFormula: _*)
 
-    val joinedFlatDataWithoutErrCol: DataFrame = joinTwoDataFrames(flatExpected, flatActual, Seq(comparisonUniqueId))
+    val joinedFlatDataWithoutErrCol: DataFrame = joinTwoDataFrames(flatExpected, flatActual)
     val joinedFlatDataWithErrCol = joinedFlatDataWithoutErrCol.withColumn(errorColumnName, lit(Array[String]()))
 
     val columns: Array[String] = flatExpected.columns.filterNot(_ == comparisonUniqueId)
