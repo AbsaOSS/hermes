@@ -158,7 +158,7 @@ object DatasetComparisonJob {
     )
 
     if ((duplicateCounts.reference + duplicateCounts.actual) > 0 && !allowDuplicates) {
-      dfsDuplicates.reference.foreach(x => writeDown(dfsWithKey.actual, x, s"$outPath/newDuplicates"))
+      dfsDuplicates.reference.foreach(x => writeDown(dfsWithKey.reference, x, s"$outPath/refDuplicates"))
       dfsDuplicates.actual.foreach(x => writeDown(dfsWithKey.actual, x, s"$outPath/newDuplicates"))
 
       throw DuplicateRowsInDF(outPath)
