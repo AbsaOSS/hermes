@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison
+package za.co.absa.hermes.datasetComparison.config
 
-case class CliHelpOptions(key: String, optional: String, text: String){
-  override def toString: String = f"$key%-26s$optional%-11s$text"
-}
-
-case class CliHelp(title: String, example: String, description: String, options: List[CliHelpOptions]) {
-  override def toString: String =
-    s"""$title
-       |$description
-       |$example
-       |Options:
-       |${options.mkString("\n")}
-       |""".stripMargin
+abstract class DatasetComparisonConfig {
+  val errorColumnName: String
+  val tmpColumnName: String
+  val comparisonUniqueId: String
+  val actualPrefix: String
+  val expectedPrefix: String
+  val allowDuplicates: Boolean
+  val deduplicate: Boolean
 }

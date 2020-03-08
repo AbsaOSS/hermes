@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison
+package za.co.absa.hermes.datasetComparison.cliUtils
 
 import net.liftweb.json.DefaultFormats
 import org.apache.commons.cli.MissingArgumentException
@@ -23,7 +23,8 @@ import scala.io.Source
 case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
                       outPath: String,
-                      keys: Option[Set[String]])
+                      keys: Option[Set[String]],
+                      rawOptions: String)
 
 object CliOptions {
   def generateHelp: Unit = {
@@ -57,6 +58,6 @@ object CliOptions {
     val refLoadOptions = DataframeOptions.validateAndCreate(finalRefMap)
     val newLoadOptions = DataframeOptions.validateAndCreate(finalNewMap)
 
-    CliOptions(refLoadOptions, newLoadOptions, outPath, keys)
+    CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "))
   }
 }

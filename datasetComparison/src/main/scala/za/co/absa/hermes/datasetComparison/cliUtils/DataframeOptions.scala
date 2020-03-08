@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison
+package za.co.absa.hermes.datasetComparison.cliUtils
 
 import org.apache.commons.cli.MissingArgumentException
 import org.apache.spark.sql._
