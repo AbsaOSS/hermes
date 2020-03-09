@@ -62,7 +62,7 @@ case class E2ERunnerConfig(rawFormat: String = "parquet",
     rawFormat.toLowerCase() match {
       case "parquet" => "--raw-format parquet"
       case "json" => "--raw-format json"
-      case "csv" => s"--raw-format csv --delimiter $csvDelimiter --header $csvHeader"
+      case "csv" => s"--raw-format csv --delimiter ${'"'}$csvDelimiter${'"'} --header $csvHeader"
       case "xml" => getXMLParameters
     }
   }
