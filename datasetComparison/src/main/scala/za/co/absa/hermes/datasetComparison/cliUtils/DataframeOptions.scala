@@ -15,8 +15,8 @@
 
 package za.co.absa.hermes.datasetComparison.cliUtils
 
-import org.apache.commons.cli.MissingArgumentException
 import org.apache.spark.sql._
+import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
 case class DataframeOptions(format: String, options: Map[String, String], path: String) {
 
@@ -36,19 +36,19 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
 
 object DataframeOptions {
   def validateAndCreate(options: Map[String, String]): DataframeOptions = {
-    val format = options.getOrElse("format", throw new MissingArgumentException(
+    val format = options.getOrElse("format", throw MissingArgumentException(
       """Format is mandatory option. Use
-        | "--format", "--ref-format" or "--new-format".
+        | "--format"
         |""".stripMargin.replaceAll("[\\r\\n]", "")))
     val path = if (format == "jdbc") {
-      options.getOrElse("dbtable", throw new MissingArgumentException(
+      options.getOrElse("dbtable", throw MissingArgumentException(
         """DB table name is mandatory option for format
-          | type jdbc. Use "--dbtable", "--ref-dbtable" or "--new-dbtable".
+          | type jdbc. Use "--dbtable"
           |""".stripMargin.replaceAll("[\\r\\n]", "")))
     } else {
-      options.getOrElse("path", throw new MissingArgumentException(
-        """Path is mandatory option for format type jdbc.
-          | Use "--path", "--ref-path" or "--new-path".
+      options.getOrElse("path", throw MissingArgumentException(
+        """Path is mandatory option for all format types except jdbc.
+          | Use "--path"
           |""".stripMargin.replaceAll("[\\r\\n]", "")))
     }
     val otherOptions = options -- Set("format", "path")

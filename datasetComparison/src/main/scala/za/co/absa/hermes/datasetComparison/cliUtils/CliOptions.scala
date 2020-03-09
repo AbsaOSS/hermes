@@ -16,9 +16,10 @@
 package za.co.absa.hermes.datasetComparison.cliUtils
 
 import net.liftweb.json.DefaultFormats
-import org.apache.commons.cli.MissingArgumentException
+import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
@@ -55,9 +56,27 @@ object CliOptions {
     val finalRefMap = genericMap ++ refMapWithoutPrefix
     val finalNewMap = genericMap ++ newMapWithoutPrefix
 
-    val refLoadOptions = DataframeOptions.validateAndCreate(finalRefMap)
-    val newLoadOptions = DataframeOptions.validateAndCreate(finalNewMap)
+    val refLoadOptions = Try(DataframeOptions.validateAndCreate(finalRefMap)) match {
+      case Success(value)     => value
+      case Failure(exception) =>
+        val message = enrichMessage(exception.getMessage, "ref-")
+        throw MissingArgumentException(message, exception)
+    }
+
+    val newLoadOptions = Try(DataframeOptions.validateAndCreate(finalNewMap)) match {
+      case Success(value)     => value
+      case Failure(exception) =>
+        val message = enrichMessage(exception.getMessage, "new-")
+        throw MissingArgumentException(message, exception)
+    }
 
     CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "))
+  }
+
+  private def enrichMessage(message: String, keyAddition: String): String = {
+    val exceptionMessagePattern = """(.*) ("--[a-z\-]+")""".r
+    val exceptionMessagePattern(extractedMessage, key) = message
+    val enrichedKey = key.patch(3, keyAddition, 0)
+    s"$extractedMessage $key or $enrichedKey"
   }
 }

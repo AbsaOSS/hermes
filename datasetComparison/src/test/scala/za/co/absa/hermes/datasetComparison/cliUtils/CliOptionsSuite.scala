@@ -1,11 +1,26 @@
+/*
+ * Copyright 2019 ABSA Group Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package za.co.absa.hermes.datasetComparison.cliUtils
 
 import java.io.ByteArrayOutputStream
 
-import org.apache.commons.cli.MissingArgumentException
 import org.scalatest.FunSuite
+import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
-class CliOptionsSuite extends FunSuite{
+class CliOptionsSuite extends FunSuite {
   test("Test generate help") {
     val outCapture = new ByteArrayOutputStream
     val expectedResult = """Dataset Comparison Tool
@@ -73,18 +88,19 @@ class CliOptionsSuite extends FunSuite{
     assert("""out-path is mandatory option. Use "--out-path".""" == caught.getMessage)
   }
 
-  test("Test wrong") {
+  test("Test no dbtable for jdbc") {
     val args = Array(
       "--ref-format", "specialFormat",
       "--format", "jdbc",
-      "--new-dbtable", "table1",
-      "--ref-path", "ref/path/alfa"
+      "--ref-path", "ref/path/alfa",
+      "--out-path", "/some/path"
     )
+    val message = """DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--new-dbtable""""
 
     val caught = intercept[MissingArgumentException] {
       CliOptions.parse(args)
     }
 
-    assert("""out-path is mandatory option. Use "--out-path".""" == caught.getMessage)
+    assert(message == caught.getMessage)
   }
 }
