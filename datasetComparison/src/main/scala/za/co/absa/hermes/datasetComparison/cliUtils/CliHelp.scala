@@ -25,6 +25,5 @@ case class CliHelp(title: String, example: String, description: String, options:
        |$description
        |$example
        |Options:
-       |${options.mkString("\n")}
-       |""".stripMargin
+       |${options.mkString("\n")}""".stripMargin
 }
