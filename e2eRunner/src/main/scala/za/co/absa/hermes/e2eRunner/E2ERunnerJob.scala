@@ -73,7 +73,9 @@ object E2ERunnerJob {
       DataframeOptions("parquet", Map.empty[String, String], s"/ref$pathHDFS"),
       DataframeOptions("parquet", Map.empty[String, String], pathHDFS),
       s"/comp$pathHDFS",
-      keys)
+      keys,
+      "ran from E2E Runner"
+    )
   }
 
   private def getInfoComparisonConfig(cmd: E2ERunnerConfig, pathHDFS: String): InfoComparisonConfig = {
