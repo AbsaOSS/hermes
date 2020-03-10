@@ -73,10 +73,19 @@ object CliOptions {
     CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "))
   }
 
-  private def enrichMessage(message: String, keyAddition: String): String = {
+  /**
+   * Adds a prefix to a key where there is an error. This then helps the message be more specific.
+   * Example: If the issue is while parsing ref data. Message will say there is a missing "key"
+   * and we want to say that it is either "key" or "ref-key", since it comes from ref.
+   *
+   * @param message The error message from parsing
+   * @param keyPrefix Key prefix that will be added. Should be either "ref-" or "new-"
+   * @return
+   */
+  private def enrichMessage(message: String, keyPrefix: String): String = {
     val exceptionMessagePattern = """(.*) ("--[a-z\-]+")""".r
     val exceptionMessagePattern(extractedMessage, key) = message
-    val enrichedKey = key.patch(3, keyAddition, 0)
+    val enrichedKey = key.patch(3, keyPrefix, 0)
     s"$extractedMessage $key or $enrichedKey"
   }
 }
