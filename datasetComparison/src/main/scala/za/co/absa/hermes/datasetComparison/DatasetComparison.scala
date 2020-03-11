@@ -154,7 +154,7 @@ class DatasetComparison(cliOptions: CliOptions,
       df.alias("original")
         .join(duplicates, Seq(config.comparisonUniqueId), "inner")
         .select("original.*")
-        .drop(Seq(config.comparisonUniqueId))
+        .drop(config.comparisonUniqueId)
         .write
         .format("parquet")
         .save(path)
