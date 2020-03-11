@@ -45,5 +45,5 @@ final case class SchemasDifferException(refPath: String,
 final case class DuplicateRowsInDF(path: String)
   extends Exception(s"Provided dataset has duplicate rows. Specific rows written to $path")
 
-final case class OptionsParseException(arguments: String)
-  extends Exception(s"Provided arguments were incorrect. Arguments:\n $arguments")
+final case class MissingArgumentException(message: String, cause: Throwable = None.orNull)
+  extends Exception(message, cause)

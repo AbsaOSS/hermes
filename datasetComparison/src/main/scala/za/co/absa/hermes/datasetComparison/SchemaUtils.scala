@@ -27,6 +27,7 @@ object SchemaUtils {
    * @param array2 The second array to compare
    * @return true if provided arrays are the same ignoring nullability
    */
+  @scala.annotation.tailrec
   private def isSameArray(array1: ArrayType, array2: ArrayType): Boolean = {
     array1.elementType match {
       case arrayType1: ArrayType =>
@@ -44,6 +45,7 @@ object SchemaUtils {
 
   }
 
+  @scala.annotation.tailrec
   private def diffArray(array1: ArrayType, array2: ArrayType, parent: String): Seq[String] = {
     array1.elementType match {
       case _ if array1.elementType.typeName != array2.elementType.typeName =>

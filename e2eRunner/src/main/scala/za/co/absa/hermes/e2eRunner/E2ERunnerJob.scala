@@ -17,7 +17,8 @@ package za.co.absa.hermes.e2eRunner
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigObject}
 import org.apache.spark.sql.SparkSession
-import za.co.absa.hermes.datasetComparison.{CliOptions, DataframeOptions, DatasetComparisonJob, DatasetsDifferException}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOptions}
+import za.co.absa.hermes.datasetComparison.{DatasetComparisonJob, DatasetsDifferException}
 import za.co.absa.hermes.infoFileComparison.{InfoComparisonConfig, InfoFileComparisonJob, InfoFilesDifferException}
 import za.co.absa.hermes.utils.HelperFunctions
 
@@ -72,7 +73,9 @@ object E2ERunnerJob {
       DataframeOptions("parquet", Map.empty[String, String], s"/ref$pathHDFS"),
       DataframeOptions("parquet", Map.empty[String, String], pathHDFS),
       s"/comp$pathHDFS",
-      keys)
+      keys,
+      "ran from E2E Runner"
+    )
   }
 
   private def getInfoComparisonConfig(cmd: E2ERunnerConfig, pathHDFS: String): InfoComparisonConfig = {

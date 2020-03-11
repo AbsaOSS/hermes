@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison
+package za.co.absa.hermes.datasetComparison.cliUtils
 
 case class CliHelpOptions(key: String, optional: String, text: String){
   override def toString: String = f"$key%-26s$optional%-11s$text"
@@ -25,6 +25,5 @@ case class CliHelp(title: String, example: String, description: String, options:
        |$description
        |$example
        |Options:
-       |${options.mkString("\n")}
-       |""".stripMargin
+       |${options.mkString("\n")}""".stripMargin
 }

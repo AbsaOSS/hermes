@@ -16,6 +16,7 @@
 package za.co.absa.hermes.utils
 
 import scala.io.Source
+import scala.language.reflectiveCalls
 
 object FileReader {
   def readFileAsListOfLines(filename: String): List[String] =
