@@ -29,5 +29,4 @@ class TypesafeConfig(path: Option[String]) extends DatasetComparisonConfig {
   val actualPrefix: String = conf.getString("dataset-comparison.actualPrefix")
   val expectedPrefix: String = conf.getString("dataset-comparison.expectedPrefix")
   val allowDuplicates: Boolean = conf.getBoolean("dataset-comparison.allowDuplicates")
-  val deduplicate: Boolean = conf.getBoolean("dataset-comparison.deduplicate")
 }

@@ -69,11 +69,11 @@ class DatasetComparison(cliOptions: CliOptions,
       addKeyColumn(selector, dfsSorted.actual)
     )
 
-    val (duplicateCounts, dfsDeduplicated) = handleDuplicates(dfsWithKey)
+    val duplicateCounts = handleDuplicates(dfsWithKey)
 
     val dfsExcepted = ComparisonPair(
-      dfsDeduplicated.reference.except(dfsDeduplicated.actual),
-      dfsDeduplicated.actual.except(dfsDeduplicated.reference)
+      dfsWithKey.reference.except(dfsWithKey.actual),
+      dfsWithKey.actual.except(dfsWithKey.reference)
     )
 
     val exceptedCount = ComparisonPair(dfsExcepted.reference.count(), dfsExcepted.actual.count())
@@ -149,7 +149,7 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param dfsWithKey DataFrame pair where both have appended unique key
    * @return
    */
-  private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame]): (ComparisonPair[Long], ComparisonPair[DataFrame]) = {
+  private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame]): ComparisonPair[Long] = {
     def write(df: DataFrame, duplicates: DataFrame, path: String): Unit = {
       df.alias("original")
         .join(duplicates, Seq(config.comparisonUniqueId), "inner")
@@ -177,15 +177,7 @@ class DatasetComparison(cliOptions: CliOptions,
       throw DuplicateRowsInDF(cliOptions.outPath)
     }
 
-    val dfsDeduplicated = if (duplicateCounts.reference + duplicateCounts.actual > 0 && config.deduplicate) {
-      ComparisonPair(
-        dfsWithKey.reference.dropDuplicates(config.comparisonUniqueId),
-        dfsWithKey.actual.dropDuplicates(config.comparisonUniqueId)
-      )
-    } else {
-      ComparisonPair(dfsWithKey.reference, dfsWithKey.actual)
-    }
-    (duplicateCounts, dfsDeduplicated)
+    duplicateCounts
   }
 
   /**

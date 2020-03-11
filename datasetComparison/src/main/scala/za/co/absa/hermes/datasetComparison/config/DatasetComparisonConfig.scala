@@ -22,5 +22,4 @@ abstract class DatasetComparisonConfig {
   val actualPrefix: String
   val expectedPrefix: String
   val allowDuplicates: Boolean
-  val deduplicate: Boolean
 }
