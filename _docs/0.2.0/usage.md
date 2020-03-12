@@ -134,6 +134,7 @@ spark-submit e2e-runner.jar \
     --report-version <report-version> \
     --keys ID1,ID2
 ```
+_Note!_ these will change soon in #63
 
 E2E Runner requires the same input as an Enceladus spark job + `keys` argument. For more about the `keys` argument refer to the Dataset Comparison above. What is important is the data location and properties. All properties are standard JAVA OPTS and can be set using spark's `--conf=spark.driver.extraJavaOptions=`.
 
