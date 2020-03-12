@@ -89,9 +89,41 @@ Now how to use it all together:
 
 #### Info File Comparison
 
+Atum's Info file comparison. Ran as part of the E2E Runner but it can be run as a plain old jar file.
+
+```shell
+java -jar info-file-comparison.jar \
+    --ref-path /path/to/reference/data/_INFO/file \
+    --new-path /path/to/new/data/_INFO/file \
+    --out-path /path/to/results
+```
+
+For _INFO file placed in local repository use format of path `file://path/to/_INFO/file`.
+
+##### Properties
+
+Default properties in use are:
+
+```json
+info-file-comparison {
+  atum-models {
+    stdVersionKey = "std_enceladus_version"
+    confVersionKey = "conform_enceladus_version"
+    stdNameKey = "Standartization"
+    confNameKey = "Conformance"
+    stdAppIdKey = "std_application_id"
+    confAppIdKey = "conform_application_id"
+  }
+  comparison-job {
+    bufferSizeDefaultValue = 4096
+  }
+}
+```
+_Note!_ these will change soon in #63
+
 #### E2E Runner
 
-E2E Runner is a spark job to to test end to end data transformations (standardization and conformance from [Enceladus](https://github.com/AbsaOSS/enceladus) project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
+E2E Runner is a spark job to test end to end data transformations (standardization and conformance from [Enceladus](https://github.com/AbsaOSS/enceladus) project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
 
 ```shell
 spark-submit e2e-runner.jar \
@@ -103,7 +135,6 @@ spark-submit e2e-runner.jar \
     --report-version <report-version> \
     --keys ID1,ID2
 ```
-
 E2E Runner requires the same input as an Enceladus spark job + `keys` argument. For more about the `keys` argument refer to the Dataset Comparison above. What is important is the data location and properties. All properties are standard JAVA OPTS and can be set using spark's `--conf=spark.driver.extraJavaOptions=`.
 
 ##### Properties
