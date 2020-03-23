@@ -15,20 +15,20 @@
 
 package za.co.absa.hermes.infoFileComparison
 
-import com.typesafe.config.{Config, ConfigFactory}
 import za.co.absa.atum.model.{Checkpoint, ControlMeasure, ControlMeasureMetadata, Measurement}
+import za.co.absa.hermes.infoFileComparison.config.InfoFileComparisonConfig
 
 /**
   * Object holding extensions of Atum Models for comparison purposes.
   */
 object AtumModelUtils {
-  private val conf: Config = ConfigFactory.load
-  private val stdVersionKey = conf.getString("info-file-comparison.atum-models.stdVersionKey")
-  private val confVersionKey = conf.getString("info-file-comparison.atum-models.confVersionKey")
-  private val stdNameKey = conf.getString("info-file-comparison.atum-models.stdNameKey")
-  private val confNameKey = conf.getString("info-file-comparison.atum-models.confNameKey")
-  private val stdAppIdKey = conf.getString("info-file-comparison.atum-models.stdAppIdKey")
-  private val confAppIdKey = conf.getString("info-file-comparison.atum-models.confAppIdKey")
+  private var versionMetaKeys = List.empty[String]
+  private var keysToIgnore = List.empty[String]
+
+  def applyConfig(config: InfoFileComparisonConfig): Unit = {
+    versionMetaKeys = config.versionMetaKeys
+    keysToIgnore = config.keysToIgnore
+  }
 
   /**
     * ControlMeasure's class extension adding compareWith
@@ -93,22 +93,9 @@ object AtumModelUtils {
     private def additionalInfoComparison(was: Map[String, String],
                                          is: Map[String,String],
                                          curPath: String): List[ModelDifference[_]] = {
-      // TODO #2 This is ignored because we cannot control the IDs and others which makes the size unstable.
-      val keysToIgnore = Seq(
-        "conform_input_dir_size",
-        "std_input_dir_size",
-        "std_output_dir_size",
-        "conform_output_dir_size"
-      )
-
       was.flatMap {
-        case (`confVersionKey`, wasValue) =>
-          logVersionAndContinue(confNameKey, wasValue, is.get(confVersionKey))
-          None
-        case (`stdVersionKey`, wasValue) =>
-          logVersionAndContinue(stdNameKey, wasValue, is.get(stdVersionKey))
-          None
-        case (wasKey, _) if wasKey == stdAppIdKey || wasKey == confAppIdKey =>
+        case (wasKey, wasValue) if versionMetaKeys.contains(wasKey) =>
+          logVersionKey(wasKey, wasValue, is.get(wasKey))
           None
         case (wasKey, wasValue) if keysToIgnore.contains(wasKey) =>
           logIgnoredKey(wasKey, wasValue, is.get(wasKey))
@@ -122,7 +109,7 @@ object AtumModelUtils {
       }.toList.sortBy({ f: ModelDifference[String] => f.path })
     }
 
-    private def logVersionAndContinue(name: String, refVersion: String, newVersion: Option[String]): Unit = {
+    private def logVersionKey(name: String, refVersion: String, newVersion: Option[String]): Unit = {
       scribe.info(s"$name versions is:")
       scribe.info(s"Reference - $refVersion")
       scribe.info(s"New - ${newVersion.getOrElse("NOT SPECIFIED")}")

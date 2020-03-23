@@ -25,22 +25,22 @@ import scala.util.{Failure, Success, Try}
   * Note: scopt requires all fields to have default values.
   *       Even if a field is mandatory it needs a default value.
   */
-case class InfoComparisonConfig(newPath: String = "",
-                                refPath: String = "",
-                                outPath: String = "")
+case class InfoComparisonArguments(newPath: String = "",
+                                   refPath: String = "",
+                                   outPath: String = "")
 
-object InfoComparisonConfig {
+object InfoComparisonArguments {
 
-  def getCmdLineArguments(args: Array[String]): Try[InfoComparisonConfig] = {
+  def getCmdLineArguments(args: Array[String]): Try[InfoComparisonArguments] = {
     val parser = new CmdParser("spark-submit [spark options] TestUtils.jar")
 
-    parser.parse(args, InfoComparisonConfig())  match {
+    parser.parse(args, InfoComparisonArguments())  match {
       case Some(config) => Success(config)
       case _            => Failure(new IllegalArgumentException("Wrong options provided. List can be found above"))
     }
   }
 
-  private class CmdParser(programName: String) extends OptionParser[InfoComparisonConfig](programName) {
+  private class CmdParser(programName: String) extends OptionParser[InfoComparisonArguments](programName) {
     head("\n_INFO File Comparison", "")
     var newPath: Option[String] = None
     var refPath: Option[String] = None

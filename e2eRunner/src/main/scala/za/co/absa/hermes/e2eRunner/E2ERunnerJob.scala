@@ -19,7 +19,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigObject}
 import org.apache.spark.sql.SparkSession
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOptions}
 import za.co.absa.hermes.datasetComparison.{DatasetComparisonJob, DatasetsDifferException}
-import za.co.absa.hermes.infoFileComparison.{InfoComparisonConfig, InfoFileComparisonJob, InfoFilesDifferException}
+import za.co.absa.hermes.infoFileComparison.{InfoComparisonArguments, InfoFileComparisonJob, InfoFilesDifferException}
 import za.co.absa.hermes.utils.HelperFunctions
 
 import scala.collection.JavaConversions._
@@ -78,8 +78,8 @@ object E2ERunnerJob {
     )
   }
 
-  private def getInfoComparisonConfig(cmd: E2ERunnerConfig, pathHDFS: String): InfoComparisonConfig = {
-    InfoComparisonConfig(
+  private def getInfoComparisonConfig(cmd: E2ERunnerConfig, pathHDFS: String): InfoComparisonArguments = {
+    InfoComparisonArguments(
       newPath = s"$pathHDFS/_INFO",
       refPath = s"/ref$pathHDFS/_INFO",
       outPath = s"/comp/info_file$pathHDFS/_INFO"

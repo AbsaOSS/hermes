@@ -27,6 +27,7 @@ import za.co.absa.atum.model.ControlMeasure
 import za.co.absa.atum.persistence.ControlMeasuresParser
 import za.co.absa.atum.utils.ARMImplicits
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
+import za.co.absa.hermes.infoFileComparison.config._
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
@@ -38,12 +39,12 @@ object InfoFileComparisonJob {
   private lazy val hadoopConfiguration = getHadoopConfiguration
 
   def main(args: Array[String]): Unit = {
-    val cmd = InfoComparisonConfig.getCmdLineArguments(args) match {
+    val cmd = InfoComparisonArguments.getCmdLineArguments(args) match {
       case Success(value) => value
       case Failure(exception) => throw exception
     }
 
-    execute(cmd)
+    execute(cmd, None)
   }
 
   /**
@@ -51,9 +52,12 @@ object InfoFileComparisonJob {
     *
     * @param cmd Provided configuration for the comparison
     */
-  def execute(cmd: InfoComparisonConfig): Unit = {
+  def execute(cmd: InfoComparisonArguments, configPath: Option[String] = None): Unit = {
     val newControlMeasure = loadControlMeasures(cmd.newPath)
     val refControlMeasure = loadControlMeasures(cmd.refPath)
+
+    val config = new TypesafeConfig(configPath)
+    AtumModelUtils.applyConfig(config)
 
     val diff: List[ModelDifference[_]] = refControlMeasure.compareWith(newControlMeasure)
 
