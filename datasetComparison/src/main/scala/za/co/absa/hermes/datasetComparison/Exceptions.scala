@@ -15,13 +15,16 @@
 
 package za.co.absa.hermes.datasetComparison
 
+class DatasetComparisonException(msg: String,
+                                 cause: Throwable = None.orNull) extends Exception(msg, cause)
+
 final case class DatasetsDifferException(refPath: String,
                                          stdPath: String,
                                          outPath: String,
                                          expectedCount: Long,
                                          actualCount: Long,
                                          cause: Throwable = None.orNull)
-  extends Exception(
+  extends DatasetComparisonException(
     s"""Expected and actual datasets differ.
        |Reference path: $refPath
        |Actual dataset path: $stdPath
@@ -33,7 +36,7 @@ final case class SchemasDifferException(refPath: String,
                                         stdPath: String,
                                         diffSchema: String,
                                         cause: Throwable = None.orNull)
-  extends Exception(
+  extends DatasetComparisonException(
     s"""Expected and actual datasets differ in schemas.
        |Reference path: $refPath
        |Actual dataset path: $stdPath
@@ -43,7 +46,7 @@ final case class SchemasDifferException(refPath: String,
 
 
 final case class DuplicateRowsInDF(path: String)
-  extends Exception(s"Provided dataset has duplicate rows. Specific rows written to $path")
+  extends DatasetComparisonException(s"Provided dataset has duplicate rows. Specific rows written to $path")
 
 final case class MissingArgumentException(message: String, cause: Throwable = None.orNull)
   extends Exception(message, cause)

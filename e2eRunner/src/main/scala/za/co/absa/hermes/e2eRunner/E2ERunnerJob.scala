@@ -18,7 +18,7 @@ package za.co.absa.hermes.e2eRunner
 import com.typesafe.config.{Config, ConfigFactory, ConfigObject}
 import org.apache.spark.sql.SparkSession
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOptions}
-import za.co.absa.hermes.datasetComparison.{DatasetComparisonJob, DatasetsDifferException}
+import za.co.absa.hermes.datasetComparison.{DatasetComparisonException, DatasetComparisonJob}
 import za.co.absa.hermes.infoFileComparison.{InfoComparisonConfig, InfoFileComparisonJob, InfoFilesDifferException}
 import za.co.absa.hermes.utils.HelperFunctions
 
@@ -120,7 +120,7 @@ object E2ERunnerJob {
     try {
       DatasetComparisonJob.execute(getDatasetComparisonConfig(cmd, stdPathHDFS))
     } catch {
-      case e: DatasetsDifferException => errAccumulator.add(e.getMessage)
+      case e: DatasetComparisonException => errAccumulator.add(e.getMessage)
     }
 
     scribe.info("Standardization Comparison of INFO file")
@@ -139,7 +139,7 @@ object E2ERunnerJob {
     try {
       DatasetComparisonJob.execute(getDatasetComparisonConfig(cmd, confPathHDFS))
     } catch {
-      case e: DatasetsDifferException => errAccumulator.add(e.getMessage)
+      case e: DatasetComparisonException => errAccumulator.add(e.getMessage)
     }
 
     scribe.info("Conformance Comparison of INFO file")
