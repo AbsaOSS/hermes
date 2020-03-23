@@ -51,15 +51,14 @@ object InfoFileComparisonJob {
     * Execute the comparison
     *
     * @param cmd Provided configuration for the comparison
+    * @param configPath Path to TypeSafe's style config file
     */
   def execute(cmd: InfoComparisonArguments, configPath: Option[String] = None): Unit = {
     val newControlMeasure = loadControlMeasures(cmd.newPath)
     val refControlMeasure = loadControlMeasures(cmd.refPath)
-
     val config = new TypesafeConfig(configPath)
-    AtumModelUtils.applyConfig(config)
 
-    val diff: List[ModelDifference[_]] = refControlMeasure.compareWith(newControlMeasure)
+    val diff: List[ModelDifference[_]] = compare(newControlMeasure, refControlMeasure, config)
 
     if (diff.nonEmpty) {
       val serializedData = ModelDifferenceParser.asJson(diff)
@@ -69,6 +68,12 @@ object InfoFileComparisonJob {
     } else {
       scribe.info("Expected and actual _INFO files are the same.")
     }
+  }
+
+  private def compare(newControlMeasure: ControlMeasure,
+                      refControlMeasure: ControlMeasure,
+                      config: TypesafeConfig): List[ModelDifference[_]] = {
+    refControlMeasure.compareWith(newControlMeasure, config)
   }
 
   private def saveDataToFile(data: String, path: String): Unit = {

@@ -40,8 +40,8 @@ object AtumModelUtils {
       * @param otherControlMeasure  Second control measure
       * @return                     Returns a list of model differences
       */
-    def compareWith(otherControlMeasure: ControlMeasure): List[ModelDifference[_]] = {
-      val metadataDifferences = controlMeasure.metadata.compareWith(otherControlMeasure.metadata, "metadata")
+    def compareWith(otherControlMeasure: ControlMeasure, config: InfoFileComparisonConfig): List[ModelDifference[_]] = {
+      val metadataDifferences = controlMeasure.metadata.compareWith(otherControlMeasure.metadata, "metadata", config)
       val checkpointsDifferences = controlMeasure.checkpoints
         .zipWithIndex
         .foldLeft(List[ModelDifference[_]]()) {
@@ -64,7 +64,9 @@ object AtumModelUtils {
       * @param curPath        Path to the ControlMeasureMetadata through the model
       * @return               Returns a list of model differences
       */
-    def compareWith(otherMetadata: ControlMeasureMetadata, curPath: String): List[ModelDifference[_]] = {
+    def compareWith(otherMetadata: ControlMeasureMetadata,
+                    curPath: String,
+                    config: InfoFileComparisonConfig): List[ModelDifference[_]] = {
       val diffs = List(
         simpleCompare(metadata.sourceApplication, otherMetadata.sourceApplication, s"$curPath.sourceApplication"),
         simpleCompare(metadata.country, otherMetadata.country, s"$curPath.country"),
@@ -77,7 +79,9 @@ object AtumModelUtils {
 
       val additionalInfoDiff = additionalInfoComparison(metadata.additionalInfo,
         otherMetadata.additionalInfo,
-        s"$curPath.additionalInfo")
+        s"$curPath.additionalInfo",
+        config.versionMetaKeys,
+        config.keysToIgnore)
 
       diffs ::: additionalInfoDiff
     }
@@ -92,7 +96,9 @@ object AtumModelUtils {
       */
     private def additionalInfoComparison(was: Map[String, String],
                                          is: Map[String,String],
-                                         curPath: String): List[ModelDifference[_]] = {
+                                         curPath: String,
+                                         versionMetaKeys: List[String],
+                                         keysToIgnore: List[String]): List[ModelDifference[_]] = {
       was.flatMap {
         case (wasKey, wasValue) if versionMetaKeys.contains(wasKey) =>
           logVersionKey(wasKey, wasValue, is.get(wasKey))
@@ -182,8 +188,7 @@ object AtumModelUtils {
   private def simpleCompare[T](first: T, other: T, curPath: String): Option[ModelDifference[T]] = {
     if (first != other) {
       Some(ModelDifference(curPath, first, other))
-    }
-    else {
+    } else {
       None
     }
   }
