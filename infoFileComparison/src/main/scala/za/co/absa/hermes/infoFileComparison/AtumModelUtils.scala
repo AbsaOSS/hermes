@@ -16,20 +16,11 @@
 package za.co.absa.hermes.infoFileComparison
 
 import za.co.absa.atum.model.{Checkpoint, ControlMeasure, ControlMeasureMetadata, Measurement}
-import za.co.absa.hermes.infoFileComparison.config.InfoFileComparisonConfig
 
 /**
   * Object holding extensions of Atum Models for comparison purposes.
   */
 object AtumModelUtils {
-  private var versionMetaKeys = List.empty[String]
-  private var keysToIgnore = List.empty[String]
-
-  def applyConfig(config: InfoFileComparisonConfig): Unit = {
-    versionMetaKeys = config.versionMetaKeys
-    keysToIgnore = config.keysToIgnore
-  }
-
   /**
     * ControlMeasure's class extension adding compareWith
     * @param controlMeasure Control Measure instance

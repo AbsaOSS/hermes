@@ -27,7 +27,6 @@ import za.co.absa.atum.model.ControlMeasure
 import za.co.absa.atum.persistence.ControlMeasuresParser
 import za.co.absa.atum.utils.ARMImplicits
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
-import za.co.absa.hermes.infoFileComparison.config._
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
@@ -44,7 +43,7 @@ object InfoFileComparisonJob {
       case Failure(exception) => throw exception
     }
 
-    execute(cmd, None)
+    execute(cmd)
   }
 
   /**
@@ -56,7 +55,7 @@ object InfoFileComparisonJob {
   def execute(cmd: InfoComparisonArguments, configPath: Option[String] = None): Unit = {
     val newControlMeasure = loadControlMeasures(cmd.newPath)
     val refControlMeasure = loadControlMeasures(cmd.refPath)
-    val config = new TypesafeConfig(configPath)
+    val config = InfoFileComparisonConfig.fromTypesafeConfig(configPath)
 
     val diff: List[ModelDifference[_]] = compare(newControlMeasure, refControlMeasure, config)
 
@@ -72,7 +71,7 @@ object InfoFileComparisonJob {
 
   private def compare(newControlMeasure: ControlMeasure,
                       refControlMeasure: ControlMeasure,
-                      config: TypesafeConfig): List[ModelDifference[_]] = {
+                      config: InfoFileComparisonConfig): List[ModelDifference[_]] = {
     refControlMeasure.compareWith(newControlMeasure, config)
   }
 
