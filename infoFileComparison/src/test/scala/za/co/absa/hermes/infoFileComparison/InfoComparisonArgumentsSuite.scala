@@ -4,7 +4,7 @@ import org.scalatest.FunSuite
 
 import scala.util.{Failure, Success}
 
-class ConfigSuite extends FunSuite {
+class InfoComparisonArgumentsSuite extends FunSuite {
   private val newPath = "/tmp/standardized_out"
   private val refPath = "/tmp/reference_data"
   private val outPath = "/tmp/out_data"
@@ -12,7 +12,7 @@ class ConfigSuite extends FunSuite {
 //  Others are not tested as it is almost impossible to get a proper error
 //  from scopt. This is hopefully going to be implemented in final stable 4.1
   test("Happy day scenario") {
-    val cmdConfig = InfoComparisonConfig.getCmdLineArguments(
+    val cmdConfig = InfoComparisonArguments.getCmdLineArguments(
       Array(
         "--new-path", newPath,
         "--ref-path", refPath,
@@ -29,7 +29,7 @@ class ConfigSuite extends FunSuite {
   }
 
   test("Missing mandatory options") {
-    val cmdConfig = InfoComparisonConfig.getCmdLineArguments(
+    val cmdConfig = InfoComparisonArguments.getCmdLineArguments(
       Array(
         "--new-path", newPath,
         "--out-path", outPath
@@ -41,7 +41,7 @@ class ConfigSuite extends FunSuite {
   }
 
   test("Ref and New path are the same") {
-    val cmdConfig = InfoComparisonConfig.getCmdLineArguments(
+    val cmdConfig = InfoComparisonArguments.getCmdLineArguments(
       Array(
         "--new-path", newPath,
         "--ref-path", newPath,
