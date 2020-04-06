@@ -146,7 +146,7 @@ info-file-comparison {
 
 #### E2E Runner
 
-E2E Runner is a spark job to to test end to end data transformations (standardization and conformance from [Enceladus][gh-enceladus] project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
+E2E Runner is a spark job to test end to end data transformations (standardization and conformance from [Enceladus][gh-enceladus] project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
 
 ```shell
 spark-submit e2e-runner.jar \
