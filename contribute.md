@@ -5,12 +5,12 @@ title: Contribute
 
 ### **Did you find a bug?**
 
-* **Ensure the bug has not already been reported** by searching our **[GitHub Issues](https://github.com/AbsaOSS/hermes/issues)**.
+* **Ensure the bug has not already been reported** by searching our **[GitHub Issues][issues]**.
 * If you are unable to find an open issue describing the problem, use the **Bug report** template to open a new one. Tag it with the **bug** label.
 
 ### **Do you want to request a new feature?**
 
-* **Ensure the feature has not already been requested** by searching our **[GitHub Issues](https://github.com/AbsaOSS/hermes/issues)**.
+* **Ensure the feature has not already been requested** by searching our **[GitHub Issues][issues]**.
 * If you are unable to find the feature request, create a new one. Tag it with the **request** label.
 
 ### **Do you want to implement a new feature or fix a bug?**
@@ -19,7 +19,7 @@ title: Contribute
   * If the feature/bug is not yet filed, please write it up first:
     * **"Life, the universe and everything"**
 * Fork the repository.
-* We follow the [**GitFlow**](https://nvie.com/posts/a-successful-git-branching-model/) branching strategy:
+* We follow the [**GitFlow**][git-flow] branching strategy:
   * Cut your branch from develop, add the GitHub Issue in the branch name:
     * **feature/42-life-universe-everything**
     * **bugfix/42-life-universe-everything**
@@ -35,3 +35,6 @@ title: Contribute
 ##### Thanks!
 
 The AbsaOSS team
+
+[issues]: https://github.com/AbsaOSS/hermes/issues
+[git-flow]: https://nvie.com/posts/a-successful-git-branching-model/

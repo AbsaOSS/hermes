@@ -5,9 +5,17 @@ version: '0.2.0'
 categories:
     - '0.2.0'
 ---
+#### Table of contents
+
+1. [Dataset Comparison](#dataset-comparison)
+2. [Info File Comparison](#info-file-comparison)
+3. [E2E Runner](#e2e-runner)
+
+***
+
 #### Dataset Comparison
 
-General tool for data set comparison. Can be used a spark job or a library. For the library-like usage check method `execute` and `compare` in `DatasetComparisonJob` class in `za.co.absa.hermes.datasetComparison` package.
+Dataset Comparison used as a spark job. _This example doesn't show spark argumetns_
 
 Example:
 
@@ -87,18 +95,20 @@ Now how to use it all together:
 
 **NOTE** if you want to use `jdbc` format or others, requiring specific drivers, you should have appropriate drivers on a class path.
 
+***
+
 #### Info File Comparison
 
 Atum's Info file comparison. Ran as part of the E2E Runner but it can be run as a plain old jar file.
 
 ```shell
 java -jar info-file-comparison.jar \
-    --ref-path /path/to/reference/data/_INFO/file \
-    --new-path /path/to/new/data/_INFO/file \
+    --ref-path /path/to/reference/data/_INFO \
+    --new-path /path/to/new/data/_INFO \
     --out-path /path/to/results
 ```
 
-For _INFO file placed in local repository use format of path `file://path/to/_INFO/file`.
+For _INFO file placed in local repository use format of path `file://path/to/_INFO`.
 
 ##### Properties
 
@@ -107,23 +117,36 @@ Default properties in use are:
 ```json
 info-file-comparison {
   atum-models {
-    stdVersionKey = "std_enceladus_version"
-    confVersionKey = "conform_enceladus_version"
-    stdNameKey = "Standartization"
-    confNameKey = "Conformance"
-    stdAppIdKey = "std_application_id"
-    confAppIdKey = "conform_application_id"
+    versionMetaKeys = [
+      "std_enceladus_version",
+      "conform_enceladus_version"
+    ]
+    ignoredMetaKeys = [
+      "std_application_id",
+      "conform_application_id",
+      "conform_input_dir_size",
+      "std_input_dir_size",
+      "std_output_dir_size",
+      "conform_output_dir_size"
+    ]
   }
   comparison-job {
     bufferSizeDefaultValue = 4096
   }
 }
 ```
-_Note!_ these will change soon in #63
+
+| Key | Description |
+|:---|:---|
+| versionMetaKeys | Keys from additional data in info file that you want to log as versions. These are not going to be compared by the tool, but both versions will be printed out |
+| ignoredMetaKeys | Keys from additional data in info file that you want to completely ignore. These are going to be logged out |
+| bufferSizeDefaultValue | This is Hadoop configuration's `io.file.buffer.size` for writing the results to Hadoop |
+
+***
 
 #### E2E Runner
 
-E2E Runner is a spark job to test end to end data transformations (standardization and conformance from [Enceladus](https://github.com/AbsaOSS/enceladus) project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
+E2E Runner is a spark job to test end to end data transformations (standardization and conformance from [Enceladus][gh-enceladus] project) and compere the output. This tools requires knowledge of the Enceladus project and is highly dependant on it, which is evident from the run example bellow.
 
 ```shell
 spark-submit e2e-runner.jar \
@@ -135,9 +158,11 @@ spark-submit e2e-runner.jar \
     --report-version <report-version> \
     --keys ID1,ID2
 ```
+
 E2E Runner requires the same input as an Enceladus spark job + `keys` argument. For more about the `keys` argument refer to the Dataset Comparison above. What is important is the data location and properties. All properties are standard JAVA OPTS and can be set using spark's `--conf=spark.driver.extraJavaOptions=`.
 
 ##### Properties
+
 Default properties in use are:
 
 ```json
@@ -182,4 +207,4 @@ Where: (in usage, all keys should be prefixed with `e2e-runner.`)
 | sparkSubmitExecutable | Path to a spark-submit executable |
 | sparkConf | Extra spark conf properties for the jobs. For example will be translated into `--conf=spark.driver.extraJavaOptions=-DdefaultTimestampTimeZone=Africa/Johannesburg` |
 
-
+[gh-enceladus]: https://github.com/AbsaOSS/enceladus

@@ -11,6 +11,7 @@ The whole project is sbt and scala based.
 #### Dependencies
 
 The projects is known to work with:
+
 - Java 1.8
 - Scala 2.11
 - Hadoop 2.7.X
@@ -18,12 +19,12 @@ The projects is known to work with:
 
 #### Test
 
-```scala
+```shell
 sbt test
 ```
 
 #### Build
 
-```scala
+```shell
 sbt assembly
 ```
