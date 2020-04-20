@@ -67,7 +67,7 @@ object E2ERunnerJob {
   }
 
   private def getDatasetComparisonConfig(cmd: E2ERunnerConfig, pathHDFS: String): CliOptions = {
-    val keys = if (cmd.keys.isDefined) { Some(cmd.keys.get.toSet) } else { None }
+    val keys = if (cmd.keys.isDefined) { cmd.keys.get.toSet } else { Set.empty[String] }
 
     CliOptions(
       DataframeOptions("parquet", Map.empty[String, String], s"/ref$pathHDFS"),

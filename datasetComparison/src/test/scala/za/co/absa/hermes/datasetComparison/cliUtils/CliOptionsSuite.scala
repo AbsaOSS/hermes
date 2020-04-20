@@ -67,7 +67,7 @@ class CliOptionsSuite extends FunSuite {
       refDataframeOptions,
       newDataframeOptions,
       "/some/out/path",
-      Some(Set("alfa", "beta")),
+      Set("alfa", "beta"),
       args.mkString(" "))
 
     assert(cliOptions == CliOptions.parse(args))

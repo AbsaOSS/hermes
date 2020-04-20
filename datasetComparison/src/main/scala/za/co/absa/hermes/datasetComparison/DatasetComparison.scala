@@ -15,7 +15,7 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import org.apache.spark.sql.functions.{array, col, concat, lit, md5, when}
+import org.apache.spark.sql.functions.{array, col, concat, concat_ws, lit, md5, when}
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
@@ -64,12 +64,14 @@ class DatasetComparison(cliOptions: CliOptions,
       SchemaUtils.alignSchema(testedDF.actual, selector)
     )
 
+    val cmpUniqueColumn: String = generateUniqueColumnName(dfsSorted.actual.columns, "HermesDatasetComparisonUniqueId")
+
     val dfsWithKey = ComparisonPair(
-      addKeyColumn(selector, dfsSorted.reference),
-      addKeyColumn(selector, dfsSorted.actual)
+      addKeyColumn(selector, dfsSorted.reference, cmpUniqueColumn),
+      addKeyColumn(selector, dfsSorted.actual, cmpUniqueColumn)
     )
 
-    val duplicateCounts = handleDuplicates(dfsWithKey)
+    val duplicateCounts = handleDuplicates(dfsWithKey, cmpUniqueColumn)
 
     val dfsExcepted = ComparisonPair(
       dfsWithKey.reference.except(dfsWithKey.actual),
@@ -79,9 +81,9 @@ class DatasetComparison(cliOptions: CliOptions,
     val exceptedCount = ComparisonPair(dfsExcepted.reference.count(), dfsExcepted.actual.count())
     val passedCount = rowCounts.reference - exceptedCount.reference
 
-    val resultDF: Option[DataFrame] = (exceptedCount.reference + exceptedCount.actual) match {
+    val resultDF: Option[DataFrame] = exceptedCount.reference + exceptedCount.actual match {
       case 0 => None
-      case _ => Some(createDiffDataFrame(cliOptions.outPath, dfsExcepted))
+      case _ => Some(createDiffDataFrame(cliOptions.outPath, cmpUniqueColumn, dfsExcepted))
     }
     val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
@@ -105,25 +107,26 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param dataFrames Pair of relative complements of reference and actual data
    */
   private def createDiffDataFrame(path: String,
+                                  cmpUniqueColumn: String,
                                   dataFrames: ComparisonPair[DataFrame]): DataFrame = {
-    val joinedData: DataFrame = joinTwoDataFrames(dataFrames)
+    val joinedData: DataFrame = joinTwoDataFrames(dataFrames, cmpUniqueColumn)
 
     // Flatten data
     val flatteningFormula = HelperFunctions.flattenSchema(dataFrames.reference)
     val flatExpected: DataFrame = dataFrames.reference.select(flatteningFormula: _*)
     val flatActual: DataFrame = dataFrames.actual.select(flatteningFormula: _*)
 
-    val joinedFlatDataWithoutErrCol: DataFrame = joinTwoDataFrames(ComparisonPair(flatExpected, flatActual))
+    val joinedFlatDataWithoutErrCol: DataFrame = joinTwoDataFrames(ComparisonPair(flatExpected, flatActual), cmpUniqueColumn)
     val joinedFlatDataWithErrCol = joinedFlatDataWithoutErrCol.withColumn(config.errorColumnName, lit(Array[String]()))
 
-    val columns: Array[String] = flatExpected.columns.filterNot(_ == config.comparisonUniqueId)
+    val columns: Array[String] = flatExpected.columns.filterNot(_ == cmpUniqueColumn)
     val flatDataWithErrors: DataFrame = findDifferences(columns, joinedFlatDataWithErrCol)
 
     // Using the hash key, join the original data and error column from the flat data.
     joinedData.as("df1")
-      .join(flatDataWithErrors.as("df2"), Seq(config.comparisonUniqueId))
+      .join(flatDataWithErrors.as("df2"), Seq(cmpUniqueColumn))
       .select("df1.*", s"df2.${config.errorColumnName}")
-      .drop(config.comparisonUniqueId)
+      .drop(cmpUniqueColumn)
   }
 
   /**
@@ -149,20 +152,20 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param dfsWithKey DataFrame pair where both have appended unique key
    * @return
    */
-  private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame]): ComparisonPair[Long] = {
+  private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame], cmpUniqueColumn: String): ComparisonPair[Long] = {
     def write(df: DataFrame, duplicates: DataFrame, path: String): Unit = {
       df.alias("original")
-        .join(duplicates, Seq(config.comparisonUniqueId), "inner")
+        .join(duplicates, Seq(cmpUniqueColumn), "inner")
         .select("original.*")
-        .drop(config.comparisonUniqueId)
+        .drop(cmpUniqueColumn)
         .write
         .format("parquet")
         .save(path)
     }
 
     val dfsDuplicates: ComparisonPair[Option[DataFrame]] = ComparisonPair(
-      checkForDuplicateRows(dfsWithKey.reference),
-      checkForDuplicateRows(dfsWithKey.actual)
+      checkForDuplicateRows(dfsWithKey.reference, cmpUniqueColumn),
+      checkForDuplicateRows(dfsWithKey.actual, cmpUniqueColumn)
     )
 
     val duplicateCounts: ComparisonPair[Long] = ComparisonPair(
@@ -187,10 +190,10 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param dataFrames Pair of data frames to be joined
    * @return Returns new data frame containing both data frames with renamed columns and joined on keys.
    */
-  private def joinTwoDataFrames(dataFrames: ComparisonPair[DataFrame]): DataFrame = {
-    val dfNewExpected = renameColumns(dataFrames.reference, config.expectedPrefix)
-    val dfNewColumnsActual = renameColumns(dataFrames.actual, config.actualPrefix)
-    dfNewExpected.join(dfNewColumnsActual, Seq(config.comparisonUniqueId), "full")
+  private def joinTwoDataFrames(dataFrames: ComparisonPair[DataFrame], cmpUniqueColumn: String): DataFrame = {
+    val dfNewExpected = renameColumns(dataFrames.reference, config.expectedPrefix, cmpUniqueColumn)
+    val dfNewColumnsActual = renameColumns(dataFrames.actual, config.actualPrefix, cmpUniqueColumn)
+    dfNewExpected.join(dfNewColumnsActual, Seq(cmpUniqueColumn), "full")
   }
 
   /**
@@ -202,15 +205,41 @@ class DatasetComparison(cliOptions: CliOptions,
    * @return DataFrame with errors in error column
    */
   private def findDifferences(columns: Array[String], joinedFlatDataWithErrCol: DataFrame): DataFrame = {
+    val tmpColumnName: String = generateUniqueColumnName(columns, "HermesDatasetComparisonTmp")
+
     columns.foldLeft(joinedFlatDataWithErrCol) { (data, column) =>
-      data.withColumnRenamed(config.errorColumnName, config.tmpColumnName)
+      data.withColumnRenamed(config.errorColumnName, tmpColumnName)
         .withColumn(config.errorColumnName, concat(
           when(col(s"${config.actualPrefix}_$column") === col(s"${config.expectedPrefix}_$column") or
             (col(s"${config.expectedPrefix}_$column").isNull and
               col(s"${config.actualPrefix}_$column").isNull),
             lit(Array[String]()))
-            .otherwise(array(lit(column))), col(config.tmpColumnName)))
-        .drop(config.tmpColumnName)
+            .otherwise(array(lit(column))), col(tmpColumnName)))
+        .drop(tmpColumnName)
+    }
+  }
+
+  /**
+   * Most simple method to generate temporary column name. As base "HermesDatasetComparisonTmp" will be used and a
+   * number will be appended to the end with underscore. Returning "HermesDatasetComparisonTmp_X" in the end. Where X is
+   * the number
+   * @param columns Array of column names
+   * @return Returns a unique column name
+   */
+  private def generateUniqueColumnName(columns: Array[String], base: String = "tmp"): String = {
+    @scala.annotation.tailrec
+    def appendNumberAndTest(name: String, condition: String => Boolean, count: Int = 0): String = {
+      val newName = s"${name}_$count"
+      if (condition(newName)) {
+        appendNumberAndTest(name, condition, count + 1)
+      }
+      else newName
+    }
+
+    if (columns.contains(base)) {
+      appendNumberAndTest(base, { x: String => columns.contains(x) })
+    } else {
+      base
     }
   }
 
@@ -221,11 +250,11 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param df DataFrame to have key column appended
    * @return Returns a DataFrame with key column appended
    */
-  private def addKeyColumn(selector: List[Column], df: DataFrame): DataFrame = {
-    if (cliOptions.keys.isDefined) {
-      df.withColumn(config.comparisonUniqueId, md5(concat(cliOptions.keys.get.toSeq.map(col): _*)))
+  private def addKeyColumn(selector: List[Column], df: DataFrame, cmpUniqueColumn: String): DataFrame = {
+    if (cliOptions.keys.nonEmpty) {
+      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", cliOptions.keys.map(col).toSeq: _*)))
     } else {
-      df.withColumn(config.comparisonUniqueId, md5(concat(selector: _*)))
+      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", selector: _*)))
     }
   }
 
@@ -235,8 +264,11 @@ class DatasetComparison(cliOptions: CliOptions,
    *
    * @param df Data frame that will be evaluated for duplicate rows
    */
-  private def checkForDuplicateRows(df: DataFrame): Option[DataFrame] = {
-    val duplicates = df.groupBy(config.comparisonUniqueId).count().filter("`count` >= 2")
+  private def checkForDuplicateRows(df: DataFrame, cmpUniqueColumn: String): Option[DataFrame] = {
+    val duplicates = df
+      .groupBy(cmpUniqueColumn)
+      .count()
+      .filter("`count` >= 2")
 
     if (duplicates.count() == 0) {
       None
@@ -252,9 +284,9 @@ class DatasetComparison(cliOptions: CliOptions,
    * @param prefix Prefix that will be put in front of column names
    * @return New DataFrame with renamed columns
    */
-  private def renameColumns(dataSet: DataFrame, prefix: String): DataFrame = {
+  private def renameColumns(dataSet: DataFrame, prefix: String, cmpUniqueColumn: String): DataFrame = {
     val renamedColumns = dataSet.columns.map { column =>
-      if (config.comparisonUniqueId.equals(column)) {
+      if (cmpUniqueColumn.equals(column)) {
         dataSet(column)
       } else {
         dataSet(column).as(s"${prefix}_$column")
