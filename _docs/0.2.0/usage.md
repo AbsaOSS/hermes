@@ -53,7 +53,7 @@ Properties in use are:
 - `errColumn` is a columns that will be appended in the result parquet file, showing location of the difference found in that row
 - `actualPrefix` is a prefix of columns comming from the new data source
 - `expectedPrefix` is a prefix of columns comming from the referential data source
-- `allowDuplicates` is switch to allow or disallow duplicate columns in comparisons. Duplicates will be ignored.
+- `allowDuplicates` is switch to allow or disallow duplicate rows in comparisons. Duplicates will be ignored.
 
 Default properties are
 
