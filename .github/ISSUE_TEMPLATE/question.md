@@ -2,7 +2,7 @@
 name: Question
 about: Ask a question
 title: ''
-labels: 'priority: undecided, question'
+labels: 'question'
 assignees: ''
 
 ---
