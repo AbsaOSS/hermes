@@ -7,9 +7,14 @@ categories:
 ---
 #### Table of contents
 
-1. [Dataset Comparison](#dataset-comparison)
-2. [Info File Comparison](#info-file-comparison)
-3. [E2E Runner](#e2e-runner)
+- [Table of contents](#table-of-contents)
+- [Dataset Comparison](#dataset-comparison)
+  - [Properties](#properties)
+  - [Parameters](#parameters)
+- [Info File Comparison](#info-file-comparison)
+  - [Properties](#properties-1)
+- [E2E Runner](#e2e-runner)
+  - [Properties](#properties-2)
 
 ***
 
@@ -46,20 +51,18 @@ Properties used in Dataset Comparison can be overriden as standard java opts. Fo
 Properties in use are:
 
 - `errColumn` is a columns that will be appended in the result parquet file, showing location of the difference found in that row
-- `tmpColumn` is temporary column name, that will be created for operational purposes and at the end removed
-- `comparisonUniqueId` is a unique key column name. Even if you supply multiple keys, they will be combined into this one column
 - `actualPrefix` is a prefix of columns comming from the new data source
 - `expectedPrefix` is a prefix of columns comming from the referential data source
+- `allowDuplicates` is a switch to allow or disallow duplicate rows in comparisons; duplicates will be ignored
 
 Default properties are
 
 ```json
 dataset-comparison {
   errColumn = "errCol"
-  tmpColumn = "tmp"
-  comparisonUniqueId = "ComparisonUniqueId"
   actualPrefix = "actual"
   expectedPrefix = "expected"
+  allowDuplicates = false
 }
 ```
 
