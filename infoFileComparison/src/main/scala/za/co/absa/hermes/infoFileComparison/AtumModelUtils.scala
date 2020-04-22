@@ -159,7 +159,8 @@ object AtumModelUtils {
       if (refSoftware != newSoftware || refVersion != newVersion)
         scribe.warn(
           s"""Software that generated checkpoints in $curPath differs.
-             |Was - $refSoftware($refVersion) Is - $newSoftware($newVersion)""".stripMargin)
+             |Was - $refSoftware($refVersion)
+             |Is - $newSoftware($newVersion)""".stripMargin)
     }
 
   }
