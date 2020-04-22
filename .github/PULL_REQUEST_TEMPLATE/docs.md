@@ -8,9 +8,9 @@ assignees: ''
 ---
 
 ### Description
-- A small description if need
-- cause for this update
-    - link to an issue that
+- A small description if needed
+- reason for this update
+    - link to a related issue
     - typo found
     - etc.
 
