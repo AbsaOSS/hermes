@@ -134,8 +134,6 @@ object AtumModelUtils {
       val diffs =
         simpleCompare(checkpoint.name, otherCheckpoint.name, s"$curPath.name") ::
           simpleCompare(checkpoint.workflowName, otherCheckpoint.workflowName, s"$curPath.workflowName") ::
-          simpleCompare(checkpoint.software, otherCheckpoint.software, s"$curPath.software") ::
-          simpleCompare(checkpoint.version, otherCheckpoint.version, s"$curPath.version") ::
           simpleCompare(checkpoint.order, otherCheckpoint.order, s"$curPath.order") :: Nil
 
       val controls = checkpoint.controls.zipWithIndex.foldLeft(List[ModelDifference[_]]()) {
@@ -144,21 +142,22 @@ object AtumModelUtils {
           checkpointValue.compareWith(otherCheckpoint.controls(index), nextPath) ::: agg
       }
 
-      val wasSoftware = checkpoint.software.getOrElse("Not Specified")
-      val isSoftware = otherCheckpoint.software.getOrElse("Not Specified")
-      val wasVersion = checkpoint.version.getOrElse("Not Specified")
-      val isVersion = otherCheckpoint.version.getOrElse("Not Specified")
+      val wasSoftware = checkpoint.software.getOrElse("NOT SPECIFIED")
+      val isSoftware = otherCheckpoint.software.getOrElse("NOT SPECIFIED")
+      val wasVersion = checkpoint.version.getOrElse("NOT SPECIFIED")
+      val isVersion = otherCheckpoint.version.getOrElse("NOT SPECIFIED")
 
-      logCheckpointDiff(wasSoftware, wasVersion, isSoftware, isVersion)
+      logCheckpointDiff(wasSoftware, isSoftware, curPath)
+      logCheckpointDiff(wasVersion, isVersion, curPath)
 
       diffs.flatten ::: controls
 
     }
 
-    private def logCheckpointDiff (refSoftware: String, refVersion: String,
-                                   newSoftware: String, newVersion: String): Unit = {
-      if (refSoftware != newSoftware) scribe.info(s"Software was - $refSoftware and is - $newSoftware.")
-      if (refVersion != newVersion) scribe.info(s"Version of software was - $refVersion and is - $newVersion.")
+    private def logCheckpointDiff (refValue: String, newValue: String,
+                                   curPath: String): Unit = {
+      if (refValue != newValue)
+        scribe.warn(s"$curPath Software or version differ. Was - $refValue Is - $newValue")
     }
 
   }
