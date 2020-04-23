@@ -37,19 +37,21 @@
     "order": 1,
     "controls": [{
       "controlName": "recordCount",
-      "controlType": "controlType.Count",
+      "controlType": "count",
       "controlCol": "id",
       "controlValue": "21"
     }]
   }, {
     "name": "Raw",
+    "software": "Atum",
+    "version": "2.5.0",
     "processStartTime": "01-01-2019 08:05:00",
     "processEndTime": "01-01-2019 08:10:00",
     "workflowName": "Raw",
     "order": 2,
     "controls": [{
       "controlName": "recordCount",
-      "controlType": "controlType.Count",
+      "controlType": "count",
       "controlCol": "*",
       "controlValue": "21"
     }]
@@ -61,7 +63,7 @@
     "order": 3,
     "controls": [{
       "controlName": "recordCount",
-      "controlType": "controlType.Count",
+      "controlType": "count",
       "controlCol": "*",
       "controlValue": "21"
     }]

@@ -41,7 +41,7 @@ object Dependencies {
   )
 
   val compareInfoFileDependencies = List(
-    "za.co.absa"           %  "atum"         % "0.2.5",
+    "za.co.absa"           %  "atum"         % "0.2.6",
     "com.github.pathikrit" %% "better-files" % "3.8.0"
   )
 

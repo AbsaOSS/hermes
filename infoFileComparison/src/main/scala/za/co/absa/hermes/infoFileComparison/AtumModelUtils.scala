@@ -142,8 +142,27 @@ object AtumModelUtils {
           checkpointValue.compareWith(otherCheckpoint.controls(index), nextPath) ::: agg
       }
 
+      val wasSoftware = checkpoint.software.getOrElse("NOT SPECIFIED")
+      val isSoftware = otherCheckpoint.software.getOrElse("NOT SPECIFIED")
+      val wasVersion = checkpoint.version.getOrElse("NOT SPECIFIED")
+      val isVersion = otherCheckpoint.version.getOrElse("NOT SPECIFIED")
+
+      logCheckpointDiff(wasSoftware, isSoftware, wasVersion, isVersion, curPath)
+
       diffs.flatten ::: controls
+
     }
+
+    private def logCheckpointDiff (refSoftware: String, newSoftware: String,
+                                   refVersion: String, newVersion: String,
+                                   curPath: String): Unit = {
+      if (refSoftware != newSoftware || refVersion != newVersion)
+        scribe.warn(
+          s"""Software that generated checkpoints in $curPath differs.
+             |Was - $refSoftware($refVersion)
+             |Is - $newSoftware($newVersion)""".stripMargin)
+    }
+
   }
 
   /**
