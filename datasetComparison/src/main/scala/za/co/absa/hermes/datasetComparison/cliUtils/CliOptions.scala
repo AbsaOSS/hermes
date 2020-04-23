@@ -24,7 +24,7 @@ import scala.util.{Failure, Success, Try}
 case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
                       outPath: String,
-                      keys: Option[Set[String]],
+                      keys: Set[String],
                       rawOptions: String)
 
 object CliOptions {
@@ -46,7 +46,10 @@ object CliOptions {
     val mapOfGroups: Map[String, String] = args.grouped(2).map{ a => (a(0).drop(2) -> a(1)) }.toMap
     val refMap = mapOfGroups.filterKeys(_ matches "ref-.*")
     val newMap = mapOfGroups.filterKeys(_ matches "new-.*")
-    val keys = mapOfGroups.get("keys").map { x => x.split(",").toSet }
+    val keys = mapOfGroups.get("keys") match {
+      case Some(x) => x.split(",").toSet
+      case None    => Set.empty[String]
+    }
     val outPath = mapOfGroups.getOrElse("out-path", throw new MissingArgumentException("""out-path is mandatory option. Use "--out-path"."""))
     val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "out-path")
 

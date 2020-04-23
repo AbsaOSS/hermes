@@ -16,24 +16,22 @@
 package za.co.absa.hermes.datasetComparison
 
 import org.apache.spark.sql.Column
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOptions}
 import za.co.absa.hermes.datasetComparison.config.ManualConfig
 import za.co.absa.hermes.utils.SparkTestBase
 
-class DatasetComparisonSuite extends FunSuite with SparkTestBase {
+class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
   test("Test a positive comparison") {
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
       "path/to/nowhere",
-      None,
+      Set.empty[String],
       "--bogus raw-options"
     )
     val manualConfig = new ManualConfig(
       "errCol",
-      "tmp",
-      "comparisonUniqueId",
       "actual",
       "expected",
       true
@@ -62,13 +60,11 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase {
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample1.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample6.csv").toString),
       "path/to/nowhere",
-      Some(Set("id", "first_name")),
+      Set("id", "first_name"),
       "--bogus raw-options"
     )
     val manualConfig = new ManualConfig(
       "errCol",
-      "tmp",
-      "comparisonUniqueId",
       "actual",
       "expected",
       true
