@@ -18,6 +18,8 @@ module Docs
     FileUtils.cd(doc_folder, verbose: true) do
       FileUtils.cp_r(latest_version, new_version, verbose: true)
 
+      remove_previous_redirect(latest_version)
+
       Dir.glob("#{new_version}/*").each do |file_path|
         puts "Updating version for #{file_path}"
         file_content = File.read(file_path).partition( /---.*?(---)/m )
@@ -83,5 +85,16 @@ module Docs
 
     data = YAML.load_file(yaml_path).delete_if { |d| d["name"] == topic_name }
     File.open(yaml_path, 'w') {|f| f.write data.to_yaml }
+  end
+
+  def self.remove_previous_redirect(version)
+    Dir.glob("#{version}/*").each do |file_path|
+      puts "Removing redirects for #{file_path}"
+      file_content = File.read(file_path).partition(/---.*?(---)/m)
+      new_content = file_content[0]
+      new_content << remove_redirect(file_content[1])
+      new_content << file_content[2]
+      File.open(file_path, 'w') { |file| file.puts(new_content) }
+    end
   end
 end
