@@ -4,12 +4,14 @@ title: Components
 version: '0.2.0'
 categories:
     - '0.2.0'
+redirect_from: /docs/components
 ---
 #### Table of contents
 
-1. [Dataset Comparison](#dataset-comparison)
-2. [Info File Comparison](#info-file-comparison)
-3. [E2E Runner](#e2e-runner)
+- [Table of contents](#table-of-contents)
+- [Dataset Comparison](#dataset-comparison)
+- [Info File Comparison](#info-file-comparison)
+- [E2E Runner](#e2e-runner)
 
 Each of the components released by *Hermes* is a command line tool. All are `.jar` files.
 

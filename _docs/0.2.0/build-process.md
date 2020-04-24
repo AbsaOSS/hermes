@@ -4,6 +4,7 @@ title: Build Process
 version: '0.2.0'
 categories:
     - '0.2.0'
+redirect_from: /docs/build-process
 ---
 
 The whole project is sbt and scala based.
