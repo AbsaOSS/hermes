@@ -42,7 +42,7 @@ class CliOptionsSuite extends FunSuite {
   test("Test a successful parse") {
     val args = Array(
       "--ref-format", "specialFormat",
-      "--format", "jdbc",
+      "--new-format", "jdbc",
       "--ref-delimiter", ";",
       "--new-something", "this",
       "--new-else", "that",
@@ -63,10 +63,16 @@ class CliOptionsSuite extends FunSuite {
       "table1"
     )
 
+    val outDataframeOptions = DataframeOptions(
+      "parquet",
+      Map.empty[String, String],
+      "/some/out/path"
+    )
+
     val cliOptions = CliOptions(
       refDataframeOptions,
       newDataframeOptions,
-      "/some/out/path",
+      outDataframeOptions,
       Set("alfa", "beta"),
       args.mkString(" "))
 
@@ -85,7 +91,7 @@ class CliOptionsSuite extends FunSuite {
       CliOptions.parse(args)
     }
 
-    assert("""out-path is mandatory option. Use "--out-path".""" == caught.getMessage)
+    assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--out-dbtable"""" == caught.getMessage)
   }
 
   test("Test no dbtable for jdbc") {
