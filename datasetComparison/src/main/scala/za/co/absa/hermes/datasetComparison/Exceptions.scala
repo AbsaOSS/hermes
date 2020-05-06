@@ -44,6 +44,17 @@ final case class SchemasDifferException(refPath: String,
        |$diffSchema""".stripMargin,
     cause)
 
+final case class BadProvidedSchema(refPath: String,
+                                   stdPath: String,
+                                   diffSchema: String,
+                                   cause: Throwable = None.orNull)
+  extends DatasetComparisonException(
+    s"""Provided schema is not a subset of Expected and Actual dataset's schemas.
+       |Reference path: $refPath
+       |Actual dataset path: $stdPath
+       |Difference is:
+       |$diffSchema""".stripMargin,
+    cause)
 
 final case class DuplicateRowsInDF(path: String)
   extends DatasetComparisonException(s"Provided dataset has duplicate rows. Specific rows written to $path")

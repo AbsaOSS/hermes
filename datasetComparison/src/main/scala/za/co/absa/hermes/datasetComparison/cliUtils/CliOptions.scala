@@ -25,7 +25,8 @@ case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
                       outPath: String,
                       keys: Set[String],
-                      rawOptions: String)
+                      rawOptions: String,
+                      schemaPath: Option[String] = None)
 
 object CliOptions {
   def generateHelp: Unit = {
@@ -46,12 +47,14 @@ object CliOptions {
     val mapOfGroups: Map[String, String] = args.grouped(2).map{ a => (a(0).drop(2) -> a(1)) }.toMap
     val refMap = mapOfGroups.filterKeys(_ matches "ref-.*")
     val newMap = mapOfGroups.filterKeys(_ matches "new-.*")
+    val schema = mapOfGroups.get("schema")
     val keys = mapOfGroups.get("keys") match {
       case Some(x) => x.split(",").toSet
       case None    => Set.empty[String]
     }
+
     val outPath = mapOfGroups.getOrElse("out-path", throw new MissingArgumentException("""out-path is mandatory option. Use "--out-path"."""))
-    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "out-path")
+    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "out-path", "schema")
 
     val refMapWithoutPrefix = refMap.map { case (key, value) => (key.drop(4), value) }
     val newMapWithoutPrefix = newMap.map { case (key, value) => (key.drop(4), value) }
@@ -73,7 +76,7 @@ object CliOptions {
         throw MissingArgumentException(message, exception)
     }
 
-    CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "))
+    CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "), schema)
   }
 
   /**

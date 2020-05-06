@@ -29,6 +29,11 @@
       "text":  "Unique columns that will be used as an anchor for data comparison. Without them, the comparison cannot give paths to differences"
     },
     {
+      "key": "--schema",
+      "optional": "optional",
+      "text":  "A schema path on HDFS. This will allow to cherry pick columns from the two data sets to compare"
+    },
+    {
       "key": "others",
       "optional": "optional",
       "text":  "Options like delimiter, header, rowTag, user, password, url, ... These are the specific options for specific formats used. For more information, check sparks documentation on what all the options for the format you are using"
