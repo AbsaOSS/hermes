@@ -27,8 +27,8 @@ class CliOptionsSuite extends FunSuite {
                            |Dataset comparison is a command line tool for comparison of two different data sets
                            |spark-submit datasetComparison.jar [OPTIONS]
                            |Options:
-                           |--[ref|new]-format        mandatory  Format of the sources
-                           |--outPath                 mandatory  Path where will the difference output will be writen to
+                           |--[ref|new|out]-format    mandatory  Format of the sources
+                           |--out-path                mandatory  Path where will the difference output will be writen to
                            |--new-path|--new-dbtable  mandatory  Path to the newly created source or name of the table
                            |--ref-path|--ref-dbtable  mandatory  Path to the referential source or name of the table
                            |--keys                    optional   Unique columns that will be used as an anchor for data comparison. Without them, the comparison cannot give paths to differences
