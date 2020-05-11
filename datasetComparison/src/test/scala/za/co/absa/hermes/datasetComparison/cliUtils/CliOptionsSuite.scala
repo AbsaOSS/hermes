@@ -32,6 +32,7 @@ class CliOptionsSuite extends FunSuite {
                            |--new-path|--new-dbtable  mandatory  Path to the newly created source or name of the table
                            |--ref-path|--ref-dbtable  mandatory  Path to the referential source or name of the table
                            |--keys                    optional   Unique columns that will be used as an anchor for data comparison. Without them, the comparison cannot give paths to differences
+                           |--schema                  optional   A schema path on HDFS. This will allow to cherry pick columns from the two data sets to compare
                            |others                    optional   Options like delimiter, header, rowTag, user, password, url, ... These are the specific options for specific formats used. For more information, check sparks documentation on what all the options for the format you are using
                            |""".stripMargin
     Console.withOut(outCapture) { CliOptions.generateHelp }
