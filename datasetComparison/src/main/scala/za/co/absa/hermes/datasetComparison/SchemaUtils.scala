@@ -140,33 +140,33 @@ object SchemaUtils {
    * @return true if provided schemas are the same ignoring nullability
    */
   def isSameSchema(schema1: StructType, schema2: StructType): Boolean = {
-    val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
-    val fields2 = schema2.map(field => field.name.toLowerCase() -> field).toMap
-
-    // Checking if every field in schema1 exists in schema2
-    val same1 = fields1.values.foldLeft(true)((stillSame, field1) => {
-      val field1NameLc = field1.name.toLowerCase()
-      if (fields2.contains(field1NameLc)) {
-        val field2 = fields2(field1NameLc)
-        stillSame && isSameField(field1, field2)
-      } else {
-        false
-      }
-    })
-
-    // Checking if every field in schema2 exists in schema1
-    val same2 = fields2.values.foldLeft(true)((stillSame, field2) => {
-      val field2NameLc = field2.name.toLowerCase()
-      if (fields1.contains(field2NameLc)) {
-        val field1 = fields1(field2NameLc)
-        stillSame && isSameField(field2, field1)
-      } else {
-        false
-      }
-    })
-    same1 && same2
+    doesSchemaComply(schema1, schema2) && doesSchemaComply(schema2, schema1)
   }
 
+  /**
+   * Answers the question if one schema is a subset of the other.
+   *
+   * @param subsetSchema Model schema. All field of this schema should be available in compliantSchema
+   * @param originalSchema Schema that should have at least all the field that model schema does
+   * @return true schema is a subset of compliantSchema
+   */
+  def doesSchemaComply(subsetSchema: StructType, originalSchema: StructType): Boolean = {
+    val fields1 = subsetSchema.map(field => field.name.toLowerCase() -> field).toMap
+    val fields2 = originalSchema.map(field => field.name.toLowerCase() -> field).toMap
+
+    fields1.values.foldLeft(true)((stillSame, field1) => {
+      val field1NameLc = field1.name.toLowerCase()
+      stillSame && fields2.contains(field1NameLc) && isSameField(field1, fields2(field1NameLc))
+    })
+  }
+
+  /**
+   * Finds differences between schema1 and schema2. Basically schema1.except(schema2). Works only one way
+   * @param schema1 Model schema. Subset schema
+   * @param schema2 Schema that needs to be a supperset of schema1
+   * @param parent Path in the schema
+   * @return Returns a Sequence of differences.
+   */
   def diffSchema(schema1: StructType, schema2: StructType, parent: String = ""): Seq[String] = {
     val fields1 = schema1.map(field => field.name.toLowerCase() -> field).toMap
     val fields2 = schema2.map(field => field.name.toLowerCase() -> field).toMap

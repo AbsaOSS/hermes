@@ -4,12 +4,12 @@
   "description": "Dataset comparison is a command line tool for comparison of two different data sets",
   "options" : [
     {
-      "key": "--[ref|new]-format",
+      "key": "--[ref|new|out]-format",
       "optional": "mandatory",
       "text": "Format of the sources"
     },
     {
-      "key": "--outPath",
+      "key": "--out-path",
       "optional": "mandatory",
       "text":  "Path where will the difference output will be writen to"
     },
@@ -27,6 +27,11 @@
       "key": "--keys",
       "optional": "optional",
       "text":  "Unique columns that will be used as an anchor for data comparison. Without them, the comparison cannot give paths to differences"
+    },
+    {
+      "key": "--schema",
+      "optional": "optional",
+      "text":  "A schema path on HDFS. This will allow to cherry pick columns from the two data sets to compare"
     },
     {
       "key": "others",

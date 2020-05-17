@@ -1,27 +1,35 @@
 # Enceladus TestUtils
-___
-<!-- toc -->
 
-- [Dataset Comparison](#dataset-comparison)
-- [Info Comparison](#info-comparison)
-- [E2E Runner](#e2e-runner)
+- [Enceladus TestUtils](#enceladus-testutils)
+  - [To Build](#to-build)
+  - [Dataset Comparison](#dataset-comparison)
+    - [Running](#running)
+      - [Where](#where)
+  - [Info File Comparison](#info-file-comparison)
+    - [Running](#running-1)
+  - [E2E Runner](#e2e-runner)
 
-<!-- tocstop -->
-## Build
+Hermes is an E2E testing tool created mainly for the use in [ABSA OSS][gh-absa] ecosystem but still provides some tools/utils that are usable in other projects and are quite generic. For more information, please look at our [Hermes Github Pages][gh-pages].
+
+## To Build
+
 ```bash
 sbt assembly
 ```
 
-Known to work with: 
+Known to work with:
+
 - Spark 2.4.4
 - Java 1.8.0_191-b12
 - Scala 2.11.12
-- Hadoop 2.7.5 
+- Hadoop 2.7.5
 
-## <a name="dataset-comparison" />Dataset Comparison
-A Spark job for comparing two data sets. 
+## Dataset Comparison
+
+Spark job for the comparison of data sets. As it leverages spark, there are almost no limitations to data sources and size of the data.
 
 ### Running
+
 Basic running example
 ```bash
 spark-submit \
@@ -61,11 +69,14 @@ Usage: spark-submit [spark options] --class za.co.absa.hermes.datasetComparison.
 
 Other configurations are Spark dependant and are out of scope of this README.
 
-##  <a name="info-comparison" />Info File Comparison
-Autm's Info file comparison. Ran as part of the E2E Runner. Can be run as a plain old jar file.
+## Info File Comparison
+
+[Autm][atum]'s (and it's derivatives) Info file comparison. Ran as part of the E2E Runner. Can be run as a plain old jar file.
 
 ### Running
+
 Basic running example
+
 ```bash
 java -jar \
 /path/to/jar/file \
@@ -74,11 +85,14 @@ java -jar \
 --out-path /path/to/diff/output
 ```
 
-##  <a name="e2e-runner" />E2E Runner
-Runs both Standardization and Conformance on the data provided. After each, a comparison job is run 
-to check the results against expected reference data.
+## E2E Runner
+
+Currently runs both Standardization and Conformance of [Enceladus][enceladus] project on the data provided. After each, a comparison job is run to check the results against expected reference data.
+
+This tool is planed for an upgrade in the nearest future to be a general E2E Runner for user defined runes.
 
 Basic running example:
+
 ```bash
 spark-submit \
 /path/to/jar/file \
@@ -90,3 +104,7 @@ spark-submit \
 --raw-format <rawFormat>
 --keys <key1,key2,...>
 ```
+
+[gh-absa]: https://github.com/AbsaOSS
+[gh-pages]: https://absaoss.github.io/hermes/
+[atum]: https://github.com/AbsaOSS/atum

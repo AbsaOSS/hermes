@@ -15,7 +15,7 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import org.apache.spark.sql.functions.{array, col, concat, concat_ws, lit, md5, when}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
@@ -32,7 +32,8 @@ import za.co.absa.hermes.utils.HelperFunctions
  * @param sparkSession Implicit spark session.
  */
 class DatasetComparison(cliOptions: CliOptions,
-                        config: DatasetComparisonConfig)
+                        config: DatasetComparisonConfig,
+                        optionalSchema: Option[StructType] = None)
                        (implicit sparkSession: SparkSession) {
 
   /**
@@ -56,9 +57,12 @@ class DatasetComparison(cliOptions: CliOptions,
     val testedDF = ComparisonPair(cliOptions.referenceOptions.loadDataFrame, cliOptions.newOptions.loadDataFrame)
     val rowCounts = ComparisonPair(testedDF.reference.count(), testedDF.actual.count())
 
-    checkSchemas(testedDF)
+    optionalSchema match {
+      case Some(schema) => checkSchemas(testedDF, schema)
+      case None => checkSchemas(testedDF)
+    }
 
-    val selector: List[Column] = SchemaUtils.getDataFrameSelector(testedDF.reference.schema)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
     val dfsSorted = ComparisonPair(
       SchemaUtils.alignSchema(testedDF.reference, selector),
       SchemaUtils.alignSchema(testedDF.actual, selector)
@@ -83,7 +87,7 @@ class DatasetComparison(cliOptions: CliOptions,
 
     val resultDF: Option[DataFrame] = exceptedCount.reference + exceptedCount.actual match {
       case 0 => None
-      case _ => Some(createDiffDataFrame(cliOptions.outPath, cmpUniqueColumn, dfsExcepted))
+      case _ => Some(createDiffDataFrame(cmpUniqueColumn, dfsExcepted))
     }
     val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
@@ -103,11 +107,10 @@ class DatasetComparison(cliOptions: CliOptions,
   /**
    * Creates DataFrame that has the original data and differences that were found in error column.
    *
-   * @param path Path where the difference will be written to
+   * @param cmpUniqueColumn A column of unique keys
    * @param dataFrames Pair of relative complements of reference and actual data
    */
-  private def createDiffDataFrame(path: String,
-                                  cmpUniqueColumn: String,
+  private def createDiffDataFrame(cmpUniqueColumn: String,
                                   dataFrames: ComparisonPair[DataFrame]): DataFrame = {
     val joinedData: DataFrame = joinTwoDataFrames(dataFrames, cmpUniqueColumn)
 
@@ -132,16 +135,33 @@ class DatasetComparison(cliOptions: CliOptions,
   /**
    * Performs a check if the schemas of two data frames are actually the same.
    *
-   * @param testedDf Comparison pair of two DataFrames whose schema will be tested
+   * @param testedDF Comparison pair of two DataFrames whose schema will be tested
    */
-  private def checkSchemas(testedDf: ComparisonPair[DataFrame]): Unit = {
-    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDf.reference.schema)
-    val actualSchema: StructType = getSchemaWithoutMetadata(testedDf.actual.schema)
+  private def checkSchemas(testedDF: ComparisonPair[DataFrame]): Unit = {
+    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
 
     if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
         SchemaUtils.diffSchema(actualSchema, expectedSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
+    }
+  }
+
+  /**
+   * Performs a check if the schemas of two data frames are supersets of schema provided..
+   *
+   * @param testedDF Comparison pair of two DataFrames whose schema will be tested
+   * @param schema Schema that needs to be a subset of schemas provided by data sets
+   */
+  def checkSchemas(testedDF: ComparisonPair[DataFrame], schema: StructType): Unit = {
+    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
+
+    if (!(SchemaUtils.doesSchemaComply(schema, actualSchema) && SchemaUtils.doesSchemaComply(schema, expectedSchema))) {
+      val diffSchema = SchemaUtils.diffSchema(schema, actualSchema) ++
+        SchemaUtils.diffSchema(schema, expectedSchema)
+      throw BadProvidedSchema(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
     }
   }
 
@@ -153,14 +173,13 @@ class DatasetComparison(cliOptions: CliOptions,
    * @return
    */
   private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame], cmpUniqueColumn: String): ComparisonPair[Long] = {
-    def write(df: DataFrame, duplicates: DataFrame, path: String): Unit = {
-      df.alias("original")
+    def write(df: DataFrame, duplicates: DataFrame, extraPath: String): Unit = {
+      val cleanedDF = df.alias("original")
         .join(duplicates, Seq(cmpUniqueColumn), "inner")
         .select("original.*")
         .drop(cmpUniqueColumn)
-        .write
-        .format("parquet")
-        .save(path)
+
+      cliOptions.outOptions.writeDataFrame(cleanedDF, extraPath)
     }
 
     val dfsDuplicates: ComparisonPair[Option[DataFrame]] = ComparisonPair(
@@ -174,10 +193,10 @@ class DatasetComparison(cliOptions: CliOptions,
     )
 
     if ((duplicateCounts.reference + duplicateCounts.actual) > 0 && !config.allowDuplicates) {
-      dfsDuplicates.reference.foreach(x => write(dfsWithKey.reference, x, s"${cliOptions.outPath}/refDuplicates"))
-      dfsDuplicates.actual.foreach(x => write(dfsWithKey.actual, x, s"${cliOptions.outPath}/newDuplicates"))
+      dfsDuplicates.reference.foreach(x => write(dfsWithKey.reference, x, "/refDuplicates"))
+      dfsDuplicates.actual.foreach(x => write(dfsWithKey.actual, x, "/newDuplicates"))
 
-      throw DuplicateRowsInDF(cliOptions.outPath)
+      throw DuplicateRowsInDF(cliOptions.outOptions.path)
     }
 
     duplicateCounts
