@@ -54,7 +54,6 @@ object CliOptions {
       case None    => Set.empty[String]
     }
 
-    val outPath = mapOfGroups.getOrElse("out-path", throw new MissingArgumentException("""out-path is mandatory option. Use "--out-path"."""))
     val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- outMap.keys -- Set("keys", "schema")
 
     val refMapWithoutPrefix = refMap.map { case (key, value) => (key.drop(4), value) }
@@ -87,7 +86,7 @@ object CliOptions {
         throw MissingArgumentException(message, exception)
     }
 
-    CliOptions(refLoadOptions, newLoadOptions, outLoadOptions, keys, args.mkString(" "))
+    CliOptions(refLoadOptions, newLoadOptions, outLoadOptions, keys, args.mkString(" "), schema)
   }
 
   /**
