@@ -23,14 +23,27 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
   private def setOptions(dfReader: DataFrameReader): DataFrameReader =
     if (options.isEmpty) dfReader else dfReader.options(options)
 
+  private def setOptions[T](dfReader: DataFrameWriter[T]): DataFrameWriter[T] =
+    if (options.isEmpty) dfReader else dfReader.options(options)
+
   private def load(dfReader: DataFrameReader): DataFrame =
     if (format == "jdbc") dfReader.load()
     else dfReader.load(path)
 
+  private def save[T](dfWriter: DataFrameWriter[T], extraPath: String = ""): Unit =
+    if (format == "jdbc") dfWriter.save()
+    else dfWriter.save(s"$path$extraPath")
+
   def loadDataFrame(implicit spark: SparkSession): DataFrame = {
-    val general = spark.read.format(format)
-    val withOptions = setOptions(general)
+    val dfReader = spark.read.format(format)
+    val withOptions = setOptions(dfReader)
     load(withOptions)
+  }
+
+  def writeDataFrame(df: DataFrame, extraPath: String = "")(implicit spark: SparkSession): Unit = {
+    val dfWriter =  df.write.format(format)
+    val withOptions = setOptions(dfWriter)
+    save(withOptions, extraPath)
   }
 }
 
@@ -53,5 +66,10 @@ object DataframeOptions {
     }
     val otherOptions = options -- Set("format", "path")
     DataframeOptions(format, otherOptions, path)
+  }
+
+  def validateWithDefaultsAndCreate(options: Map[String, String], defaults: Map[String, String]): DataframeOptions = {
+    val finalMap = defaults ++ options
+    validateAndCreate(finalMap)
   }
 }
