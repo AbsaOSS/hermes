@@ -23,6 +23,8 @@ import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
 import za.co.absa.hermes.datasetComparison.config.TypesafeConfig
 
+import scala.util.{Failure, Success}
+
 object DatasetComparisonJob {
 
   def main(args: Array[String]): Unit = {
@@ -47,7 +49,10 @@ object DatasetComparisonJob {
     */
   def execute(cliOptions: CliOptions, configPath: Option[String] = None)
              (implicit sparkSession: SparkSession): Unit = {
-    val config = new TypesafeConfig(configPath)
+    val config = new TypesafeConfig(configPath).validate() match {
+      case Success(value) => value
+      case Failure(exception) => throw exception
+    }
     val optionalSchema = cliOptions.schemaPath match {
       case Some(schema) =>
         val schemaSource = sparkSession.sparkContext.wholeTextFiles(schema).take(1)(0)._2

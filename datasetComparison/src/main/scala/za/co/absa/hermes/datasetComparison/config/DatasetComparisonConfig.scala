@@ -15,9 +15,31 @@
 
 package za.co.absa.hermes.datasetComparison.config
 
+import scala.util.{Failure, Success, Try}
+
 abstract class DatasetComparisonConfig {
   val errorColumnName: String
   val actualPrefix: String
   val expectedPrefix: String
   val allowDuplicates: Boolean
+
+  def validate(): Try[DatasetComparisonConfig]  = {
+
+    def validateColumnName(column_name: String, config_name: String): Try[Boolean] = {
+      if (column_name.matches(".*[ ,;{}()\n\t=].*")) {
+        Failure(new IllegalArgumentException(
+          s"$config_name configuration options has forbidden characters for a column name"
+        ))
+      }
+      else {
+        Success(true)
+      }
+    }
+
+    for {
+      _errColumnName <- validateColumnName(errorColumnName, "errorColumnName")
+      _actualPrefix <- validateColumnName(actualPrefix, "actualPrefix")
+      _expectedPrefix <- validateColumnName(expectedPrefix, "expectedPrefix")
+    } yield this
+  }
 }
