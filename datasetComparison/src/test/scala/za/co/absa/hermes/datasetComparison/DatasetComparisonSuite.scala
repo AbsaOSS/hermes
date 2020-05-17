@@ -16,6 +16,7 @@
 package za.co.absa.hermes.datasetComparison
 
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.types.{StringType, StructType}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOptions}
 import za.co.absa.hermes.datasetComparison.config.ManualConfig
@@ -53,6 +54,83 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cmpResult = new DatasetComparison(cliOptions, manualConfig).compare
 
     assert(expectedResult == cmpResult)
+  }
+
+  test("Test a positive comparison with provided schema") {
+    val cliOptions = new CliOptions(
+      DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
+      DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
+      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Set.empty[String],
+      "--bogus raw-options",
+      Some(getClass.getResource("/dataSample1Schema.json").toString)
+    )
+    val manualConfig = new ManualConfig(
+      "errCol",
+      "actual",
+      "expected",
+      true
+    )
+    val expectedResult = ComparisonResult(
+      10, 10, 0, 0, 10,
+      List(
+        new Column("_c0"),
+        new Column("_c1"),
+        new Column("_c2"),
+        new Column("_c3"),
+        new Column("_c4")
+      ),
+      None, 0,
+      "--bogus raw-options"
+    )
+    val schema = new StructType()
+      .add("_c0", StringType, true)
+      .add("_c1", StringType, true)
+      .add("_c2", StringType, true)
+      .add("_c3", StringType, true)
+      .add("_c4", StringType, true)
+
+    val cmpResult = new DatasetComparison(cliOptions, manualConfig, Some(schema)).compare
+
+    assert(expectedResult == cmpResult)
+  }
+
+  test("Test a negative comparison with wrong provided schema") {
+    val cliOptions = new CliOptions(
+      DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
+      DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
+      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Set.empty[String],
+      "--bogus raw-options"
+    )
+    val manualConfig = new ManualConfig(
+      "errCol",
+      "actual",
+      "expected",
+      true
+    )
+    val expectedResult = ComparisonResult(
+      10, 10, 0, 0, 10,
+      List(
+        new Column("_c0"),
+        new Column("_c1"),
+        new Column("_c2"),
+        new Column("_c3"),
+        new Column("_c4")
+      ),
+      None, 0,
+      "--bogus raw-options"
+    )
+    val schema = new StructType()
+      .add("_c01", StringType, true)
+      .add("_c1", StringType, true)
+      .add("_c2", StringType, true)
+      .add("_c3", StringType, true)
+      .add("_c4", StringType, true)
+
+    intercept[BadProvidedSchema] {
+      new DatasetComparison(cliOptions, manualConfig, Some(schema)).compare
+    }
   }
 
   test("Compare datasets with duplicates disallowed") {

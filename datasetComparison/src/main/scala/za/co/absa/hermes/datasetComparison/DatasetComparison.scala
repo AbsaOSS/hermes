@@ -15,7 +15,7 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import org.apache.spark.sql.functions.{array, col, concat, concat_ws, lit, md5, when}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
@@ -32,7 +32,8 @@ import za.co.absa.hermes.utils.HelperFunctions
  * @param sparkSession Implicit spark session.
  */
 class DatasetComparison(cliOptions: CliOptions,
-                        config: DatasetComparisonConfig)
+                        config: DatasetComparisonConfig,
+                        optionalSchema: Option[StructType] = None)
                        (implicit sparkSession: SparkSession) {
 
   /**
@@ -56,9 +57,12 @@ class DatasetComparison(cliOptions: CliOptions,
     val testedDF = ComparisonPair(cliOptions.referenceOptions.loadDataFrame, cliOptions.newOptions.loadDataFrame)
     val rowCounts = ComparisonPair(testedDF.reference.count(), testedDF.actual.count())
 
-    checkSchemas(testedDF)
+    optionalSchema match {
+      case Some(schema) => checkSchemas(testedDF, schema)
+      case None => checkSchemas(testedDF)
+    }
 
-    val selector: List[Column] = SchemaUtils.getDataFrameSelector(testedDF.reference.schema)
+    val selector: List[Column] = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
     val dfsSorted = ComparisonPair(
       SchemaUtils.alignSchema(testedDF.reference, selector),
       SchemaUtils.alignSchema(testedDF.actual, selector)
@@ -131,16 +135,33 @@ class DatasetComparison(cliOptions: CliOptions,
   /**
    * Performs a check if the schemas of two data frames are actually the same.
    *
-   * @param testedDf Comparison pair of two DataFrames whose schema will be tested
+   * @param testedDF Comparison pair of two DataFrames whose schema will be tested
    */
-  private def checkSchemas(testedDf: ComparisonPair[DataFrame]): Unit = {
-    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDf.reference.schema)
-    val actualSchema: StructType = getSchemaWithoutMetadata(testedDf.actual.schema)
+  private def checkSchemas(testedDF: ComparisonPair[DataFrame]): Unit = {
+    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
 
     if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
       val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
         SchemaUtils.diffSchema(actualSchema, expectedSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
+    }
+  }
+
+  /**
+   * Performs a check if the schemas of two data frames are supersets of schema provided..
+   *
+   * @param testedDF Comparison pair of two DataFrames whose schema will be tested
+   * @param schema Schema that needs to be a subset of schemas provided by data sets
+   */
+  def checkSchemas(testedDF: ComparisonPair[DataFrame], schema: StructType): Unit = {
+    val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
+    val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
+
+    if (!(SchemaUtils.doesSchemaComply(schema, actualSchema) && SchemaUtils.doesSchemaComply(schema, expectedSchema))) {
+      val diffSchema = SchemaUtils.diffSchema(schema, actualSchema) ++
+        SchemaUtils.diffSchema(schema, expectedSchema)
+      throw BadProvidedSchema(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
     }
   }
 

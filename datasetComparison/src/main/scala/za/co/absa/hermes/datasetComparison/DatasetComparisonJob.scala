@@ -19,6 +19,7 @@ import java.io.PrintWriter
 
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
 import za.co.absa.hermes.datasetComparison.config.TypesafeConfig
 
@@ -47,7 +48,13 @@ object DatasetComparisonJob {
   def execute(cliOptions: CliOptions, configPath: Option[String] = None)
              (implicit sparkSession: SparkSession): Unit = {
     val config = new TypesafeConfig(configPath)
-    val dsComparison = new DatasetComparison(cliOptions, config)
+    val optionalSchema = cliOptions.schemaPath match {
+      case Some(schema) =>
+        val schemaSource = sparkSession.sparkContext.wholeTextFiles(schema).take(1)(0)._2
+        Some(DataType.fromJson(schemaSource).asInstanceOf[StructType])
+      case None => None
+    }
+    val dsComparison = new DatasetComparison(cliOptions, config, optionalSchema)
     val result = dsComparison.compare
 
     result.resultDF.foreach { df => cliOptions.outOptions.writeDataFrame(df) }

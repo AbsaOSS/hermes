@@ -1,0 +1,29 @@
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "_c0",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_c1",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_c2",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_c3",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_c4",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}
