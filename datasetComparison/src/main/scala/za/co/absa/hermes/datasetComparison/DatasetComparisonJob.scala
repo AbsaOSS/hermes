@@ -57,15 +57,15 @@ object DatasetComparisonJob {
     val dsComparison = new DatasetComparison(cliOptions, config, optionalSchema)
     val result = dsComparison.compare
 
-    result.resultDF.foreach { df => df.write.format("parquet").save(cliOptions.outPath) }
+    result.resultDF.foreach { df => cliOptions.outOptions.writeDataFrame(df) }
 
-    writeMetricsToFile(result, cliOptions.outPath)
+    writeMetricsToFile(result, cliOptions.outOptions.path)
 
     if (result.diffCount > 0) {
       throw DatasetsDifferException(
           cliOptions.referenceOptions.path,
           cliOptions.newOptions.path,
-          cliOptions.outPath,
+          cliOptions.outOptions.path,
           result.refRowCount,
           result.newRowCount
       )

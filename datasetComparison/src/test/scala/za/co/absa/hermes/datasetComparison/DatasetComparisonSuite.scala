@@ -27,7 +27,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
-      "path/to/nowhere",
+      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
       Set.empty[String],
       "--bogus raw-options"
     )
@@ -137,7 +137,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample1.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample6.csv").toString),
-      "path/to/nowhere",
+      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
       Set("id", "first_name"),
       "--bogus raw-options"
     )

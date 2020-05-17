@@ -23,7 +23,7 @@ import scala.util.{Failure, Success, Try}
 
 case class CliOptions(referenceOptions: DataframeOptions,
                       newOptions: DataframeOptions,
-                      outPath: String,
+                      outOptions: DataframeOptions,
                       keys: Set[String],
                       rawOptions: String,
                       schemaPath: Option[String] = None)
@@ -48,19 +48,22 @@ object CliOptions {
     val refMap = mapOfGroups.filterKeys(_ matches "ref-.*")
     val newMap = mapOfGroups.filterKeys(_ matches "new-.*")
     val schema = mapOfGroups.get("schema")
+    val outMap = mapOfGroups.filterKeys(_ matches "out-.*")
     val keys = mapOfGroups.get("keys") match {
       case Some(x) => x.split(",").toSet
       case None    => Set.empty[String]
     }
 
     val outPath = mapOfGroups.getOrElse("out-path", throw new MissingArgumentException("""out-path is mandatory option. Use "--out-path"."""))
-    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- Set("keys", "out-path", "schema")
+    val genericMap = mapOfGroups -- refMap.keys -- newMap.keys -- outMap.keys -- Set("keys", "schema")
 
     val refMapWithoutPrefix = refMap.map { case (key, value) => (key.drop(4), value) }
     val newMapWithoutPrefix = newMap.map { case (key, value) => (key.drop(4), value) }
+    val outMapWithoutPrefix = outMap.map { case (key, value) => (key.drop(4), value) }
 
     val finalRefMap = genericMap ++ refMapWithoutPrefix
     val finalNewMap = genericMap ++ newMapWithoutPrefix
+    val finalOutMap = genericMap ++ outMapWithoutPrefix
 
     val refLoadOptions = Try(DataframeOptions.validateAndCreate(finalRefMap)) match {
       case Success(value)     => value
@@ -76,7 +79,15 @@ object CliOptions {
         throw MissingArgumentException(message, exception)
     }
 
-    CliOptions(refLoadOptions, newLoadOptions, outPath, keys, args.mkString(" "), schema)
+    val outDefaults = Map("format" -> "parquet")
+    val outLoadOptions = Try(DataframeOptions.validateWithDefaultsAndCreate(finalOutMap, outDefaults)) match {
+      case Success(value)     => value
+      case Failure(exception) =>
+        val message = enrichMessage(exception.getMessage, "out-")
+        throw MissingArgumentException(message, exception)
+    }
+
+    CliOptions(refLoadOptions, newLoadOptions, outLoadOptions, keys, args.mkString(" "))
   }
 
   /**

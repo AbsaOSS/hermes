@@ -38,7 +38,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val outPath = s"target/test_output/comparison_job/positive/$timePrefix"
 
     val args = Array(
-      "--format", "csv",
+      "--new-format", "csv",
+      "--ref-format", "csv",
       "--delimiter", ",",
       "--new-path", getClass.getResource("/dataSample1.csv").toString,
       "--ref-path", getClass.getResource("/dataSample2.csv").toString,
@@ -61,7 +62,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "Count Expected( 10 ) vs Actual( 11 )"
 
     val args = Array(
-      "--format", "csv",
+      "--new-format", "csv",
+      "--ref-format", "csv",
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
@@ -129,7 +131,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
          |_c5 cannot be found in both schemas""".stripMargin
 
     val args = Array(
-      "--format", "csv",
+      "--new-format", "csv",
+      "--ref-format", "csv",
       "--delimiter", ",",
       "--new-path", newPath,
       "--ref-path", refPath,
@@ -154,7 +157,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
       "Count Expected( 9 ) vs Actual( 10 )"
 
     val args = Array(
-      "--format", "csv",
+      "--new-format", "csv",
+      "--ref-format", "csv",
       "--delimiter", ",",
       "--header", "true",
       "--new-path", newPath,
@@ -178,7 +182,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val message = s"Provided dataset has duplicate rows. Specific rows written to $outPath"
 
     val args = Array(
-      "--format", "csv",
+      "--new-format", "csv",
+      "--ref-format", "csv",
       "--delimiter", ",",
       "--header", "true",
       "--new-path", newPath,
@@ -232,7 +237,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
 
     val args = Array(
-      "--format", "xml",
+      "--new-format", "xml",
+      "--ref-format", "xml",
       "--rowTag", "row",
       "--new-path", newPath,
       "--ref-path", refPath,

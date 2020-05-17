@@ -87,7 +87,7 @@ class DatasetComparison(cliOptions: CliOptions,
 
     val resultDF: Option[DataFrame] = exceptedCount.reference + exceptedCount.actual match {
       case 0 => None
-      case _ => Some(createDiffDataFrame(cliOptions.outPath, cmpUniqueColumn, dfsExcepted))
+      case _ => Some(createDiffDataFrame(cmpUniqueColumn, dfsExcepted))
     }
     val diffCount: Long = resultDF.map(_.count).getOrElse(0)
 
@@ -107,11 +107,10 @@ class DatasetComparison(cliOptions: CliOptions,
   /**
    * Creates DataFrame that has the original data and differences that were found in error column.
    *
-   * @param path Path where the difference will be written to
+   * @param cmpUniqueColumn A column of unique keys
    * @param dataFrames Pair of relative complements of reference and actual data
    */
-  private def createDiffDataFrame(path: String,
-                                  cmpUniqueColumn: String,
+  private def createDiffDataFrame(cmpUniqueColumn: String,
                                   dataFrames: ComparisonPair[DataFrame]): DataFrame = {
     val joinedData: DataFrame = joinTwoDataFrames(dataFrames, cmpUniqueColumn)
 
@@ -174,14 +173,13 @@ class DatasetComparison(cliOptions: CliOptions,
    * @return
    */
   private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame], cmpUniqueColumn: String): ComparisonPair[Long] = {
-    def write(df: DataFrame, duplicates: DataFrame, path: String): Unit = {
-      df.alias("original")
+    def write(df: DataFrame, duplicates: DataFrame, extraPath: String): Unit = {
+      val cleanedDF = df.alias("original")
         .join(duplicates, Seq(cmpUniqueColumn), "inner")
         .select("original.*")
         .drop(cmpUniqueColumn)
-        .write
-        .format("parquet")
-        .save(path)
+
+      cliOptions.outOptions.writeDataFrame(cleanedDF, extraPath)
     }
 
     val dfsDuplicates: ComparisonPair[Option[DataFrame]] = ComparisonPair(
@@ -195,10 +193,10 @@ class DatasetComparison(cliOptions: CliOptions,
     )
 
     if ((duplicateCounts.reference + duplicateCounts.actual) > 0 && !config.allowDuplicates) {
-      dfsDuplicates.reference.foreach(x => write(dfsWithKey.reference, x, s"${cliOptions.outPath}/refDuplicates"))
-      dfsDuplicates.actual.foreach(x => write(dfsWithKey.actual, x, s"${cliOptions.outPath}/newDuplicates"))
+      dfsDuplicates.reference.foreach(x => write(dfsWithKey.reference, x, "/refDuplicates"))
+      dfsDuplicates.actual.foreach(x => write(dfsWithKey.actual, x, "/newDuplicates"))
 
-      throw DuplicateRowsInDF(cliOptions.outPath)
+      throw DuplicateRowsInDF(cliOptions.outOptions.path)
     }
 
     duplicateCounts
