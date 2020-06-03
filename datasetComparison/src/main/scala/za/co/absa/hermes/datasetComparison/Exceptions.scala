@@ -56,8 +56,11 @@ final case class BadProvidedSchema(refPath: String,
        |$diffSchema""".stripMargin,
     cause)
 
-final case class DuplicateRowsInDF(path: String)
-  extends DatasetComparisonException(s"Provided dataset has duplicate rows. Specific rows written to $path")
+final case class DuplicateRowsInDF(countRef: Long, countNew: Long)
+  extends DatasetComparisonException(
+    s"""Provided datasets have duplicate rows.
+       |Reference Dataset has $countRef
+       |New Dataset has $countNew""".stripMargin)
 
 final case class MissingArgumentException(message: String, cause: Throwable = None.orNull)
   extends Exception(message, cause)
