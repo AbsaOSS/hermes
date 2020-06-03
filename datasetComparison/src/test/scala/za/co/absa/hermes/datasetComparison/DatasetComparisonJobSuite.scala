@@ -179,7 +179,9 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val refPath = getClass.getResource("/dataSample1.csv").toString
     val newPath = getClass.getResource("/dataSample5.csv").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
-    val message = s"Provided dataset has duplicate rows. Specific rows written to $outPath"
+    val message = s"""Provided datasets have duplicate rows.
+                     |Reference Dataset has 0
+                     |New Dataset has 1""".stripMargin
 
     val args = Array(
       "--new-format", "csv",
@@ -197,7 +199,6 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     }
 
     assert(caught.getMessage == message)
-    assert(Files.exists(Paths.get(outPath)))
   }
 
   test("Compare nested structures with errors") {
