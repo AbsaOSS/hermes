@@ -63,20 +63,20 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
     load(withOptions)
   }
 
-  def writeDataFrame(df: DataFrame, extraPath: String = "")
+  def writeDataFrame(df: DataFrame, pathSuffix: String = "")
                     (implicit spark: SparkSession): Unit = {
     val dfWriter =  df.write.format(format)
     val withOptions = setOptions(dfWriter)
-    save(withOptions, s"$path$extraPath")
+    save(withOptions, s"$path$pathSuffix")
   }
 
-  def writeNextDataFrame(df: DataFrame, extraPath: String = "")
+  def writeNextDataFrame(df: DataFrame, pathSuffix: String = "")
                         (implicit spark: SparkSession): String = {
-    val nonExistingPath: String = getUniqueFilePath(extraPath, spark.sparkContext.hadoopConfiguration)
+    val uniqueFilePath: String = getUniqueFilePath(pathSuffix, spark.sparkContext.hadoopConfiguration)
     val dfWriter =  df.write.format(format)
     val withOptions = setOptions(dfWriter)
-    save(withOptions, nonExistingPath)
-    nonExistingPath
+    save(withOptions, uniqueFilePath)
+    uniqueFilePath
   }
 }
 
