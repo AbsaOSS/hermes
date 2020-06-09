@@ -62,20 +62,23 @@ object DatasetComparisonJob {
     val dsComparison = new DatasetComparison(cliOptions, config, optionalSchema)
     val result = dsComparison.compare
 
-    result.resultDF.foreach { df => cliOptions.outOptions.writeDataFrame(df) }
+    val path: String = result.resultDF match {
+      case Some(df) => cliOptions.outOptions.writeNextDataFrame(df)
+      case None => cliOptions.outOptions.getUniqueFilePath("", sparkSession.sparkContext.hadoopConfiguration)
+    }
 
-    writeMetricsToFile(result, cliOptions.outOptions.path)
+    writeMetricsToFile(result, path)
 
     if (result.diffCount > 0) {
       throw DatasetsDifferException(
           cliOptions.referenceOptions.path,
           cliOptions.newOptions.path,
-          cliOptions.outOptions.path,
+          path,
           result.refRowCount,
           result.newRowCount
       )
     } else {
-      scribe.info("Expected and actual data sets are the same.")
+      scribe.info(s"Expected and actual data sets are the same. Metrics written to $path")
     }
   }
 

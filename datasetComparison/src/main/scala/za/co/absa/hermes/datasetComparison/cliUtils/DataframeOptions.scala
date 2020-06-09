@@ -15,6 +15,8 @@
 
 package za.co.absa.hermes.datasetComparison.cliUtils
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql._
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
@@ -30,9 +32,30 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
     if (format == "jdbc") dfReader.load()
     else dfReader.load(path)
 
-  private def save[T](dfWriter: DataFrameWriter[T], extraPath: String = ""): Unit =
+  private def save[T](dfWriter: DataFrameWriter[T], endPath: String = ""): Unit =
     if (format == "jdbc") dfWriter.save()
-    else dfWriter.save(s"$path$extraPath")
+    else dfWriter.save(endPath)
+
+  def getUniqueFilePath(extraPath: String, conf: Configuration): String = {
+    val fs = FileSystem.get(conf)
+    val basePath = s"$path$extraPath"
+
+    @scala.annotation.tailrec
+    def appendNumberAndTest(namePt1: String,
+                            namePt2: String,
+                            condition: String => Boolean,
+                            count: Int = 1): String = {
+      val newName = s"${namePt1}_run$count$namePt2"
+      if (condition(newName)) { appendNumberAndTest(namePt1, namePt2, condition, count + 1) }
+      else newName
+    }
+
+    if (fs.exists(new Path(basePath))) {
+      appendNumberAndTest(path, extraPath, { x: String => fs.exists(new Path(x)) })
+    } else {
+      basePath
+    }
+  }
 
   def loadDataFrame(implicit spark: SparkSession): DataFrame = {
     val dfReader = spark.read.format(format)
@@ -40,10 +63,20 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
     load(withOptions)
   }
 
-  def writeDataFrame(df: DataFrame, extraPath: String = "")(implicit spark: SparkSession): Unit = {
+  def writeDataFrame(df: DataFrame, pathSuffix: String = "")
+                    (implicit spark: SparkSession): Unit = {
     val dfWriter =  df.write.format(format)
     val withOptions = setOptions(dfWriter)
-    save(withOptions, extraPath)
+    save(withOptions, s"$path$pathSuffix")
+  }
+
+  def writeNextDataFrame(df: DataFrame, pathSuffix: String = "")
+                        (implicit spark: SparkSession): String = {
+    val uniqueFilePath: String = getUniqueFilePath(pathSuffix, spark.sparkContext.hadoopConfiguration)
+    val dfWriter =  df.write.format(format)
+    val withOptions = setOptions(dfWriter)
+    save(withOptions, uniqueFilePath)
+    uniqueFilePath
   }
 }
 
