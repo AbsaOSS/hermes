@@ -179,7 +179,7 @@ class DatasetComparison(cliOptions: CliOptions,
         .select("original.*")
         .drop(cmpUniqueColumn)
 
-      cliOptions.outOptions.writeDataFrame(cleanedDF, extraPath)
+      cliOptions.outOptions.writeNextDataFrame(cleanedDF, extraPath)
     }
 
     val dfsDuplicates: ComparisonPair[Option[DataFrame]] = ComparisonPair(
