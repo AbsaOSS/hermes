@@ -166,7 +166,7 @@ class DatasetComparison(cliOptions: CliOptions,
   }
 
   /**
-   * Handles duplicates in a sense that this method looks for them based on a primary key. Then based on the
+   * Counts duplicates within both provided dataframes based on the primary key. Then depending on the
    * configuration, if found, throws an error.
    *
    * @param dfsWithKey DataFrame pair where both have appended unique key
