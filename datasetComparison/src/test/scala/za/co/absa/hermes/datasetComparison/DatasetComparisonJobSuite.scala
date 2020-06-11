@@ -180,8 +180,8 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val newPath = getClass.getResource("/dataSample5.csv").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
     val message = s"""Provided datasets have duplicate rows.
-                     |Reference Dataset has 0
-                     |New Dataset has 1""".stripMargin
+                     |Reference Dataset has 0  duplicates
+                     |New Dataset has 1 duplicates""".stripMargin
 
     val args = Array(
       "--new-format", "csv",
