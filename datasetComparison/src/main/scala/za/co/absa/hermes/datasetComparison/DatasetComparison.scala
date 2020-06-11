@@ -75,7 +75,7 @@ class DatasetComparison(cliOptions: CliOptions,
       addKeyColumn(selector, dfsSorted.actual, cmpUniqueColumn)
     )
 
-    val duplicateCounts = handleDuplicates(dfsWithKey, cmpUniqueColumn)
+    val duplicateCounts: ComparisonPair[Long] = handleDuplicates(dfsWithKey, cmpUniqueColumn)
 
     val dfsExcepted = ComparisonPair(
       dfsWithKey.reference.except(dfsWithKey.actual),
@@ -166,22 +166,13 @@ class DatasetComparison(cliOptions: CliOptions,
   }
 
   /**
-   * Handles duplicates in a sense that this method looks for them. Then based on the configuration if found, throws an
-   * error, does deduplication or just passes through.
+   * Counts duplicates within both provided dataframes based on the primary key. Then depending on the
+   * configuration, if found, throws an error.
    *
    * @param dfsWithKey DataFrame pair where both have appended unique key
-   * @return
+   * @return A Pair for comparison counts
    */
   private def handleDuplicates(dfsWithKey: ComparisonPair[DataFrame], cmpUniqueColumn: String): ComparisonPair[Long] = {
-    def write(df: DataFrame, duplicates: DataFrame, extraPath: String): Unit = {
-      val cleanedDF = df.alias("original")
-        .join(duplicates, Seq(cmpUniqueColumn), "inner")
-        .select("original.*")
-        .drop(cmpUniqueColumn)
-
-      cliOptions.outOptions.writeNextDataFrame(cleanedDF, extraPath)
-    }
-
     val dfsDuplicates: ComparisonPair[Option[DataFrame]] = ComparisonPair(
       checkForDuplicateRows(dfsWithKey.reference, cmpUniqueColumn),
       checkForDuplicateRows(dfsWithKey.actual, cmpUniqueColumn)
@@ -193,10 +184,7 @@ class DatasetComparison(cliOptions: CliOptions,
     )
 
     if ((duplicateCounts.reference + duplicateCounts.actual) > 0 && !config.allowDuplicates) {
-      dfsDuplicates.reference.foreach(x => write(dfsWithKey.reference, x, "/refDuplicates"))
-      dfsDuplicates.actual.foreach(x => write(dfsWithKey.actual, x, "/newDuplicates"))
-
-      throw DuplicateRowsInDF(cliOptions.outOptions.path)
+      throw DuplicateRowsInDF(duplicateCounts.reference, duplicateCounts.actual)
     }
 
     duplicateCounts
