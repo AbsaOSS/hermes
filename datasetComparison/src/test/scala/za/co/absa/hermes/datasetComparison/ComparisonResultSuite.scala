@@ -33,7 +33,7 @@ class ComparisonResultSuite extends FunSuite {
                    |  "passedOptions":"--alfa beta"
                    |}""".stripMargin
 
-    assert(result == CR1.getJsonMetadata)
+    assert(result == CR1.getPrettyJson)
   }
 
   test("testGetMetadata") {

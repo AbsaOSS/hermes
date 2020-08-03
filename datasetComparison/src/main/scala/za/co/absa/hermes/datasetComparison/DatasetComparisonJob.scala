@@ -82,15 +82,15 @@ object DatasetComparisonJob {
     }
   }
 
-  private def writeMetricsToFile(result: ComparisonResult, fileName: String)
-                                (implicit sparkSession: SparkSession): Unit = {
+  def writeMetricsToFile(result: ComparisonResult, fileName: String)
+                        (implicit sparkSession: SparkSession): Unit = {
     val path = new Path(fileName, "_METRICS")
     val fs = FileSystem.get(sparkSession.sparkContext.hadoopConfiguration)
     val fsOut = fs.create(path)
 
     try {
       val pw = new PrintWriter(fsOut, true)
-      pw.print(result.getJsonMetadata)
+      pw.print(result.getPrettyJson)
       pw.close()
     } finally {
       fsOut.close()

@@ -18,8 +18,9 @@ package za.co.absa.hermes.datasetComparison
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import za.co.absa.commons.spark.SchemaUtils
 import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
-import za.co.absa.hermes.datasetComparison.config.DatasetComparisonConfig
+import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
 
 /**
@@ -32,7 +33,7 @@ import za.co.absa.hermes.utils.HelperFunctions
  * @param sparkSession Implicit spark session.
  */
 class DatasetComparison(cliOptions: CliOptions,
-                        config: DatasetComparisonConfig,
+                        config: DatasetComparisonConfig = new TypesafeConfig(None),
                         optionalSchema: Option[StructType] = None)
                        (implicit sparkSession: SparkSession) {
 
@@ -62,10 +63,10 @@ class DatasetComparison(cliOptions: CliOptions,
       case None => checkSchemas(testedDF)
     }
 
-    val selector: List[Column] = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
+    val selector = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
     val dfsSorted = ComparisonPair(
-      SchemaUtils.alignSchema(testedDF.reference, selector),
-      SchemaUtils.alignSchema(testedDF.actual, selector)
+      testedDF.reference.select(selector: _*),
+      testedDF.actual.select(selector: _*)
     )
 
     val cmpUniqueColumn: String = generateUniqueColumnName(dfsSorted.actual.columns, "HermesDatasetComparisonUniqueId")
@@ -141,7 +142,7 @@ class DatasetComparison(cliOptions: CliOptions,
     val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
 
-    if (!SchemaUtils.isSameSchema(expectedSchema, actualSchema)) {
+    if (!SchemaUtils.equivalentSchemas(expectedSchema, actualSchema)) {
       val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
         SchemaUtils.diffSchema(actualSchema, expectedSchema)
       throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
@@ -158,7 +159,7 @@ class DatasetComparison(cliOptions: CliOptions,
     val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
 
-    if (!(SchemaUtils.doesSchemaComply(schema, actualSchema) && SchemaUtils.doesSchemaComply(schema, expectedSchema))) {
+    if (!(SchemaUtils.isSubset(schema, actualSchema) && SchemaUtils.isSubset(schema, expectedSchema))) {
       val diffSchema = SchemaUtils.diffSchema(schema, actualSchema) ++
         SchemaUtils.diffSchema(schema, expectedSchema)
       throw BadProvidedSchema(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
@@ -213,7 +214,6 @@ class DatasetComparison(cliOptions: CliOptions,
    */
   private def findDifferences(columns: Array[String], joinedFlatDataWithErrCol: DataFrame): DataFrame = {
     val tmpColumnName: String = generateUniqueColumnName(columns, "HermesDatasetComparisonTmp")
-
     columns.foldLeft(joinedFlatDataWithErrCol) { (data, column) =>
       data.withColumnRenamed(config.errorColumnName, tmpColumnName)
         .withColumn(config.errorColumnName, concat(

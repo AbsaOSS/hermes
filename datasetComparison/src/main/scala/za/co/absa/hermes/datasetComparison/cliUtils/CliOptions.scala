@@ -15,7 +15,6 @@
 
 package za.co.absa.hermes.datasetComparison.cliUtils
 
-import net.liftweb.json.DefaultFormats
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
 import scala.io.Source
@@ -29,18 +28,18 @@ case class CliOptions(referenceOptions: DataframeOptions,
                       schemaPath: Option[String] = None)
 
 object CliOptions {
-  def generateHelp: Unit = {
-    implicit val formats: DefaultFormats.type = DefaultFormats
+  def generateHelp(): Unit = {
+    import CliHelpProtocol._
+    import spray.json._
 
-    val fileStream = getClass.getResourceAsStream("/cli_options.json")
-    val jsonString = Source.fromInputStream(fileStream).mkString
-    val json = net.liftweb.json.parse(jsonString)
-    println(json.extract[CliHelp])
+    val fileStream = this.getClass.getResourceAsStream("/cli_options.json")
+    val jsonString = try { Source.fromInputStream(fileStream).mkString } finally fileStream.close()
+    println(jsonString.parseJson.convertTo[CliHelp])
   }
 
   def parse(args: Array[String]): CliOptions = {
     if (args.contains("--help")) {
-      generateHelp
+      generateHelp()
       System.exit(0)
     }
 

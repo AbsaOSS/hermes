@@ -15,10 +15,7 @@
 
 package za.co.absa.hermes.e2eRunner
 
-final case class E2EComparisonException(msg: String)
-  extends Exception(s"Some comparison(s) failed\n$msg")
+case class TestDefinitionJsonMalformed(msg: String, cause: Throwable = None.orNull) extends Exception(msg, cause)
 
-final case class NotAllRequestedPluginsDefined(pluginNames: Set[String])
-  extends Exception(
-    s"""Some requested test plugins were not found on a class path.
-       |These plugins were not found ${pluginNames.mkString(", ")}""".stripMargin)
+case class PluginNotFound(pluginName: String, cause: Throwable = None.orNull)
+  extends Exception(s"Plugin $pluginName not found on the class path.", cause)
