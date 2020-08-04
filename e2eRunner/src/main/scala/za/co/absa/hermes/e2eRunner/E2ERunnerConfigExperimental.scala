@@ -62,6 +62,8 @@ object E2ERunnerConfigExperimental {
       .optional
       .action((value, config) => { config.copy(failfast = value) })
       .text("Should tests exit if one of them has a non-zero exit")
+
+    help("help").text("prints this usage text")
   }
 }
 
