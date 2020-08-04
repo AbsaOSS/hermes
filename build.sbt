@@ -62,7 +62,12 @@ lazy val datasetComparison = project
     libraryDependencies ++= datasetComparisonDependencies,
     mainClass in assembly := Some("za.co.absa.hermes.datasetComparison.DatasetComparisonJob"),
     test in assembly := {},
-    mergeStrategy
+    mergeStrategy,
+    artifact in (Compile, assembly) := {
+      val art = (artifact in (Compile, assembly)).value
+      art.withClassifier(Some("assembly"))
+    },
+    addArtifact(artifact in (Compile, assembly), assembly)
   )
 
 lazy val e2eRunner = project
@@ -71,7 +76,12 @@ lazy val e2eRunner = project
     name := "e2e-runner",
     mainClass in assembly := Some("za.co.absa.hermes.e2eRunner.E2ERunnerJob"),
     test in assembly := {},
-    mergeStrategy
+    mergeStrategy,
+    artifact in (Compile, assembly) := {
+      val art = (artifact in (Compile, assembly)).value
+      art.withClassifier(Some("assembly"))
+    },
+    addArtifact(artifact in (Compile, assembly), assembly)
   )
 
 lazy val infoFileComparison = project
@@ -81,7 +91,12 @@ lazy val infoFileComparison = project
     libraryDependencies ++= compareInfoFileDependencies,
     mainClass in assembly := Some("za.co.absa.hermes.infoFileComparison.InfoFileComparisonJob"),
     test in assembly := {},
-    mergeStrategy
+    mergeStrategy,
+    artifact in (Compile, assembly) := {
+      val art = (artifact in (Compile, assembly)).value
+      art.withClassifier(Some("assembly"))
+    },
+    addArtifact(artifact in (Compile, assembly), assembly)
   )
 
 lazy val utils = project
@@ -89,5 +104,10 @@ lazy val utils = project
     libraryDependencies ++= baseDependencies,
     libraryDependencies ++= utilsDependencies,
     test in assembly := {},
-    mergeStrategy
+    mergeStrategy,
+    artifact in (Compile, assembly) := {
+      val art = (artifact in (Compile, assembly)).value
+      art.withClassifier(Some("assembly"))
+    },
+    addArtifact(artifact in (Compile, assembly), assembly)
   )
