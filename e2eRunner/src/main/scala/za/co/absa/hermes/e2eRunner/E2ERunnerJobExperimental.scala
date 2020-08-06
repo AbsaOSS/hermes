@@ -46,7 +46,7 @@ object E2ERunnerJobExperimental {
     val pluginExpectedToUse = testDefinitions.map(_.pluginName).toSet
     scribe.info(s"Loaded ${testDefinitions.size} test definitions")
 
-    if (pluginNames.diff(pluginExpectedToUse).nonEmpty)
+    if (pluginExpectedToUse.diff(pluginNames).nonEmpty)
       throw NotAllRequestedPluginsDefined(pluginNames.diff(pluginExpectedToUse))
 
     scribe.info("Running tests")
