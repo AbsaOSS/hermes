@@ -55,7 +55,13 @@ object E2ERunnerConfigExperimental {
 
     opt[String]("jar-path")
       .optional
-      .action((value, config) => { config.copy(jarPath = Some(value)) })
+      .action((value, config) => {
+        if (value.isEmpty) {
+          config.copy(jarPath = None)
+        } else {
+          config.copy(jarPath = Some(value))
+        }
+      })
       .text("Path to a JAR files with plugin definitions")
 
     opt[Boolean]("fail-fast")

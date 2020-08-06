@@ -55,7 +55,7 @@ object E2ERunnerJobExperimental {
     scribe.info("Invoking logging of test results")
     results.foreach {
       case Success(value) => value.logResult()
-      case Failure(exception) => scribe.warn(exception.getCause)
+      case Failure(exception) => scribe.warn(exception)
     }
   }
 }
