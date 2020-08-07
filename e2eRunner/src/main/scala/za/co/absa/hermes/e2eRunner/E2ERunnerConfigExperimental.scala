@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
   */
 case class E2ERunnerConfigExperimental(testDefinition: String = "",
                                        jarPath: Option[String] = None,
-                                       failfast: Boolean = true)
+                                       failfast: Boolean = false)
 
 object E2ERunnerConfigExperimental {
   /**

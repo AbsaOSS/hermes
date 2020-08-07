@@ -33,46 +33,68 @@ class PluginManager(private val plugins: Map[String, String]) {
 
   def getPluginNames: Set[String] = plugins.keySet
 
-  def runWithDefinitions(pluginDefinitions: Seq[TestDefinition]): Seq[PluginResult] = {
-    val sortedPD = pluginDefinitions.sortBy(pd => (pd.order, pd.pluginName))
-    sortedPD.zipWithIndex.map {
-      case (td, i) =>
+  def runWithDefinitions(testDefinitions: Seq[TestDefinition], failFast: Boolean = false): Seq[PluginResult] = {
+    val sortedPD = testDefinitions.sortBy(pd => (pd.order, pd.pluginName))
+    sortedPD.zipWithIndex.foldLeft(Seq.empty[PluginResult]) {
+      case (acc, (td, i)) =>
         scribe.info(s"Running ${td.name}")
         val plugin: Plugin = getPlugin(td.pluginName)
-        val tryExecution = tryExecute(td, i, plugin)
+
+        val tryExecution = if (canTestProceed(td, acc)) {
+          tryExecute(td, i, plugin)
+        } else {
+          Failure(throw DependeeFailed(td.name, td.dependsOn.get))
+        }
 
         tryExecution match {
-          case Success(value) => value
-          case Failure(exception) =>  FailedPluginResult(td.args, exception, i, td.name)
+          case Success(value) => acc :+ value
+          case Failure(exception) if !failFast =>  acc :+ FailedPluginResult(td.args, exception, i, td.name)
+          case Failure(exception) if failFast =>  throw exception
         }
     }
   }
 
-  private def tryExecute(td: TestDefinition, i: Int, plugin: Plugin): Try[PluginResult] = Try {
-      val result: PluginResult = plugin.performAction(td.args, i, td.name)
-      if (td.writeArgs.isDefined) result.write(td.writeArgs.get)
-      result.logResult()
-      result
+  private def canTestProceed(td: TestDefinition, previousResults: Seq[PluginResult]): Boolean = {
+    td.dependsOn.forall { dependerName =>
+      previousResults.find({ previousResult =>
+        dependerName.equalsIgnoreCase(previousResult.getTestName)
+      }).forall(_.testPassed)
     }
+  }
+
+  private def tryExecute(td: TestDefinition,
+                         testOrder: Int,
+                         plugin: Plugin): Try[PluginResult] = Try {
+    val result: PluginResult = plugin.performAction(td.args, testOrder, td.name)
+    if (td.writeArgs.isDefined) result.write(td.writeArgs.get)
+    result.logResult()
+    result
+  }
 }
 
 object PluginManager {
   def apply(plugins: Map[String, String]): PluginManager = new PluginManager(plugins)
 
   def apply(classpath: Seq[File] = Seq(new File("."))): PluginManager = {
-    classpath.foreach(x => println(x.getName))
+    val plugins = getPluginsIterator(classpath)
+    val pluginMap: Map[String, String] = getPluginsMap(plugins)
+    PluginManager(pluginMap)
+  }
+
+  private def getPluginsMap(plugins: Iterator[ClassInfo]): Map[String, String] = {
+    plugins.foldLeft(Map.empty[String, String]) {
+      (acc, value) =>
+        val plugin: Plugin = Class.forName(value.name).newInstance().asInstanceOf[Plugin]
+        if (acc.keySet.contains(plugin.name)) throw DuplicatePluginNames(plugin.name)
+        acc + (plugin.name -> value.name)
+    }
+  }
+
+  private def getPluginsIterator(classpath: Seq[File]): Iterator[ClassInfo] = {
     val finder: ClassFinder = ClassFinder(classpath)
     val classes: LazyList[ClassInfo] = finder.getClasses
     val classMap = ClassFinder.classInfoMap(classes)
     val plugins: Iterator[ClassInfo] = ClassFinder.concreteSubclasses("za.co.absa.hermes.e2eRunner.Plugin", classMap)
-
-    val pluginMap: Map[String, String] = plugins.foldLeft(Map.empty[String, String]) {
-    (acc, value) =>
-      val plugin: Plugin = Class.forName(value.name).newInstance().asInstanceOf[Plugin]
-      acc + (plugin.name -> value.name)
-    }
-
-    PluginManager(pluginMap)
+    plugins
   }
-
 }

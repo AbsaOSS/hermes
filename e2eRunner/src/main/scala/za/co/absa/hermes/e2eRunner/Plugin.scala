@@ -40,6 +40,11 @@ abstract class PluginResult(arguments: Array[String],
    * Implement this method to log the result of the plugin execution at the end.
    */
   def logResult(): Unit
+
+  /**
+   * @return Returns a name of the test that was executed and which result this instance represents
+   */
+  def getTestName: String = testName
 }
 
 case class FailedPluginResult(arguments: Array[String],

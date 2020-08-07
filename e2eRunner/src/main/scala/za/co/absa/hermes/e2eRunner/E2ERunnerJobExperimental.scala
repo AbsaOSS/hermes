@@ -50,7 +50,7 @@ object E2ERunnerJobExperimental {
       throw NotAllRequestedPluginsDefined(pluginNames.diff(pluginExpectedToUse))
 
     scribe.info("Running tests")
-    val results: Seq[PluginResult] = pluginManager.runWithDefinitions(testDefinitions)
+    val results = pluginManager.runWithDefinitions(testDefinitions, cmd.failfast)
 
     scribe.info("##################################################")
     scribe.info("Invoking logging of test results")

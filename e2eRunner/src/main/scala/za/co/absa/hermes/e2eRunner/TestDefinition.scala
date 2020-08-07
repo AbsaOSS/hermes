@@ -18,7 +18,7 @@ package za.co.absa.hermes.e2eRunner
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 object TestDefinitionJsonProtocol extends DefaultJsonProtocol {
-  implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat5(TestDefinition.apply)
+  implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat6(TestDefinition.apply)
 }
 
 /**
@@ -35,6 +35,7 @@ case class TestDefinition(name: String,
                           order: Int,
                           pluginName: String,
                           args: Array[String],
+                          dependsOn: Option[String],
                           writeArgs: Option[Array[String]])
 
 object TestDefinition {

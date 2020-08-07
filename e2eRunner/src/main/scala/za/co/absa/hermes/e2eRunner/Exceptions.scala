@@ -19,3 +19,9 @@ case class TestDefinitionJsonMalformed(msg: String, cause: Throwable = None.orNu
 
 case class PluginNotFound(pluginName: String, cause: Throwable = None.orNull)
   extends Exception(s"Plugin $pluginName not found on the class path.", cause)
+
+case class DependeeFailed(name: String, dependeeName: String)
+  extends Exception(s"Test named $dependeeName failed, but it was destined as a dependee of $name")
+
+case class DuplicatePluginNames(name: String)
+  extends Exception(s"Found two or more plugins with same name $name")
