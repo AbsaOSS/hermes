@@ -10,9 +10,10 @@ import za.co.absa.hermes.utils.HelperFunctions
 case class DatasetComparisonResult(arguments: Array[String],
                                    returnedValue: ComparisonResult,
                                    order: Int,
+                                   testName: String,
                                    passed: Boolean,
                                    additionalInfo: Map[String, String])
-  extends PluginResult(arguments, returnedValue, order, passed, additionalInfo) {
+  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
   override def write(writeArgs: Seq[String]): Unit = {
     def sparkSessionC(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
@@ -34,13 +35,14 @@ case class DatasetComparisonResult(arguments: Array[String],
 
   override def logResult(): Unit = {
     if (passed) {
-      scribe.error(s"""Expected and actual datasets differ.
-                      |Reference path: ${additionalInfo("referenceOptions.path")}
-                      |Actual dataset path: ${additionalInfo("newOptions.path")}
-                      |Difference written to: ${additionalInfo("outOptions.path")}
-                      |Count Expected( ${returnedValue.refRowCount} ) vs Actual( ${returnedValue.newRowCount} )""".stripMargin)
-    } else {
       scribe.info(s"Expected and actual data sets are the same. Metrics written to ${additionalInfo("outOptions.path")}/_METRICS")
+    } else {
+      scribe.warn(s"""Expected and actual datasets differ.
+                     |Reference path: ${additionalInfo("referenceOptions.path")}
+                     |Actual dataset path: ${additionalInfo("newOptions.path")}
+                     |Difference written to: ${additionalInfo("outOptions.path")}
+                     |Count Expected( ${returnedValue.refRowCount} ) vs Actual( ${returnedValue.newRowCount} )""".stripMargin)
+
     }
   }
 }
@@ -48,7 +50,7 @@ case class DatasetComparisonResult(arguments: Array[String],
 final class DatasetComparisonPlugin extends Plugin {
   override def name: String = "DatasetComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int): PluginResult = {
+  override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {
     println(args.mkString(" "))
     def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
       val session = SparkSession.builder().appName(name)
@@ -63,6 +65,6 @@ final class DatasetComparisonPlugin extends Plugin {
       "outOptions.path" -> cliOptions.outOptions.path
     )
     val datasetResult: ComparisonResult = new DatasetComparison(cliOptions)(sparkSession()).compare
-    DatasetComparisonResult(args, datasetResult, actualOrder, datasetResult.passed, extraMap)
+    DatasetComparisonResult(args, datasetResult, actualOrder, testName, datasetResult.passed, extraMap)
   }
 }

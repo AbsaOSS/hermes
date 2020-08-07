@@ -18,7 +18,7 @@ package za.co.absa.hermes.e2eRunner
 import java.io.File
 
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 object E2ERunnerJobExperimental {
   def main(args: Array[String]): Unit = {
@@ -50,12 +50,14 @@ object E2ERunnerJobExperimental {
       throw NotAllRequestedPluginsDefined(pluginNames.diff(pluginExpectedToUse))
 
     scribe.info("Running tests")
-    val results: Seq[Try[PluginResult]] = pluginManager.runWithDefinitions(testDefinitions)
+    val results: Seq[PluginResult] = pluginManager.runWithDefinitions(testDefinitions)
 
+    scribe.info("##################################################")
     scribe.info("Invoking logging of test results")
-    results.foreach {
-      case Success(value) => value.logResult()
-      case Failure(exception) => scribe.warn(exception)
-    }
+    scribe.info("##################################################")
+    results.foreach({ x =>
+      x.logResult()
+      scribe.info("##################################################")
+    })
   }
 }

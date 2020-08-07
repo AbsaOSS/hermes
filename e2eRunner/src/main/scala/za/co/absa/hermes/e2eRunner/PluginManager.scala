@@ -20,7 +20,7 @@ import java.io.File
 import org.clapper.classutil.ScalaCompat.LazyList
 import org.clapper.classutil.{ClassFinder, ClassInfo}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class PluginManager(private val plugins: Map[String, String]) {
   def getPlugin(name: String): Plugin = {
@@ -33,21 +33,27 @@ class PluginManager(private val plugins: Map[String, String]) {
 
   def getPluginNames: Set[String] = plugins.keySet
 
-  def runWithDefinitions(pluginDefinitions: Seq[TestDefinition]): Seq[Try[PluginResult]] = {
+  def runWithDefinitions(pluginDefinitions: Seq[TestDefinition]): Seq[PluginResult] = {
     val sortedPD = pluginDefinitions.sortBy(pd => (pd.order, pd.pluginName))
     sortedPD.zipWithIndex.map {
-      case (pd, i) =>
-        scribe.info(s"Running ${pd.name}")
-        val plugin: Plugin = getPlugin(pd.pluginName)
+      case (td, i) =>
+        scribe.info(s"Running ${td.name}")
+        val plugin: Plugin = getPlugin(td.pluginName)
+        val tryExecution = tryExecute(td, i, plugin)
 
-        Try {
-          val result: PluginResult = plugin.performAction(pd.args, i)
-          if (pd.writeArgs.isDefined) result.write(pd.writeArgs.get)
-          result.logResult()
-          result
+        tryExecution match {
+          case Success(value) => value
+          case Failure(exception) =>  FailedPluginResult(td.args, exception, i, td.name)
         }
     }
   }
+
+  private def tryExecute(td: TestDefinition, i: Int, plugin: Plugin): Try[PluginResult] = Try {
+      val result: PluginResult = plugin.performAction(td.args, i, td.name)
+      if (td.writeArgs.isDefined) result.write(td.writeArgs.get)
+      result.logResult()
+      result
+    }
 }
 
 object PluginManager {

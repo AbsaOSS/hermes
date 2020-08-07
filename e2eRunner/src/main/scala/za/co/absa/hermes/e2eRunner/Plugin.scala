@@ -18,6 +18,7 @@ package za.co.absa.hermes.e2eRunner
 abstract class PluginResult(arguments: Array[String],
                             returnedValue: Any,
                             order: Int,
+                            testName: String,
                             passed: Boolean,
                             additionalInfo: Map[String, String]) {
 
@@ -41,6 +42,21 @@ abstract class PluginResult(arguments: Array[String],
   def logResult(): Unit
 }
 
+case class FailedPluginResult(arguments: Array[String],
+                              returnedException: Throwable,
+                              order: Int,
+                              testName: String,
+                              additionalInfo: Map[String, String] = Map.empty)
+  extends PluginResult(arguments, returnedException, order, testName, false, additionalInfo) {
+  /**
+   * Implement this method to log the result of the plugin execution at the end.
+   */
+  override def logResult(): Unit = {
+    scribe.error(s"Test $testName ($order) failed on an exception", returnedException)
+  }
+}
+
+
 trait Plugin {
   /**
    * Plugin names is here to provide user-friendly name for each plugin
@@ -58,5 +74,5 @@ trait Plugin {
    *                    PluginResult expects this number.
    * @return Returns a subclass of PluginResult.
    */
-  def performAction(args: Array[String], actualOrder: Int): PluginResult
+  def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult
 }

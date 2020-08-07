@@ -10,9 +10,10 @@ import scala.util.{Failure,Success}
 case class InfoFileComparisonResult(arguments: Array[String],
                                     returnedValue: List[ModelDifference[_]],
                                     order: Int,
+                                    testName: String,
                                     passed: Boolean,
                                     additionalInfo: Map[String, String])
-  extends PluginResult(arguments, returnedValue, order, passed, additionalInfo) {
+  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
   override def write(writeArgs: Seq[String]): Unit = {
     if (!passed) {
@@ -25,7 +26,7 @@ case class InfoFileComparisonResult(arguments: Array[String],
     if (passed) {
       scribe.info("Expected and actual _INFO files are the same.")
     } else {
-      scribe.error(s"""Expected and actual info files differ.
+      scribe.warn(s"""Expected and actual info files differ.
                       |Reference path: ${additionalInfo("refPath")}
                       |Actual dataset path: ${additionalInfo("newPath")}
                       |Difference written to: ${additionalInfo("outPath")}""".stripMargin)
@@ -36,7 +37,7 @@ case class InfoFileComparisonResult(arguments: Array[String],
 class InfoFileComparisonPlugin extends Plugin {
   override def name: String = "InfoFileComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int): PluginResult = {
+  override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {
     val parsedArgs = InfoComparisonArguments.getCmdLineArguments(args) match {
       case Success(value) => value.toStringMap
       case Failure(exception)  => throw exception
@@ -47,6 +48,6 @@ class InfoFileComparisonPlugin extends Plugin {
 
     val diff: List[ModelDifference[_]] = refControlMeasure.compareWith(newControlMeasure, config)
 
-    InfoFileComparisonResult(args, diff, actualOrder, diff.isEmpty, parsedArgs)
+    InfoFileComparisonResult(args, diff, actualOrder, testName, diff.isEmpty, parsedArgs)
   }
 }
