@@ -12,12 +12,21 @@ case class EnceladusSparkJobsResult(arguments: Array[String],
                                     additionalInfo: Map[String, String])
   extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
-  override def logResult(): Unit = {
-    scribe.info("Job Finished. In theory succesfully")
-  }
-
+  /**
+   * This method should be used to write the plugin result in a form required.
+   *
+   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
+   */
   override def write(writeArgs: Seq[String]): Unit = {
     scribe.warn("EnceladusSparkJobs plugin does not support write for the result")
+  }
+
+  /**
+   * Logs the result of the plugin execution at the end.
+   */
+
+  override def logResult(): Unit = {
+    scribe.info("Job Finished. In theory succesfully")
   }
 }
 

@@ -15,6 +15,11 @@ case class InfoFileComparisonResult(arguments: Array[String],
                                     additionalInfo: Map[String, String])
   extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
+  /**
+   * This method should be used to write the plugin result in a form required.
+   *
+   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
+   */
   override def write(writeArgs: Seq[String]): Unit = {
     if (!passed) {
       val serializedData = ModelDifferenceParser.asJson(returnedValue)
@@ -22,6 +27,9 @@ case class InfoFileComparisonResult(arguments: Array[String],
     }
   }
 
+  /**
+   * Logs the result of the plugin execution at the end.
+   */
   override def logResult(): Unit = {
     if (passed) {
       scribe.info("Expected and actual _INFO files are the same.")

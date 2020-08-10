@@ -17,9 +17,59 @@ package za.co.absa.hermes.e2eRunner
 
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
+import scala.io.Source
+
 object TestDefinitionJsonProtocol extends DefaultJsonProtocol {
   implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat6(TestDefinition.apply)
 }
+
+case class TestDefinitions(private val testDefinitions: Seq[TestDefinition])  {
+  /**
+   * @return Returns the number of tests defined
+   */
+  def size: Int = testDefinitions.size
+
+  /**
+   * @return Returns a set of Plugin names used across test definitions
+   */
+  def getPluginNames: Set[String] = testDefinitions.map(_.pluginName).toSet
+
+  /**
+   * @return Returns sorted Sequence of TestDefinitions. Sorted by order and then by name.
+   */
+  def getSorted: Seq[TestDefinition] = testDefinitions.sortBy(pd => (pd.order, pd.pluginName))
+
+  /**
+   * @return Returns sorted TestDefinitionsWithIndex. Index here represents a run order.
+   */
+  def getSortedWithIndex: Seq[TestDefinitionWithOrder] = {
+    getSorted
+      .zipWithIndex
+      .map({ case(td, index) => TestDefinitionWithOrder(td, index + 1)})
+  }
+
+  /**
+   * Predefined foldLeft function that will always have an empty Sequence of Plugins as an accumulator
+   * and a sorted TestDefinitions zipped with index to get actual run number.
+   * @param op Operation to be executed
+   * @return Returns a sequence of PluginResults
+   */
+  def foldLeftWithIndex(op: (Seq[PluginResult], TestDefinitionWithOrder) => Seq[PluginResult]): Seq[PluginResult] = {
+    @scala.annotation.tailrec
+    def fold(acc: Seq[PluginResult], seq: Seq[TestDefinitionWithOrder]): Seq[PluginResult] = seq match {
+      case Seq()   => acc
+      case head :: tail => fold(op(acc, head), tail)
+    }
+    fold(Seq.empty[PluginResult], getSortedWithIndex)
+  }
+}
+
+/**
+ * A representation of a test definition together with it's actual order
+ * @param definition TestDefinition instance
+ * @param actualOrder Actual order of the test for running.
+ */
+case class TestDefinitionWithOrder(definition: TestDefinition, actualOrder: Int)
 
 /**
  * Test definition representation.
@@ -48,7 +98,7 @@ object TestDefinition {
    * @param jsonString JsonString with test definitions
    * @return Returns a Sequence of TestDefinitions. These are not ordered or filtered in any way.
    */
-  def fromString(jsonString: String): Seq[TestDefinition] = {
+  def fromString(jsonString: String): TestDefinitions = {
     val parsedJson: JsValue = jsonString.parseJson
 
     val maybeVars: Option[JsValue] = parsedJson.asJsObject.getFields("vars").headOption
@@ -67,6 +117,13 @@ object TestDefinition {
       parsedJson
     }
 
-    formattedJson.convertTo[Seq[TestDefinition]]
+    TestDefinitions(formattedJson.convertTo[Seq[TestDefinition]])
+  }
+
+  def fromFile(path: String): TestDefinitions = {
+    val testDefinitionSource = Source.fromFile(path)
+    val testDefinitionString = try testDefinitionSource.mkString finally { testDefinitionSource.close() }
+
+    TestDefinition.fromString(testDefinitionString)
   }
 }

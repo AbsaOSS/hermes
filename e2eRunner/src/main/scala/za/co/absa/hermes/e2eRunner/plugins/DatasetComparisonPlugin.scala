@@ -15,6 +15,11 @@ case class DatasetComparisonResult(arguments: Array[String],
                                    additionalInfo: Map[String, String])
   extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
+  /**
+   * This method should be used to write the plugin result in a form required.
+   *
+   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
+   */
   override def write(writeArgs: Seq[String]): Unit = {
     def sparkSessionC(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
       val session = SparkSession.builder().appName(name)
@@ -33,6 +38,9 @@ case class DatasetComparisonResult(arguments: Array[String],
     DatasetComparisonJob.writeMetricsToFile(returnedValue, outOptions.path)
   }
 
+  /**
+   * Logs the result of the plugin execution at the end.
+   */
   override def logResult(): Unit = {
     if (passed) {
       scribe.info(s"Expected and actual data sets are the same. Metrics written to ${additionalInfo("outOptions.path")}/_METRICS")

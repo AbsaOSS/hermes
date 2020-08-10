@@ -25,3 +25,6 @@ case class DependeeFailed(name: String, dependeeName: String)
 
 case class DuplicatePluginNames(name: String)
   extends Exception(s"Found two or more plugins with same name $name")
+
+case class TestFailedWithFailFastOn(name: String, index: Int, cause: Throwable = None.orNull)
+  extends Exception(s"Test $name ($index) Failed. FailFast is turned on.", cause)
