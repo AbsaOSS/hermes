@@ -32,9 +32,9 @@ case class InfoFileComparisonResult(arguments: Array[String],
    */
   override def logResult(): Unit = {
     if (passed) {
-      scribe.info("Expected and actual _INFO files are the same.")
+      scribe.info(s"Test $testName ($order) finished. Expected and actual _INFO files are the same.")
     } else {
-      scribe.warn(s"""Expected and actual info files differ.
+      scribe.warn(s"""Test $testName ($order) finished. Expected and actual info files differ.
                       |Reference path: ${additionalInfo("refPath")}
                       |Actual dataset path: ${additionalInfo("newPath")}
                       |Difference written to: ${additionalInfo("outPath")}""".stripMargin)

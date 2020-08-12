@@ -43,9 +43,11 @@ case class DatasetComparisonResult(arguments: Array[String],
    */
   override def logResult(): Unit = {
     if (passed) {
-      scribe.info(s"Expected and actual data sets are the same. Metrics written to ${additionalInfo("outOptions.path")}/_METRICS")
+      scribe.info(
+        s"""Test $testName ($order) finished. Expected and actual data sets are the same. Metrics written to
+           |${additionalInfo("outOptions.path")}/_METRICS""".stripMargin.replaceAll("[\\r\\n]", ""))
     } else {
-      scribe.warn(s"""Expected and actual datasets differ.
+      scribe.warn(s"""Test $testName ($order) finished. Expected and actual datasets differ.
                      |Reference path: ${additionalInfo("referenceOptions.path")}
                      |Actual dataset path: ${additionalInfo("newOptions.path")}
                      |Difference written to: ${additionalInfo("outOptions.path")}
@@ -59,7 +61,6 @@ final class DatasetComparisonPlugin extends Plugin {
   override def name: String = "DatasetComparison"
 
   override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {
-    println(args.mkString(" "))
     def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
       val session = SparkSession.builder().appName(name)
       val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session

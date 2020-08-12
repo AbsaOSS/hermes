@@ -26,7 +26,7 @@ case class EnceladusSparkJobsResult(arguments: Array[String],
    */
 
   override def logResult(): Unit = {
-    scribe.info("Job Finished. In theory succesfully")
+    scribe.info(s"Test $testName ($order) finished. In theory succesfully")
   }
 }
 
@@ -40,6 +40,7 @@ class EnceladusSparkJobsPlugin extends Plugin {
       (s"echo $bashCmd" #| "bash").!!
     }
 
+    scribe.info(s"Running spark-submit with: ${args.mkString(" ")}")
     val (confTime, returnValue) = HelperFunctions.calculateTime { runBashCmd(args.mkString(" ")) }
     val additionalInfo = Map("elapsedTimeInMilliseconds" -> confTime.toString)
     EnceladusSparkJobsResult(args, returnValue, actualOrder, testName, passed = true, additionalInfo)
