@@ -27,16 +27,21 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
-      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Some(DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere")),
       Set.empty[String],
       "--bogus raw-options"
     )
+
+    val df1 = cliOptions.referenceOptions.loadDataFrame
+    val df2 = cliOptions.actualOptions.loadDataFrame
+
     val manualConfig = new ManualConfig(
       "errCol",
       "actual",
       "expected",
       true
     )
+
     val expectedResult = ComparisonResult(
       10, 10, 0, 0, 10,
       List(
@@ -47,11 +52,10 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
         new Column("_c4"),
         new Column("_c5")
       ),
-      None, 0,
-      "--bogus raw-options"
+      None
     )
 
-    val cmpResult = new DatasetComparison(cliOptions, manualConfig).compare
+    val cmpResult = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig).compare
 
     assert(expectedResult == cmpResult)
   }
@@ -60,17 +64,22 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
-      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Some(DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere")),
       Set.empty[String],
       "--bogus raw-options",
       Some(getClass.getResource("/dataSample1Schema.json").toString)
     )
+
+    val df1 = cliOptions.referenceOptions.loadDataFrame
+    val df2 = cliOptions.actualOptions.loadDataFrame
+
     val manualConfig = new ManualConfig(
       "errCol",
       "actual",
       "expected",
       true
     )
+
     val expectedResult = ComparisonResult(
       10, 10, 0, 0, 10,
       List(
@@ -80,8 +89,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
         new Column("_c3"),
         new Column("_c4")
       ),
-      None, 0,
-      "--bogus raw-options"
+      None
     )
     val schema = new StructType()
       .add("_c0", StringType, true)
@@ -90,7 +98,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       .add("_c3", StringType, true)
       .add("_c4", StringType, true)
 
-    val cmpResult = new DatasetComparison(cliOptions, manualConfig, Some(schema)).compare
+    val cmpResult = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
 
     assert(expectedResult == cmpResult)
   }
@@ -99,28 +107,21 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample1.csv").toString),
-      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Some(DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere")),
       Set.empty[String],
       "--bogus raw-options"
     )
+
+    val df1 = cliOptions.referenceOptions.loadDataFrame
+    val df2 = cliOptions.actualOptions.loadDataFrame
+
     val manualConfig = new ManualConfig(
       "errCol",
       "actual",
       "expected",
       true
     )
-    val expectedResult = ComparisonResult(
-      10, 10, 0, 0, 10,
-      List(
-        new Column("_c0"),
-        new Column("_c1"),
-        new Column("_c2"),
-        new Column("_c3"),
-        new Column("_c4")
-      ),
-      None, 0,
-      "--bogus raw-options"
-    )
+
     val schema = new StructType()
       .add("_c01", StringType, true)
       .add("_c1", StringType, true)
@@ -129,7 +130,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       .add("_c4", StringType, true)
 
     intercept[BadProvidedSchema] {
-      new DatasetComparison(cliOptions, manualConfig, Some(schema)).compare
+      new DatasetComparison(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
     }
   }
 
@@ -137,10 +138,14 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample1.csv").toString),
       DataframeOptions("csv", Map("delimiter" -> ",", "header" -> "true"), getClass.getResource("/dataSample6.csv").toString),
-      DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere"),
+      Some(DataframeOptions("parquet", Map.empty[String, String], "path/to/nowhere")),
       Set("id", "first_name"),
       "--bogus raw-options"
     )
+
+    val df1 = cliOptions.referenceOptions.loadDataFrame
+    val df2 = cliOptions.actualOptions.loadDataFrame
+
     val manualConfig = new ManualConfig(
       "errCol",
       "actual",
@@ -148,13 +153,12 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       true
     )
 
-    val result = new DatasetComparison(cliOptions, manualConfig).compare
+    val result = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig).compare
     assert(9 == result.refRowCount)
     assert(10 == result.newRowCount)
     assert(0 == result.refDuplicateCount)
     assert(1 == result.newDuplicateCount)
     assert(7 == result.passedCount)
     assert(2 == result.diffCount)
-    assert("--bogus raw-options" ==  result.passedOptions)
   }
 }

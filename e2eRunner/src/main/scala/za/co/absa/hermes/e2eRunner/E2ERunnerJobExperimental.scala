@@ -56,8 +56,8 @@ object E2ERunnerJobExperimental {
     scribe.info("##################################################")
     scribe.info("Invoking logging of test results")
     scribe.info("##################################################")
-    results.foreach({ x =>
-      x.logResult()
+    results.foreach({ result =>
+      result.logResult()
       scribe.info("##################################################")
     })
   }

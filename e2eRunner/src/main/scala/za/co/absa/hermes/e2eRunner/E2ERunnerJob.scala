@@ -72,7 +72,7 @@ object E2ERunnerJob {
     CliOptions(
       DataframeOptions("parquet", Map.empty[String, String], s"/ref$pathHDFS"),
       DataframeOptions("parquet", Map.empty[String, String], pathHDFS),
-      DataframeOptions("parquet", Map.empty[String, String], s"/comp$pathHDFS"),
+      Some(DataframeOptions("parquet", Map.empty[String, String], s"/comp$pathHDFS")),
       keys,
       "ran from E2E Runner"
     )

@@ -124,10 +124,7 @@ class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeA
     val newPath = getClass.getResource("/dataSample1.csv").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
     val message =
-      s"""Expected and actual datasets differ in schemas.
-         |Reference path: $refPath
-         |Actual dataset path: $newPath
-         |Difference is:
+      s"""Expected and actual datasets differ in schemas. Difference is:
          |_c5 cannot be found in both schemas""".stripMargin
 
     val args = Array(

@@ -100,20 +100,19 @@ object TestDefinition {
    */
   def fromString(jsonString: String): TestDefinitions = {
     val parsedJson: JsValue = jsonString.parseJson
-
     val maybeVars: Option[JsValue] = parsedJson.asJsObject.getFields("vars").headOption
-    if (maybeVars.isDefined) scribe.info("""Loaded "vars" key from test definitions""")
-    else { scribe.info("""Could not find "vars" key in test definitions""") }
 
     val maybeRuns = parsedJson.asJsObject.getFields("runs").headOption
     val runsString = if (maybeRuns.isEmpty) { throw TestDefinitionJsonMalformed("Runs key not defined")}
     else { maybeRuns.get.toString() }
 
     val formattedJson = if (maybeVars.isDefined) {
+      scribe.info("""Loaded "vars" key from test definitions""")
       val varsMap = maybeVars.get.convertTo[Map[String, String]]
       val remappedJson = varsMap.foldLeft(runsString) { case (acc, (k,v)) => acc.replaceAllLiterally(s"#{$k}#", v) }
       remappedJson.parseJson
     } else {
+      scribe.info("""Could not find "vars" key in test definitions""")
       parsedJson
     }
 

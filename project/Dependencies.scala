@@ -25,8 +25,8 @@ object Dependencies {
   )
 
   val e2eDependencies = List(
-    "org.reflections"   % "reflections"   % "0.9.12",
-    "org.clapper"      %% "classutil"   % "1.5.0"
+    "org.reflections"    % "reflections"   % "0.9.12",
+    "org.clapper"       %% "classutil"   % "1.5.0"
   )
 
   val datasetComparisonDependencies = List(

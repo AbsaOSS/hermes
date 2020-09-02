@@ -2,7 +2,8 @@ package za.co.absa.hermes.e2eRunner.plugins
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
+import za.co.absa.hermes.datasetComparison.DatasetComparisonJob.{getConfig, getSchema}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, CliOptionsParser, DataframeOptions}
 import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparison, DatasetComparisonJob}
 import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult}
 import za.co.absa.hermes.utils.HelperFunctions
@@ -12,7 +13,7 @@ case class DatasetComparisonResult(arguments: Array[String],
                                    order: Int,
                                    testName: String,
                                    passed: Boolean,
-                                   additionalInfo: Map[String, String])
+                                   additionalInfo: Map[String, String] = Map.empty)
   extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
 
   /**
@@ -21,21 +22,23 @@ case class DatasetComparisonResult(arguments: Array[String],
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
   override def write(writeArgs: Seq[String]): Unit = {
-    def sparkSessionC(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
+    def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
       val session = SparkSession.builder().appName(name)
       val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session
       withConf.getOrCreate()
     }
 
-    implicit val sparkSession: SparkSession = sparkSessionC()
-    val outOptions = CliOptions.parse(arguments).outOptions
+    implicit val spark: SparkSession = sparkSession()
+    val outDFOptions: DataframeOptions = CliOptionsParser.parseOutputParameters(arguments)
 
     returnedValue.resultDF match {
-      case Some(df) => outOptions.writeDataFrame(df)
-      case None => scribe.info(s"DatastComparison run as ${HelperFunctions.appendOrdinalSuffix(order)} had no difference, no DF written.")
+      case Some(df) => outDFOptions.writeDataFrame(df)
+      case None => scribe.info(
+        s"DatastComparison run as ${HelperFunctions.appendOrdinalSuffix(order)} had no difference, no DF written."
+      )
     }
 
-    DatasetComparisonJob.writeMetricsToFile(returnedValue, outOptions.path)
+    DatasetComparisonJob.writeMetricsToFile(returnedValue, outDFOptions.path)
   }
 
   /**
@@ -67,13 +70,20 @@ final class DatasetComparisonPlugin extends Plugin {
       withConf.getOrCreate()
     }
 
-    val cliOptions = CliOptions.parse(args)
-    val extraMap = Map(
-      "referenceOptions.path" -> cliOptions.referenceOptions.path,
-      "newOptions.path" -> cliOptions.newOptions.path,
-      "outOptions.path" -> cliOptions.outOptions.path
+    implicit val spark: SparkSession = sparkSession()
+    val cliOptions = CliOptionsParser.parseInputParameters(args)
+    val optionalSchema = getSchema(cliOptions.schemaPath)
+    val dataFrameRef = cliOptions.referenceOptions.loadDataFrame
+    val dataFrameActual = cliOptions.actualOptions.loadDataFrame
+    val dsComparison = new DatasetComparison(
+      dataFrameRef,
+      dataFrameActual,
+      cliOptions.keys,
+      optionalSchema = optionalSchema
     )
-    val datasetResult: ComparisonResult = new DatasetComparison(cliOptions)(sparkSession()).compare
-    DatasetComparisonResult(args, datasetResult, actualOrder, testName, datasetResult.passed, extraMap)
+
+    val datasetResult: ComparisonResult = dsComparison.compare
+    val datasetResultWithOptions = datasetResult.copy(passedOptions = args.mkString(" "))
+    DatasetComparisonResult(args, datasetResultWithOptions, actualOrder, testName, datasetResultWithOptions.passed)
   }
 }

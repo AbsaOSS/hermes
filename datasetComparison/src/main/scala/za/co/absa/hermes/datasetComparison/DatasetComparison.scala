@@ -19,7 +19,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import za.co.absa.commons.spark.SchemaUtils
-import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
 
@@ -27,12 +26,13 @@ import za.co.absa.hermes.utils.HelperFunctions
  * Class that is the brain of the DatasetComparison module. This class should be used in case of using DatasetComparison
  * as a library. In case of running the DatasetComparison as SparkJob, please use the DatasetComparisonJob.
  *
- * @param cliOptions Config object holding run based configurable parameters.
  * @param config Config object holding project based configurable parameters. Difference to the cliOptions is that these
  *               are meant to stay the same for the project, while cliOptions change for each test
  * @param sparkSession Implicit spark session.
  */
-class DatasetComparison(cliOptions: CliOptions,
+class DatasetComparison(dataFrameReference: DataFrame,
+                        dataFrameActual: DataFrame,
+                        keys: Set[String] = Set.empty[String],
                         config: DatasetComparisonConfig = new TypesafeConfig(None),
                         optionalSchema: Option[StructType] = None)
                        (implicit sparkSession: SparkSession) {
@@ -55,7 +55,7 @@ class DatasetComparison(cliOptions: CliOptions,
    * @return ComparisonObject with final state of the comparison ran.
    */
   def compare: ComparisonResult = {
-    val testedDF = ComparisonPair(cliOptions.referenceOptions.loadDataFrame, cliOptions.newOptions.loadDataFrame)
+    val testedDF = ComparisonPair(dataFrameReference, dataFrameActual)
     val rowCounts = ComparisonPair(testedDF.reference.count(), testedDF.actual.count())
 
     optionalSchema match {
@@ -100,8 +100,7 @@ class DatasetComparison(cliOptions: CliOptions,
       passedCount,
       selector,
       resultDF,
-      diffCount,
-      cliOptions.rawOptions
+      diffCount
     )
   }
 
@@ -145,7 +144,7 @@ class DatasetComparison(cliOptions: CliOptions,
     if (!SchemaUtils.equivalentSchemas(expectedSchema, actualSchema)) {
       val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
         SchemaUtils.diffSchema(actualSchema, expectedSchema)
-      throw SchemasDifferException(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
+      throw SchemasDifferException(diffSchema.mkString("\n"))
     }
   }
 
@@ -162,7 +161,7 @@ class DatasetComparison(cliOptions: CliOptions,
     if (!(SchemaUtils.isSubset(schema, actualSchema) && SchemaUtils.isSubset(schema, expectedSchema))) {
       val diffSchema = SchemaUtils.diffSchema(schema, actualSchema) ++
         SchemaUtils.diffSchema(schema, expectedSchema)
-      throw BadProvidedSchema(cliOptions.referenceOptions.path, cliOptions.newOptions.path, diffSchema.mkString("\n"))
+      throw BadProvidedSchema(diffSchema.mkString("\n"))
     }
   }
 
@@ -258,8 +257,8 @@ class DatasetComparison(cliOptions: CliOptions,
    * @return Returns a DataFrame with key column appended
    */
   private def addKeyColumn(selector: List[Column], df: DataFrame, cmpUniqueColumn: String): DataFrame = {
-    if (cliOptions.keys.nonEmpty) {
-      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", cliOptions.keys.map(col).toSeq: _*)))
+    if (keys.nonEmpty) {
+      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", keys.map(col).toSeq: _*)))
     } else {
       df.withColumn(cmpUniqueColumn, md5(concat_ws("|", selector: _*)))
     }

@@ -20,7 +20,7 @@ import java.io.ByteArrayOutputStream
 import org.scalatest.FunSuite
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
-class CliOptionsSuite extends FunSuite {
+class CliOptionsParserSuite extends FunSuite {
   test("Test generate help") {
     val outCapture = new ByteArrayOutputStream
     val expectedResult = """Dataset Comparison Tool
@@ -35,7 +35,7 @@ class CliOptionsSuite extends FunSuite {
                            |--schema                  optional   A schema path on HDFS. This will allow to cherry pick columns from the two data sets to compare
                            |others                    optional   Options like delimiter, header, rowTag, user, password, url, ... These are the specific options for specific formats used. For more information, check sparks documentation on what all the options for the format you are using
                            |""".stripMargin
-    Console.withOut(outCapture) { CliOptions.generateHelp }
+    Console.withOut(outCapture) { CliOptionsParser.generateHelp }
 
     assert(expectedResult == outCapture.toString())
   }
@@ -73,11 +73,11 @@ class CliOptionsSuite extends FunSuite {
     val cliOptions = CliOptions(
       refDataframeOptions,
       newDataframeOptions,
-      outDataframeOptions,
+      Some(outDataframeOptions),
       Set("alfa", "beta"),
       args.mkString(" "))
 
-    assert(cliOptions == CliOptions.parse(args))
+    assert(cliOptions == CliOptionsParser.parse(args))
   }
 
   test("Test missing out path") {
@@ -89,7 +89,7 @@ class CliOptionsSuite extends FunSuite {
     )
 
     val caught = intercept[MissingArgumentException] {
-      CliOptions.parse(args)
+      CliOptionsParser.parse(args)
     }
 
     assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--out-dbtable"""" == caught.getMessage)
@@ -105,7 +105,7 @@ class CliOptionsSuite extends FunSuite {
     val message = """DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--new-dbtable""""
 
     val caught = intercept[MissingArgumentException] {
-      CliOptions.parse(args)
+      CliOptionsParser.parse(args)
     }
 
     assert(message == caught.getMessage)

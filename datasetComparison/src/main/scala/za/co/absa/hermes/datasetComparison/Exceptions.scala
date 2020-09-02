@@ -32,27 +32,17 @@ final case class DatasetsDifferException(refPath: String,
        |Count Expected( $expectedCount ) vs Actual( $actualCount )""".stripMargin,
     cause)
 
-final case class SchemasDifferException(refPath: String,
-                                        stdPath: String,
-                                        diffSchema: String,
+final case class SchemasDifferException(diffSchema: String,
                                         cause: Throwable = None.orNull)
   extends DatasetComparisonException(
-    s"""Expected and actual datasets differ in schemas.
-       |Reference path: $refPath
-       |Actual dataset path: $stdPath
-       |Difference is:
+    s"""Expected and actual datasets differ in schemas. Difference is:
        |$diffSchema""".stripMargin,
     cause)
 
-final case class BadProvidedSchema(refPath: String,
-                                   stdPath: String,
-                                   diffSchema: String,
+final case class BadProvidedSchema(diffSchema: String,
                                    cause: Throwable = None.orNull)
   extends DatasetComparisonException(
-    s"""Provided schema is not a subset of Expected and Actual dataset's schemas.
-       |Reference path: $refPath
-       |Actual dataset path: $stdPath
-       |Difference is:
+    s"""Provided schema is not a subset of Expected and Actual dataset's schemas. Difference is:
        |$diffSchema""".stripMargin,
     cause)
 

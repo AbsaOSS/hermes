@@ -17,7 +17,7 @@ class E2ERunnerConfigExperimentalTest extends FunSuite {
 
     assert(randomPath == cmd.testDefinition)
     assert(cmd.jarPath.isEmpty)
-    assert(cmd.failfast)
+    assert(!cmd.failfast)
   }
 
   test("GetCmdLineArguments - missing test definition") {
