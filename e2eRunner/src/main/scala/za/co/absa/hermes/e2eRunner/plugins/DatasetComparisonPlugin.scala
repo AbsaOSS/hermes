@@ -21,7 +21,7 @@ case class DatasetComparisonResult(arguments: Array[String],
    *
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
-  override def write(writeArgs: Seq[String]): Unit = {
+  override def write(writeArgs: Array[String]): Unit = {
     def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
       val session = SparkSession.builder().appName(name)
       val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session
@@ -29,7 +29,7 @@ case class DatasetComparisonResult(arguments: Array[String],
     }
 
     implicit val spark: SparkSession = sparkSession()
-    val outDFOptions: DataframeOptions = CliOptionsParser.parseOutputParameters(arguments)
+    val outDFOptions: DataframeOptions = CliOptionsParser.parseOutputParameters(writeArgs)
 
     returnedValue.resultDF match {
       case Some(df) => outDFOptions.writeDataFrame(df)
@@ -60,7 +60,7 @@ case class DatasetComparisonResult(arguments: Array[String],
   }
 }
 
-final class DatasetComparisonPlugin extends Plugin {
+class DatasetComparisonPlugin extends Plugin {
   override def name: String = "DatasetComparison"
 
   override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {

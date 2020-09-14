@@ -4,11 +4,11 @@ import org.scalatest.FunSuite
 
 import scala.util.{Failure, Success}
 
-class E2ERunnerConfigExperimentalTest extends FunSuite {
+class E2ERunnerConfigTest extends FunSuite {
   private val randomPath = "/alfa/beta"
 
   test("GetCmdLineArguments - positive minimal") {
-    val cmd = E2ERunnerConfigExperimental.getCmdLineArguments(Array(
+    val cmd = E2ERunnerConfig.getCmdLineArguments(Array(
       "--test-definition-path", randomPath
     )) match {
       case Success(value) => value
@@ -21,7 +21,7 @@ class E2ERunnerConfigExperimentalTest extends FunSuite {
   }
 
   test("GetCmdLineArguments - missing test definition") {
-    val actualException = E2ERunnerConfigExperimental.getCmdLineArguments(Array()) match {
+    val actualException = E2ERunnerConfig.getCmdLineArguments(Array()) match {
       case Success(_) => fail("Command line parsing passed but shouldn't")
       case Failure(exception) => exception
     }
@@ -30,7 +30,7 @@ class E2ERunnerConfigExperimentalTest extends FunSuite {
   }
 
   test("GetCmdLineArguments - positive full") {
-    val cmd = E2ERunnerConfigExperimental.getCmdLineArguments(Array(
+    val cmd = E2ERunnerConfig.getCmdLineArguments(Array(
       "--test-definition-path", randomPath,
       "--jar-path", "/some/path",
       "--fail-fast", "false"

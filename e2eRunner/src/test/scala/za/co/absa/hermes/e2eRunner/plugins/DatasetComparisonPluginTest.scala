@@ -1,11 +1,18 @@
 package za.co.absa.hermes.e2eRunner.plugins
 
+import java.nio.file.{Files, Paths}
+import java.text.SimpleDateFormat
+import java.util.Calendar
+
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Column
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import za.co.absa.hermes.datasetComparison.ComparisonResult
 import za.co.absa.hermes.utils.SparkTestBase
 
-class DatasetComparisonPluginTest extends FunSuite with SparkTestBase {
+class DatasetComparisonPluginTest extends FunSuite with BeforeAndAfterEach with SparkTestBase {
+
+  private val plugin = new DatasetComparisonPlugin()
 
   private val extraMap = Map(
     "referenceOptions.path" -> "/cliOptions/referenceOptions/path",
@@ -23,14 +30,48 @@ class DatasetComparisonPluginTest extends FunSuite with SparkTestBase {
     resultDF = None,
     diffCount = 0,
     passedOptions = "",
-    additionalInfo = Map.empty[String, String]
+    additionalInfo = extraMap
   )
 
   private val result1 = DatasetComparisonResult(Array("Some", "arguments", "passed"), comparisonResult1, 10,
     "UnitTestComparisonResult", true, extraMap)
 
-  test("Result - testWrite") {
-//    result1.write(Array.empty[String])
+  private val format = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss")
+  private var timePrefix = ""
+
+  override def beforeEach(): Unit = {
+    timePrefix = format.format(Calendar.getInstance().getTime)
   }
 
+  test("Result - testWrite") {
+    val outPath = s"target/test_output/e2e/comparison_plugin/$timePrefix"
+    result1.write(Array("--out-path", outPath, "--ignores-this", "option"))
+    assert(Files.exists(Paths.get(outPath,"_METRICS")))
+  }
+
+  test("Plugin - name") {
+    assert(plugin.name == "DatasetComparison")
+  }
+
+  test("Plugin - performAction") {
+    val shouldPass = true
+    val order = 111
+    val testName = "UnitTest"
+    val args = Array(
+      "--ref-path", getClass.getResource("/DatasetComparisonPlugin/dataset1.csv").toString,
+      "--new-path", getClass.getResource("/DatasetComparisonPlugin/dataset1.csv").toString,
+      "--format", "csv",
+      "--header", "true"
+    )
+
+    val schemaSelector = List("id", "first_name", "last_name", "email", "gender", "ip_address").map(col)
+    val passedOptions = "Omitted because of paths"
+    val comparisonResult = ComparisonResult(9,9,0,0,9,schemaSelector,None,0,passedOptions,Map())
+    val expectedDatasetComparisonResult = DatasetComparisonResult(args, comparisonResult, order, testName, shouldPass)
+
+    val result = plugin.performAction(args, order, testName).asInstanceOf[DatasetComparisonResult]
+    val resultOptionsOmitted = result.copy(returnedValue = result.returnedValue.copy(passedOptions = passedOptions))
+
+    assert(expectedDatasetComparisonResult == resultOptionsOmitted)
+  }
 }

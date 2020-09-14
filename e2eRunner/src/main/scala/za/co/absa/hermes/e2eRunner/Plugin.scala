@@ -27,7 +27,7 @@ abstract class PluginResult(arguments: Array[String],
    *
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
-  def write(writeArgs: Seq[String]): Unit = {
+  def write(writeArgs: Array[String]): Unit = {
     throw new NotImplementedError(s"PluginResult ${this.getClass} does not have an implementation of write function")
   }
 

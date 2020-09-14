@@ -17,7 +17,7 @@ case class EnceladusSparkJobsResult(arguments: Array[String],
    *
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
-  override def write(writeArgs: Seq[String]): Unit = {
+  override def write(writeArgs: Array[String]): Unit = {
     scribe.warn("EnceladusSparkJobs plugin does not support write for the result")
   }
 

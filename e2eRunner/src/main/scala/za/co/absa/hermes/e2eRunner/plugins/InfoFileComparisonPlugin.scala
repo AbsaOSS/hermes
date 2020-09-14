@@ -20,7 +20,7 @@ case class InfoFileComparisonResult(arguments: Array[String],
    *
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
-  override def write(writeArgs: Seq[String]): Unit = {
+  override def write(writeArgs: Array[String]): Unit = {
     if (!passed) {
       val serializedData = ModelDifferenceParser.asJson(returnedValue)
       InfoFileComparisonJob.saveDataToFile(serializedData, additionalInfo("outPath"))

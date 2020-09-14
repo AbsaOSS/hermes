@@ -43,7 +43,7 @@ object CliOptionsParser {
   }
 
   def parse(args: Array[String]): CliOptions = {
-    require(args.nonEmpty, "No arguments passed")
+    require(args.nonEmpty, "No arguments for reader and wirter passed")
     require(args.length == 1 || args.length % 2 == 0, "Number of arguments must be either one, for help, or even")
 
     if (args.length == 1) {
@@ -63,7 +63,7 @@ object CliOptionsParser {
   }
 
   def parseInputParameters(args: Array[String]): CliOptions = {
-    require(args.nonEmpty, "No arguments passed")
+    require(args.nonEmpty, "No arguments for reader passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
     val (schema, keys, finalOutMapWithDefaults) = genericTrioParse(args)
@@ -75,7 +75,7 @@ object CliOptionsParser {
   }
 
   def parseOutputParameters(args: Array[String]): DataframeOptions = {
-    require(args.nonEmpty, "No arguments passed")
+    require(args.nonEmpty, "No arguments for writer passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
     val mapOfAllOptions = arrayToMap(args)
