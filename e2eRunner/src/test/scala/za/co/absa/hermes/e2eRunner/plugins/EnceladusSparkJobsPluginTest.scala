@@ -1,10 +1,10 @@
 package za.co.absa.hermes.e2eRunner.plugins
 
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.FunSuite
 
 // IMPORTANT this plugin is currently only a shell based runner of Enceladus, because Enceladus does not support
 // library like usage.
-class EnceladusSparkJobsPluginTest extends FunSuite with BeforeAndAfterEach {
+class EnceladusSparkJobsPluginTest extends FunSuite {
   private val plugin = new EnceladusSparkJobsPlugin()
 
   test("Plugin - name") {
