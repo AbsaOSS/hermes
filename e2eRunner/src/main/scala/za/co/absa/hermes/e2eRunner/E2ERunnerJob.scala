@@ -44,7 +44,7 @@ object E2ERunnerJob {
       s"""Loaded plugins are:
          |${pluginNames.mkString("\n")}""".stripMargin)
 
-    val testDefinitions = TestDefinition.fromFile(cmd.testDefinition)
+    val testDefinitions = TestDefinitions.fromFile(cmd.testDefinition)
     scribe.info(s"Loaded ${testDefinitions.size} test definitions")
 
     val pluginsExpectedToUse = testDefinitions.getPluginNames

@@ -31,7 +31,6 @@ class PluginDefinitions(private val plugins: Map[String, String]) {
    */
   def getPluginNames: Set[String] = plugins.keySet
 
-
 }
 
 object PluginDefinitions {
