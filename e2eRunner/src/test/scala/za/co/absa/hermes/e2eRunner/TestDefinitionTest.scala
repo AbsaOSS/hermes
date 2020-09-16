@@ -4,9 +4,14 @@ import java.net.URL
 
 import org.scalatest.FunSuite
 
+import scala.util.{Failure, Success, Try}
+
 class TestDefinitionTest extends FunSuite {
 
-  private val testDefinitions: TestDefinitions = TestDefinitions.fromFile(getClass.getResource("/TestDefinitionBase.json").getFile)
+  private val testDefinitions: TestDefinitions =
+    TestDefinitions.fromFile(getClass.getResource("/TestDefinitionBase.json").getFile)
+  private val badTestDefinitions: TestDefinitions =
+    TestDefinitions.fromFile(getClass.getResource("/TestDefinitionBadDependency.json").getFile)
 
   test("size") {
     assert(3 == testDefinitions.size)
@@ -29,6 +34,24 @@ class TestDefinitionTest extends FunSuite {
       ("Test2","InfoComparison", 3)
     )
     assert(list == sortedDefs)
+  }
+
+  test("ensureOrderAndDependenciesCorrect") {
+    Try { testDefinitions.ensureOrderAndDependenciesCorrect() } match {
+      case Success(value) =>
+      case Failure(value) if !value.isInstanceOf[TestDefinitionDependenciesOutOfOrder] =>
+        fail(s"ensureOrderAndDependenciesCorrect threw unexpected error: $value")
+    }
+  }
+
+  test("ensureOrderAndDependenciesCorrect with bad input") {
+    val expectedMessage = """These test dependencies are out of order:
+                            |Test1""".stripMargin
+    val caught = intercept[TestDefinitionDependenciesOutOfOrder] {
+      badTestDefinitions.ensureOrderAndDependenciesCorrect()
+    }
+
+    assert(expectedMessage == caught.getMessage)
   }
 
   test("testDefinitionBase") {

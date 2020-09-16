@@ -33,18 +33,19 @@ object E2ERunnerJob {
       case Failure(exception) => throw exception
     }
 
-    val classpath = (List(locationToThisClass) ++ cmd.jarPath).map(new File(_))
+    val classPaths = (List(locationToThisClass) ++ cmd.jarPath).map(new File(_))
     scribe.info(
       s"""Plugin classes will be loaded from these paths:
-         |${classpath.mkString("\n")}""".stripMargin)
+         |${classPaths.mkString("\n")}""".stripMargin)
 
-    val pluginDefinitions: PluginDefinitions = PluginDefinitions(classpath)
+    val pluginDefinitions: PluginDefinitions = PluginDefinitions(classPaths)
     val pluginNames = pluginDefinitions.getPluginNames
     scribe.info(
       s"""Loaded plugins are:
          |${pluginNames.mkString("\n")}""".stripMargin)
 
     val testDefinitions = TestDefinitions.fromFile(cmd.testDefinition)
+    testDefinitions.ensureOrderAndDependenciesCorrect()
     scribe.info(s"Loaded ${testDefinitions.size} test definitions")
 
     val pluginsExpectedToUse = testDefinitions.getPluginNames
@@ -93,9 +94,11 @@ object E2ERunnerJob {
 
   private def canTestProceed(td: TestDefinition, previousResults: Seq[PluginResult]): Boolean = {
     td.dependsOn.forall { dependerName =>
-      previousResults.find({ previousResult =>
+      val found = previousResults.find({ previousResult =>
         dependerName.equalsIgnoreCase(previousResult.getTestName)
-      }).forall(_.testPassed)
+      })
+      if (found.isEmpty){ false }
+      else { found.forall(_.testPassed) }
     }
   }
 

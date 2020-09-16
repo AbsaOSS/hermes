@@ -26,8 +26,15 @@ import za.co.absa.hermes.utils.HelperFunctions
  * Class that is the brain of the DatasetComparison module. This class should be used in case of using DatasetComparison
  * as a library. In case of running the DatasetComparison as SparkJob, please use the DatasetComparisonJob.
  *
+ * @param dataFrameReference is a Dataframe used in a comparison as the origin of truth
+ * @param dataFrameActual is a Dataframe that is being tested
+ * @param keys is a set of primary keys of the dataset. This highly increases accuracy of the output as we are then able
+ *             to pinpoint the differences
  * @param config Config object holding project based configurable parameters. Difference to the cliOptions is that these
  *               are meant to stay the same for the project, while cliOptions change for each test
+ * @param optionalSchema Optional schema to cherry-pick columns form the two dataframes to compare. For example, if you
+ *                       have a timestamp column that will never be the same, you provide a schema without that timestamp
+ *                       and it will not be compared.
  * @param sparkSession Implicit spark session.
  */
 class DatasetComparison(dataFrameReference: DataFrame,

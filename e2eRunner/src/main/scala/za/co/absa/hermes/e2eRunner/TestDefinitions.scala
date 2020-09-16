@@ -18,6 +18,20 @@ package za.co.absa.hermes.e2eRunner
 import scala.io.Source
 
 case class TestDefinitions(private val testDefinitions: Seq[TestDefinition])  {
+  def ensureOrderAndDependenciesCorrect() = {
+    val output = getSorted.foldLeft((Seq.empty[String], Seq.empty[String])) { case (acc, td) =>
+      if (td.dependsOn.forall(d => acc._2.contains(d))){
+        (acc._1, acc._2 :+ td.name)
+      } else {
+        (acc._1 :+ td.name, acc._2 :+ td.name)
+      }
+    }
+
+    if (output._1.nonEmpty) {
+      throw TestDefinitionDependenciesOutOfOrder(output._1)
+    }
+  }
+
   /**
    * @return Returns the number of tests defined
    */

@@ -50,7 +50,6 @@ class InfoFileComparisonPlugin extends Plugin {
       case Success(value) => value.toStringMap
       case Failure(exception)  => throw exception
     }
-    println(parsedArgs)
 
     val newControlMeasure = InfoFileComparisonJob.loadControlMeasures(parsedArgs("newPath"))
     val refControlMeasure = InfoFileComparisonJob.loadControlMeasures(parsedArgs("refPath"))
@@ -58,8 +57,6 @@ class InfoFileComparisonPlugin extends Plugin {
 
     val diff: List[ModelDifference[_]] = refControlMeasure.compareWith(newControlMeasure, config)
 
-    val a = InfoFileComparisonResult(args, diff, actualOrder, testName, diff.isEmpty, parsedArgs)
-    println(a)
-    a
+    InfoFileComparisonResult(args, diff, actualOrder, testName, diff.isEmpty, parsedArgs)
   }
 }

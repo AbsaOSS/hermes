@@ -28,3 +28,8 @@ case class DuplicatePluginNames(name: String)
 
 case class TestFailedWithFailFastOn(name: String, index: Int, cause: Throwable = None.orNull)
   extends Exception(s"Test $name ($index) Failed. FailFast is turned on.", cause)
+
+case class TestDefinitionDependenciesOutOfOrder(dependencies: Seq[String])
+  extends Exception(
+    s"""These test dependencies are out of order:
+       |${dependencies.mkString("\n")}""".stripMargin)

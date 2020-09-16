@@ -1,0 +1,30 @@
+{
+  "vars": {
+    "prefix": "Some Random PreFIX stuff"
+  },
+  "runs" : [
+    {
+      "pluginName" : "EnceladusSparkJobs",
+      "name": "Test1",
+      "order" : 0,
+      "args" : ["#{prefix}#", "-a", "b"],
+      "dependsOn": "alfa"
+    },
+    {
+      "pluginName" : "InfoComparison",
+      "name": "Test2",
+      "order" : 1,
+      "args" : ["info", "file"],
+      "writeArgs": [],
+      "dependsOn": "Test1"
+    },
+    {
+      "pluginName" : "DatasetComparison",
+      "name": "Test3",
+      "order" : 1,
+      "args" : ["#{prefix}#", "nothing", "extra"],
+      "writeArgs": ["some", "args", "for", "output"],
+      "dependsOn": "Test1"
+    }
+  ]
+}

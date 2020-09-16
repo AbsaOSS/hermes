@@ -43,11 +43,11 @@ object PluginDefinitions {
 
   /**
    * Load plugins from a Classpath
-   * @param classpaths Sequence of Files where Plugins will be searched for
+   * @param classPaths Sequence of Files where Plugins will be searched for
    * @return New instance of PluginManager
    */
-  def apply(classpaths: Seq[File] = Seq(new File("."))): PluginDefinitions = {
-    val plugins = getPluginsIterator(classpaths)
+  def apply(classPaths: Seq[File] = Seq(new File("."))): PluginDefinitions = {
+    val plugins = getPluginsIterator(classPaths)
     val pluginMap: Map[String, String] = getPluginsMap(plugins)
     PluginDefinitions(pluginMap)
   }
