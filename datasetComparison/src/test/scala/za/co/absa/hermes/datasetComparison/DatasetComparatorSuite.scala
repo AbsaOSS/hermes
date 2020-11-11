@@ -22,7 +22,7 @@ import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, DataframeOption
 import za.co.absa.hermes.datasetComparison.config.ManualConfig
 import za.co.absa.hermes.utils.SparkTestBase
 
-class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
+class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
   test("Test a positive comparison") {
     val cliOptions = new CliOptions(
       DataframeOptions("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
@@ -55,7 +55,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       None
     )
 
-    val cmpResult = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig).compare
+    val cmpResult = new DatasetComparator(df1, df2, cliOptions.keys, manualConfig).compare
 
     assert(expectedResult == cmpResult)
   }
@@ -98,7 +98,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       .add("_c3", StringType, true)
       .add("_c4", StringType, true)
 
-    val cmpResult = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
+    val cmpResult = new DatasetComparator(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
 
     assert(expectedResult == cmpResult)
   }
@@ -130,7 +130,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       .add("_c4", StringType, true)
 
     intercept[BadProvidedSchema] {
-      new DatasetComparison(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
+      new DatasetComparator(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
     }
   }
 
@@ -153,7 +153,7 @@ class DatasetComparisonSuite extends FunSuite with SparkTestBase with BeforeAndA
       true
     )
 
-    val result = new DatasetComparison(df1, df2, cliOptions.keys, manualConfig).compare
+    val result = new DatasetComparator(df1, df2, cliOptions.keys, manualConfig).compare
     assert(9 == result.refRowCount)
     assert(10 == result.newRowCount)
     assert(0 == result.refDuplicateCount)

@@ -13,13 +13,28 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.e2eRunner
+package za.co.absa.hermes.e2eRunner.plugins
 
 import org.scalatest.FunSuite
-import za.co.absa.atum.utils.SparkTestBase
 
-class E2ERunnerJobSuite extends FunSuite with SparkTestBase {
-//  test("alfa") {
-//    E2ERunnerJob.main(Array(getClass.getResource("/TestDefinitionBase.json").toString))
-//  }
+class BashPluginTest extends FunSuite {
+  private val plugin = new BashPlugin()
+
+  test("Plugin - name") {
+    assert(plugin.name == "BashPlugin")
+  }
+
+  test("Plugin - performAction") {
+    val shouldPass = true
+    val order = 111
+    val testName = "UnitTest"
+    val args = Array("echo", "Something Something")
+
+    val expectedResult = BashJobsResult(args, "Something Something\n", order, testName, shouldPass, Map.empty)
+
+    val result = plugin.performAction(args, order, testName)
+      .copy(additionalInfo = Map.empty)
+
+    assert(expectedResult == result)
+  }
 }

@@ -15,11 +15,13 @@
 
 package za.co.absa.hermes.e2eRunner
 
-import org.scalatest.FunSuite
-import za.co.absa.atum.utils.SparkTestBase
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 
-class E2ERunnerJobSuite extends FunSuite with SparkTestBase {
-//  test("alfa") {
-//    E2ERunnerJob.main(Array(getClass.getResource("/TestDefinitionBase.json").toString))
-//  }
+trait SparkBase {
+  def sparkSession(name: String, sparkConf: Option[SparkConf] = None ): SparkSession = {
+    val session = SparkSession.builder().appName(name)
+    val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session
+    withConf.getOrCreate()
+  }
 }

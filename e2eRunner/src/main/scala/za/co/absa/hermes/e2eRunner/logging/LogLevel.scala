@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.e2eRunner
+package za.co.absa.hermes.e2eRunner.logging
 
-import org.scalatest.FunSuite
-import za.co.absa.atum.utils.SparkTestBase
+sealed trait LogLevel
 
-class E2ERunnerJobSuite extends FunSuite with SparkTestBase {
-//  test("alfa") {
-//    E2ERunnerJob.main(Array(getClass.getResource("/TestDefinitionBase.json").toString))
-//  }
-}
+case object DebugLogLevel extends LogLevel
+case object InfoLogLevel extends LogLevel
+case object WarningLogLevel extends LogLevel
+case object ErrorLogLevel extends LogLevel

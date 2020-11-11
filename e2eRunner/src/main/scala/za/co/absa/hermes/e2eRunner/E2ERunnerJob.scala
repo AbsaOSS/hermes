@@ -17,6 +17,10 @@ package za.co.absa.hermes.e2eRunner
 
 import java.io.File
 
+import za.co.absa.hermes.e2eRunner.logging.LoggingFunctions
+import za.co.absa.hermes.e2eRunner.logging.functions.Scribe
+import za.co.absa.hermes.e2eRunner.plugins.FailedPluginResult
+
 import scala.util.{Failure, Success, Try}
 
 object E2ERunnerJob {
@@ -33,38 +37,45 @@ object E2ERunnerJob {
       case Failure(exception) => throw exception
     }
 
+    implicit val loggingFunctions: Scribe = Scribe(this.getClass)
+
     val classPaths = (List(locationToThisClass) ++ cmd.jarPath).map(new File(_))
-    scribe.info(
+    loggingFunctions.info(
       s"""Plugin classes will be loaded from these paths:
          |${classPaths.mkString("\n")}""".stripMargin)
 
     val pluginDefinitions: PluginDefinitions = PluginDefinitions(classPaths)
     val pluginNames = pluginDefinitions.getPluginNames
-    scribe.info(
+    loggingFunctions.info(
       s"""Loaded plugins are:
          |${pluginNames.mkString("\n")}""".stripMargin)
 
     val testDefinitions = TestDefinitions.fromFile(cmd.testDefinition)
     testDefinitions.ensureOrderAndDependenciesCorrect()
-    scribe.info(s"Loaded ${testDefinitions.size} test definitions")
+    loggingFunctions.info(s"Loaded ${testDefinitions.size} test definitions")
 
     val pluginsExpectedToUse = testDefinitions.getPluginNames
     validatePluginsToBeUsed(pluginNames, pluginsExpectedToUse)
 
-    scribe.info("Running tests")
+    loggingFunctions.info("Running tests")
     val results = runTests(testDefinitions, pluginDefinitions, cmd.failfast)
 
-    scribe.info("##################################################")
-    scribe.info("Invoking logging of test results")
-    scribe.info("##################################################")
+    logFinalResultsUsingScribe(results)
+  }
+
+  private def logFinalResultsUsingScribe(results: Seq[PluginResult])(implicit loggingFunctions: LoggingFunctions): Unit = {
+    loggingFunctions.info("##################################################")
+    loggingFunctions.info("Invoking logging of test results")
+    loggingFunctions.info("##################################################")
     results.foreach({ result =>
-      result.logResult()
-      scribe.info("##################################################")
+      result.resultLog.log
+      loggingFunctions.info("##################################################")
     })
   }
 
   /**
    * Runs test definitions one by one
+   *
    * @param testDefinitions Tests to be run
    * @param pluginDefinitions Plugins available
    * @param failFast Should the tests fail if one of them throws exception
@@ -72,16 +83,16 @@ object E2ERunnerJob {
    */
   def runTests(testDefinitions: TestDefinitions,
                pluginDefinitions: PluginDefinitions,
-               failFast: Boolean = false): Seq[PluginResult] = {
+               failFast: Boolean = false)(implicit loggingFunctions: LoggingFunctions): Seq[PluginResult] = {
     testDefinitions.foldLeftWithIndex {
       case (acc, TestDefinitionWithOrder(td, order)) =>
-        scribe.info(s"Running ${td.name}")
+        loggingFunctions.info(s"Running ${td.name}")
         val plugin: Plugin = pluginDefinitions.getPlugin(td.pluginName)
 
         val tryExecution = if (canTestProceed(td, acc)) {
           tryExecute(td, order, plugin)
         } else {
-          Failure(throw DependeeFailed(td.name, td.dependsOn.get))
+          Failure(DependeeFailed(td.name, td.dependsOn.get))
         }
 
         tryExecution match {
@@ -107,7 +118,6 @@ object E2ERunnerJob {
                          plugin: Plugin): Try[PluginResult] = Try {
     val result: PluginResult = plugin.performAction(td.args, testOrder, td.name)
     if (td.writeArgs.isDefined) result.write(td.writeArgs.get)
-    result.logResult()
     result
   }
 

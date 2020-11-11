@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.e2eRunner
+package za.co.absa.hermes.datasetComparison.cliUtils
 
-import org.scalatest.FunSuite
-import za.co.absa.atum.utils.SparkTestBase
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
-class E2ERunnerJobSuite extends FunSuite with SparkTestBase {
-//  test("alfa") {
-//    E2ERunnerJob.main(Array(getClass.getResource("/TestDefinitionBase.json").toString))
-//  }
+object CliHelpJsonProtocol extends DefaultJsonProtocol {
+  implicit val cliHelpOptionsFormat: RootJsonFormat[CliHelpOptions] = jsonFormat3(CliHelpOptions)
+  implicit val cliHelpFormat: RootJsonFormat[CliHelp] = jsonFormat4(CliHelp)
 }

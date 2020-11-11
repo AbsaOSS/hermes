@@ -34,7 +34,7 @@ object CliOptionsParser {
   private val outputDefaults = Map("format" -> "parquet")
 
   def generateHelp(): Unit = {
-    import CliHelpProtocol._
+    import CliHelpJsonProtocol._
     import spray.json._
 
     val fileStream = this.getClass.getResourceAsStream("/cli_options.json")

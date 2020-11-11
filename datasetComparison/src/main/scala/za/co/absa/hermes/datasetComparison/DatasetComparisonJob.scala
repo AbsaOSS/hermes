@@ -53,7 +53,7 @@ object DatasetComparisonJob {
     val optionalSchema = getSchema(cliOptions.schemaPath)
     val dataFrameRef = cliOptions.referenceOptions.loadDataFrame
     val dataFrameActual = cliOptions.actualOptions.loadDataFrame
-    val dsComparison = new DatasetComparison(dataFrameRef, dataFrameActual, cliOptions.keys, config, optionalSchema)
+    val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliOptions.keys, config, optionalSchema)
     val result = dsComparison.compare
 
     val finalPath = cliOptions.outOptions.map { outOptions =>
@@ -79,19 +79,14 @@ object DatasetComparisonJob {
   }
 
   def getSchema(schemaPath: Option[String])(implicit sparkSession: SparkSession): Option[StructType] = {
-    schemaPath match {
-      case Some(path) =>
-        val schemaSource = sparkSession.sparkContext.wholeTextFiles(path).take(1)(0)._2
-        Some(DataType.fromJson(schemaSource).asInstanceOf[StructType])
-      case None => None
+    schemaPath.map { path =>
+      val schemaSource = sparkSession.sparkContext.wholeTextFiles(path).take(1)(0)._2
+      DataType.fromJson(schemaSource).asInstanceOf[StructType]
     }
   }
 
   def getConfig(configPath: Option[String]): DatasetComparisonConfig = {
-    new TypesafeConfig(configPath).validate() match {
-      case Success(value) => value
-      case Failure(exception) => throw exception
-    }
+    new TypesafeConfig(configPath).validate().get
   }
 
   def writeMetricsToFile(result: ComparisonResult, fileName: String)

@@ -1,11 +1,25 @@
+/*
+ * Copyright 2019 ABSA Group Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package za.co.absa.hermes.e2eRunner.plugins
 
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import za.co.absa.hermes.datasetComparison.DatasetComparisonJob.{getConfig, getSchema}
-import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, CliOptionsParser, DataframeOptions}
-import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparison, DatasetComparisonJob}
-import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptionsParser, DataframeOptions}
+import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparator, DatasetComparisonJob}
+import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
+import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, SparkBase}
 import za.co.absa.hermes.utils.HelperFunctions
 
 case class DatasetComparisonResult(arguments: Array[String],
@@ -14,7 +28,7 @@ case class DatasetComparisonResult(arguments: Array[String],
                                    testName: String,
                                    passed: Boolean,
                                    additionalInfo: Map[String, String] = Map.empty)
-  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
+  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) with SparkBase {
 
   /**
    * This method should be used to write the plugin result in a form required.
@@ -22,13 +36,7 @@ case class DatasetComparisonResult(arguments: Array[String],
    * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
    */
   override def write(writeArgs: Array[String]): Unit = {
-    def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
-      val session = SparkSession.builder().appName(name)
-      val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session
-      withConf.getOrCreate()
-    }
-
-    implicit val spark: SparkSession = sparkSession()
+    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
     val outDFOptions: DataframeOptions = CliOptionsParser.parseOutputParameters(writeArgs)
 
     returnedValue.resultDF match {
@@ -44,38 +52,34 @@ case class DatasetComparisonResult(arguments: Array[String],
   /**
    * Logs the result of the plugin execution at the end.
    */
-  override def logResult(): Unit = {
+  override def resultLog: ResultLog = {
     if (passed) {
-      scribe.info(
+      InfoResultLog(
         s"""Test $testName ($order) finished. Expected and actual data sets are the same. Metrics written to
-           |${additionalInfo("outOptions.path")}/_METRICS""".stripMargin.replaceAll("[\\r\\n]", ""))
+         |${additionalInfo("outOptions.path")}/_METRICS""".stripMargin.replaceAll("[\\r\\n]", "")
+      )
     } else {
-      scribe.warn(s"""Test $testName ($order) finished. Expected and actual datasets differ.
-                     |Reference path: ${additionalInfo("referenceOptions.path")}
-                     |Actual dataset path: ${additionalInfo("newOptions.path")}
-                     |Difference written to: ${additionalInfo("outOptions.path")}
-                     |Count Expected( ${returnedValue.refRowCount} ) vs Actual( ${returnedValue.newRowCount} )""".stripMargin)
-
+      ErrorResultLog(
+        s"""Test $testName ($order) finished. Expected and actual datasets differ.
+         |Reference path: ${additionalInfo("referenceOptions.path")}
+         |Actual dataset path: ${additionalInfo("newOptions.path")}
+         |Difference written to: ${additionalInfo("outOptions.path")}
+         |Count Expected( ${returnedValue.refRowCount} ) vs Actual( ${returnedValue.newRowCount} )""".stripMargin
+      )
     }
   }
 }
 
-class DatasetComparisonPlugin extends Plugin {
+class DatasetComparisonPlugin extends Plugin with SparkBase {
   override def name: String = "DatasetComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {
-    def sparkSession(name: String = "DatasetComparisonPlugin", sparkConf: Option[SparkConf] = None ): SparkSession = {
-      val session = SparkSession.builder().appName(name)
-      val withConf = if (sparkConf.isDefined) session.config(sparkConf.get) else session
-      withConf.getOrCreate()
-    }
-
-    implicit val spark: SparkSession = sparkSession()
+  override def performAction(args: Array[String], actualOrder: Int, testName: String): DatasetComparisonResult = {
+    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
     val cliOptions = CliOptionsParser.parseInputParameters(args)
-    val optionalSchema = getSchema(cliOptions.schemaPath)
+    val optionalSchema = DatasetComparisonJob.getSchema(cliOptions.schemaPath)
     val dataFrameRef = cliOptions.referenceOptions.loadDataFrame
     val dataFrameActual = cliOptions.actualOptions.loadDataFrame
-    val dsComparison = new DatasetComparison(
+    val dsComparison = new DatasetComparator(
       dataFrameRef,
       dataFrameActual,
       cliOptions.keys,

@@ -1,11 +1,27 @@
+/*
+ * Copyright 2019 ABSA Group Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package za.co.absa.hermes.e2eRunner.plugins
 
+import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
 import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult}
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
 import za.co.absa.hermes.infoFileComparison.InfoFileComparisonJob
 import za.co.absa.hermes.infoFileComparison._
 
-import scala.util.{Failure,Success}
+import scala.util.{Failure, Success}
 
 case class InfoFileComparisonResult(arguments: Array[String],
                                     returnedValue: List[ModelDifference[_]],
@@ -30,14 +46,16 @@ case class InfoFileComparisonResult(arguments: Array[String],
   /**
    * Logs the result of the plugin execution at the end.
    */
-  override def logResult(): Unit = {
+  override def resultLog: ResultLog = {
     if (passed) {
-      scribe.info(s"Test $testName ($order) finished. Expected and actual _INFO files are the same.")
+      InfoResultLog(s"Test $testName ($order) finished. Expected and actual _INFO files are the same.")
     } else {
-      scribe.warn(s"""Test $testName ($order) finished. Expected and actual info files differ.
-                      |Reference path: ${additionalInfo("refPath")}
-                      |Actual dataset path: ${additionalInfo("newPath")}
-                      |Difference written to: ${additionalInfo("outPath")}""".stripMargin)
+      ErrorResultLog(
+        s"""Test $testName ($order) finished. Expected and actual info files differ.
+          |Reference path: ${additionalInfo("refPath")}
+          |Actual dataset path: ${additionalInfo("newPath")}
+          |Difference written to: ${additionalInfo("outPath")}""".stripMargin
+      )
     }
   }
 }
@@ -45,7 +63,7 @@ case class InfoFileComparisonResult(arguments: Array[String],
 class InfoFileComparisonPlugin extends Plugin {
   override def name: String = "InfoFileComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult = {
+  override def performAction(args: Array[String], actualOrder: Int, testName: String): InfoFileComparisonResult = {
     val parsedArgs = InfoComparisonArguments.getCmdLineArguments(args) match {
       case Success(value) => value.toStringMap
       case Failure(exception)  => throw exception

@@ -4,7 +4,7 @@
   },
   "runs" : [
     {
-      "pluginName" : "EnceladusSparkJobs",
+      "pluginName" : "BashPlugin",
       "name": "Test1",
       "order" : 0,
       "args" : ["#{prefix}#", "-a", "b"],

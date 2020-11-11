@@ -37,7 +37,7 @@ import za.co.absa.hermes.utils.HelperFunctions
  *                       and it will not be compared.
  * @param sparkSession Implicit spark session.
  */
-class DatasetComparison(dataFrameReference: DataFrame,
+class DatasetComparator(dataFrameReference: DataFrame,
                         dataFrameActual: DataFrame,
                         keys: Set[String] = Set.empty[String],
                         config: DatasetComparisonConfig = new TypesafeConfig(None),
@@ -71,16 +71,16 @@ class DatasetComparison(dataFrameReference: DataFrame,
     }
 
     val selector = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
-    val dfsSorted = ComparisonPair(
+    val dfsColumnsSorted = ComparisonPair(
       testedDF.reference.select(selector: _*),
       testedDF.actual.select(selector: _*)
     )
 
-    val cmpUniqueColumn: String = generateUniqueColumnName(dfsSorted.actual.columns, "HermesDatasetComparisonUniqueId")
+    val cmpUniqueColumn: String = generateUniqueColumnName(dfsColumnsSorted.actual.columns, "HermesDatasetComparisonUniqueId")
 
     val dfsWithKey = ComparisonPair(
-      addKeyColumn(selector, dfsSorted.reference, cmpUniqueColumn),
-      addKeyColumn(selector, dfsSorted.actual, cmpUniqueColumn)
+      addKeyColumn(selector, dfsColumnsSorted.reference, cmpUniqueColumn),
+      addKeyColumn(selector, dfsColumnsSorted.actual, cmpUniqueColumn)
     )
 
     val duplicateCounts: ComparisonPair[Long] = handleDuplicates(dfsWithKey, cmpUniqueColumn)

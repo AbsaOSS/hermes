@@ -26,7 +26,7 @@ import za.co.absa.hermes.utils.{FileReader, SparkTestBase}
 
 import scala.io.Source
 
-class DatasetComparisonJobSuite extends FunSuite with SparkTestBase with BeforeAndAfterEach {
+class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeAndAfterEach {
   val format = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss")
   var timePrefix = ""
 

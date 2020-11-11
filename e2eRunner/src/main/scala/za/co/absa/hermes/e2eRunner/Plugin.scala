@@ -15,53 +15,6 @@
 
 package za.co.absa.hermes.e2eRunner
 
-abstract class PluginResult(arguments: Array[String],
-                            returnedValue: Any,
-                            order: Int,
-                            testName: String,
-                            passed: Boolean,
-                            additionalInfo: Map[String, String]) {
-
-  /**
-   * This method should be used to write the plugin result in a form required.
-   *
-   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
-   */
-  def write(writeArgs: Array[String]): Unit = {
-    throw new NotImplementedError(s"PluginResult ${this.getClass} does not have an implementation of write function")
-  }
-
-  /**
-   * @return Returns true or false depending if the plugin/test execution passed or failed
-   */
-  def testPassed: Boolean = this.passed
-
-  /**
-   * Implement this method to log the result of the plugin execution at the end.
-   */
-  def logResult(): Unit
-
-  /**
-   * @return Returns a name of the test that was executed and which result this instance represents
-   */
-  def getTestName: String = testName
-}
-
-case class FailedPluginResult(arguments: Array[String],
-                              returnedException: Throwable,
-                              order: Int,
-                              testName: String,
-                              additionalInfo: Map[String, String] = Map.empty)
-  extends PluginResult(arguments, returnedException, order, testName, false, additionalInfo) {
-  /**
-   * Implement this method to log the result of the plugin execution at the end.
-   */
-  override def logResult(): Unit = {
-    scribe.error(s"Test $testName ($order) failed on an exception", returnedException)
-  }
-}
-
-
 trait Plugin {
   /**
    * Plugin names is here to provide user-friendly name for each plugin
