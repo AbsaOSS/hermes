@@ -15,9 +15,11 @@
 
 package za.co.absa.hermes.datasetComparison.cliUtils
 
-case class CliParameters(referenceDataParameters: DataframeParameters,
-                         actualDataParameters: DataframeParameters,
-                         outDataParameters: Option[DataframeParameters],
+import za.co.absa.hermes.datasetComparison.dataFrame.Parameters
+
+case class CliParameters(referenceDataParameters: Parameters,
+                         actualDataParameters: Parameters,
+                         outDataParameters: Option[Parameters],
                          keys: Set[String],
                          rawOptions: String,
                          schemaPath: Option[String] = None)

@@ -1,6 +1,7 @@
 package za.co.absa.hermes.datasetComparison.cliUtils
 
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
+import za.co.absa.hermes.datasetComparison.dataFrame.Parameters
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -74,7 +75,7 @@ object CliParametersParser {
     CliParameters(refLoadOptions, newLoadOptions, None, keys, args.mkString(" "), schema)
   }
 
-  def parseOutputParameters(args: Array[String]): DataframeParameters = {
+  def parseOutputParameters(args: Array[String]): Parameters = {
     require(args.nonEmpty, "No arguments for writer passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
@@ -127,8 +128,8 @@ object CliParametersParser {
    *                  distinguishing from which option type (ref, new, out) the issue came.
    * @return Returns the DataframeOptions
    */
-  private[cliUtils] def getLoadOptions(mapOfOptions: Map[String, String], keyPrefix: String): DataframeParameters = {
-    Try(DataframeParameters.validateAndCreate(mapOfOptions)) match {
+  private[cliUtils] def getLoadOptions(mapOfOptions: Map[String, String], keyPrefix: String): Parameters = {
+    Try(Parameters.validateAndCreate(mapOfOptions)) match {
       case Success(value) => value
       case Failure(exception) =>
         val message = enrichMessage(exception.getMessage, keyPrefix)

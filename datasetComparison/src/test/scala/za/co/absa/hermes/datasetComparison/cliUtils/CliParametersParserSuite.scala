@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream
 
 import org.scalatest.FunSuite
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
+import za.co.absa.hermes.datasetComparison.dataFrame.Parameters
 
 class CliParametersParserSuite extends FunSuite {
   test("Test generate help") {
@@ -53,18 +54,18 @@ class CliParametersParserSuite extends FunSuite {
       "--keys", "alfa,beta"
     )
 
-    val refDataframeOptions = DataframeParameters(
+    val refDataframeOptions = Parameters(
       "specialFormat",
       Map("delimiter" -> ";"),
       "ref/path/alfa"
     )
-    val newDataframeOptions = DataframeParameters(
+    val newDataframeOptions = Parameters(
       "jdbc",
       Map("something" -> "this", "else" -> "that", "dbtable" -> "table1"),
       "table1"
     )
 
-    val outDataframeOptions = DataframeParameters(
+    val outDataframeOptions = Parameters(
       "parquet",
       Map.empty[String, String],
       "/some/out/path"

@@ -13,75 +13,17 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison.cliUtils
+package za.co.absa.hermes.datasetComparison.dataFrame
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql._
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
-case class DataframeParameters(format: String, options: Map[String, String], path: String) {
+case class Parameters(format: String, options: Map[String, String], path: String)
 
-  private def setOptions(dfReader: DataFrameReader): DataFrameReader =
-    if (options.isEmpty) dfReader else dfReader.options(options)
-
-  private def setOptions[T](dfReader: DataFrameWriter[T]): DataFrameWriter[T] =
-    if (options.isEmpty) dfReader else dfReader.options(options)
-
-  private def load(dfReader: DataFrameReader): DataFrame =
-    if (format == "jdbc") dfReader.load()
-    else dfReader.load(path)
-
-  private def save[T](dfWriter: DataFrameWriter[T], endPath: String = ""): Unit =
-    if (format == "jdbc") dfWriter.save()
-    else dfWriter.save(endPath)
-
-  def getUniqueFilePath(extraPath: String, conf: Configuration): String = {
-    val fs = FileSystem.get(conf)
-    val basePath = s"$path$extraPath"
-
-    @scala.annotation.tailrec
-    def appendNumberAndTest(namePt1: String,
-                            namePt2: String,
-                            condition: String => Boolean,
-                            count: Int = 1): String = {
-      val newName = s"${namePt1}_run$count$namePt2"
-      if (condition(newName)) { appendNumberAndTest(namePt1, namePt2, condition, count + 1) }
-      else newName
-    }
-
-    if (fs.exists(new Path(basePath))) {
-      appendNumberAndTest(path, extraPath, { x: String => fs.exists(new Path(x)) })
-    } else {
-      basePath
-    }
-  }
-
-  def loadDataFrame(implicit spark: SparkSession): DataFrame = {
-    val dfReader = spark.read.format(format)
-    val withOptions = setOptions(dfReader)
-    load(withOptions)
-  }
-
-  def writeDataFrame(df: DataFrame, pathSuffix: String = "")
-                    (implicit spark: SparkSession): Unit = {
-    val dfWriter =  df.write.format(format)
-    val withOptions = setOptions(dfWriter)
-    save(withOptions, s"$path$pathSuffix")
-  }
-
-  def writeNextDataFrame(df: DataFrame, pathSuffix: String = "")
-                        (implicit spark: SparkSession): String = {
-    val uniqueFilePath: String = getUniqueFilePath(pathSuffix, spark.sparkContext.hadoopConfiguration)
-    val dfWriter =  df.write.format(format)
-    val withOptions = setOptions(dfWriter)
-    save(withOptions, uniqueFilePath)
-    uniqueFilePath
-  }
-}
-
-object DataframeParameters {
-  def validateAndCreate(options: Map[String, String]): DataframeParameters = {
+object Parameters {
+  def validateAndCreate(options: Map[String, String]): Parameters = {
     val format = options.getOrElse("format", throw MissingArgumentException(
       """Format is mandatory option. Use
         | "--format"
@@ -98,10 +40,10 @@ object DataframeParameters {
           |""".stripMargin.replaceAll("[\\r\\n]", "")))
     }
     val otherOptions = options -- Set("format", "path")
-    DataframeParameters(format, otherOptions, path)
+    Parameters(format, otherOptions, path)
   }
 
-  def validateWithDefaultsAndCreate(options: Map[String, String], defaults: Map[String, String]): DataframeParameters = {
+  def validateWithDefaultsAndCreate(options: Map[String, String], defaults: Map[String, String]): Parameters = {
     val finalMap = defaults ++ options
     validateAndCreate(finalMap)
   }

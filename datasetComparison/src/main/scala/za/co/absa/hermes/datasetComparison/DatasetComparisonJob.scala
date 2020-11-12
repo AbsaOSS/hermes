@@ -22,8 +22,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
-
-import scala.util.{Failure, Success}
+import za.co.absa.hermes.datasetComparison.dataFrame.Utils
 
 object DatasetComparisonJob {
 
@@ -51,15 +50,15 @@ object DatasetComparisonJob {
              (implicit sparkSession: SparkSession): Unit = {
     val config = getConfig(configPath)
     val optionalSchema = getSchema(cliParameters.schemaPath)
-    val dataFrameRef = cliParameters.referenceDataParameters.loadDataFrame
-    val dataFrameActual = cliParameters.actualDataParameters.loadDataFrame
+    val dataFrameRef = Utils.loadDataFrame(cliParameters.referenceDataParameters)
+    val dataFrameActual = Utils.loadDataFrame(cliParameters.actualDataParameters)
     val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliParameters.keys, config, optionalSchema)
     val result = dsComparison.compare
 
     val finalPath = cliParameters.outDataParameters.map { outOptions =>
       val path: String = result.resultDF match {
-        case Some(df) => outOptions.writeNextDataFrame(df)
-        case None => outOptions.getUniqueFilePath("", sparkSession.sparkContext.hadoopConfiguration)
+        case Some(df) => Utils.writeNextDataFrame(df, outOptions)
+        case None => Utils.getUniqueFilePath(outOptions, "", sparkSession.sparkContext.hadoopConfiguration)
       }
       writeMetricsToFile(result, path)
       path
