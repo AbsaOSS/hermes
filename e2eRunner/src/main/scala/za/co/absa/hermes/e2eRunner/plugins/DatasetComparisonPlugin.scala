@@ -16,7 +16,7 @@
 package za.co.absa.hermes.e2eRunner.plugins
 
 import org.apache.spark.sql.SparkSession
-import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptionsParser, DataframeOptions}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliParametersParser, DataframeParameters}
 import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparator, DatasetComparisonJob}
 import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
 import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, SparkBase}
@@ -37,7 +37,7 @@ case class DatasetComparisonResult(arguments: Array[String],
    */
   override def write(writeArgs: Array[String]): Unit = {
     implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
-    val outDFOptions: DataframeOptions = CliOptionsParser.parseOutputParameters(writeArgs)
+    val outDFOptions: DataframeParameters = CliParametersParser.parseOutputParameters(writeArgs)
 
     returnedValue.resultDF match {
       case Some(df) => outDFOptions.writeDataFrame(df)
@@ -75,10 +75,10 @@ class DatasetComparisonPlugin extends Plugin with SparkBase {
 
   override def performAction(args: Array[String], actualOrder: Int, testName: String): DatasetComparisonResult = {
     implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
-    val cliOptions = CliOptionsParser.parseInputParameters(args)
+    val cliOptions = CliParametersParser.parseInputParameters(args)
     val optionalSchema = DatasetComparisonJob.getSchema(cliOptions.schemaPath)
-    val dataFrameRef = cliOptions.referenceOptions.loadDataFrame
-    val dataFrameActual = cliOptions.actualOptions.loadDataFrame
+    val dataFrameRef = cliOptions.referenceDataParameters.loadDataFrame
+    val dataFrameActual = cliOptions.actualDataParameters.loadDataFrame
     val dsComparison = new DatasetComparator(
       dataFrameRef,
       dataFrameActual,

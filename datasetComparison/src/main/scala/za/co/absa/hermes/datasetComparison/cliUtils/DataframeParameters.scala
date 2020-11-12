@@ -20,7 +20,7 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql._
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
-case class DataframeOptions(format: String, options: Map[String, String], path: String) {
+case class DataframeParameters(format: String, options: Map[String, String], path: String) {
 
   private def setOptions(dfReader: DataFrameReader): DataFrameReader =
     if (options.isEmpty) dfReader else dfReader.options(options)
@@ -80,8 +80,8 @@ case class DataframeOptions(format: String, options: Map[String, String], path: 
   }
 }
 
-object DataframeOptions {
-  def validateAndCreate(options: Map[String, String]): DataframeOptions = {
+object DataframeParameters {
+  def validateAndCreate(options: Map[String, String]): DataframeParameters = {
     val format = options.getOrElse("format", throw MissingArgumentException(
       """Format is mandatory option. Use
         | "--format"
@@ -98,10 +98,10 @@ object DataframeOptions {
           |""".stripMargin.replaceAll("[\\r\\n]", "")))
     }
     val otherOptions = options -- Set("format", "path")
-    DataframeOptions(format, otherOptions, path)
+    DataframeParameters(format, otherOptions, path)
   }
 
-  def validateWithDefaultsAndCreate(options: Map[String, String], defaults: Map[String, String]): DataframeOptions = {
+  def validateWithDefaultsAndCreate(options: Map[String, String], defaults: Map[String, String]): DataframeParameters = {
     val finalMap = defaults ++ options
     validateAndCreate(finalMap)
   }

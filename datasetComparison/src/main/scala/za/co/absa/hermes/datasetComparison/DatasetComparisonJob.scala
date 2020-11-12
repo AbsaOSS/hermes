@@ -20,7 +20,7 @@ import java.io.PrintWriter
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
-import za.co.absa.hermes.datasetComparison.cliUtils.{CliOptions, CliOptionsParser}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 
 import scala.util.{Failure, Success}
@@ -28,35 +28,35 @@ import scala.util.{Failure, Success}
 object DatasetComparisonJob {
 
   def main(args: Array[String]): Unit = {
-    val cliOptions = CliOptionsParser.parse(args)
+    val cliParameters = CliParametersParser.parse(args)
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(
-        s"""Dataset comparison - '${cliOptions.referenceOptions.path}' and
-           | '${cliOptions.actualOptions.path}'
+        s"""Dataset comparison - '${cliParameters.referenceDataParameters.path}' and
+           | '${cliParameters.actualDataParameters.path}'
            |""".stripMargin.replaceAll("[\\r\\n]", "")
       )
       .getOrCreate()
 
-    execute(cliOptions, None)
+    execute(cliParameters, None)
   }
 
   /**
     * Execute the comparison
     *
-    * @param cliOptions Provided configuration for the comparison
+    * @param cliParameters Provided configuration for the comparison
     * @param sparkSession Implicit spark session
     */
-  def execute(cliOptions: CliOptions, configPath: Option[String] = None)
+  def execute(cliParameters: CliParameters, configPath: Option[String] = None)
              (implicit sparkSession: SparkSession): Unit = {
     val config = getConfig(configPath)
-    val optionalSchema = getSchema(cliOptions.schemaPath)
-    val dataFrameRef = cliOptions.referenceOptions.loadDataFrame
-    val dataFrameActual = cliOptions.actualOptions.loadDataFrame
-    val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliOptions.keys, config, optionalSchema)
+    val optionalSchema = getSchema(cliParameters.schemaPath)
+    val dataFrameRef = cliParameters.referenceDataParameters.loadDataFrame
+    val dataFrameActual = cliParameters.actualDataParameters.loadDataFrame
+    val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliParameters.keys, config, optionalSchema)
     val result = dsComparison.compare
 
-    val finalPath = cliOptions.outOptions.map { outOptions =>
+    val finalPath = cliParameters.outDataParameters.map { outOptions =>
       val path: String = result.resultDF match {
         case Some(df) => outOptions.writeNextDataFrame(df)
         case None => outOptions.getUniqueFilePath("", sparkSession.sparkContext.hadoopConfiguration)
@@ -67,8 +67,8 @@ object DatasetComparisonJob {
 
     if (result.diffCount > 0) {
       throw DatasetsDifferException(
-          cliOptions.referenceOptions.path,
-          cliOptions.actualOptions.path,
+          cliParameters.referenceDataParameters.path,
+          cliParameters.actualDataParameters.path,
           finalPath.getOrElse("Not Provided"),
           result.refRowCount,
           result.newRowCount

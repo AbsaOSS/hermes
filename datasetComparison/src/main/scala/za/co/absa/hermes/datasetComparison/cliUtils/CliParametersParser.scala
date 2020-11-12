@@ -18,14 +18,14 @@ private case class OptionsTrio(reference: Map[String, String],
 
   private[cliUtils] def dropOptionPrefix: OptionsTrio = {
     OptionsTrio(
-      CliOptionsParser.dropOptionPrefix(reference),
-      CliOptionsParser.dropOptionPrefix(actual),
-      CliOptionsParser.dropOptionPrefix(output)
+      CliParametersParser.dropOptionPrefix(reference),
+      CliParametersParser.dropOptionPrefix(actual),
+      CliParametersParser.dropOptionPrefix(output)
     )
   }
 }
 
-object CliOptionsParser {
+object CliParametersParser {
   private val argumentPrefix: String = "--"
   private val argumentPrefixSize: Int = argumentPrefix.length
   private val actualPrefix = "new-"
@@ -42,7 +42,7 @@ object CliOptionsParser {
     println(jsonString.parseJson.convertTo[CliHelp])
   }
 
-  def parse(args: Array[String]): CliOptions = {
+  def parse(args: Array[String]): CliParameters = {
     require(args.nonEmpty, "No arguments for reader and wirter passed")
     require(args.length == 1 || args.length % 2 == 0, "Number of arguments must be either one, for help, or even")
 
@@ -59,10 +59,10 @@ object CliOptionsParser {
     val newLoadOptions = getLoadOptions(finalOutMapWithDefaults.actual, actualPrefix)
     val outLoadOptions = getLoadOptions(finalOutMapWithDefaults.output, outputPrefix)
 
-    CliOptions(refLoadOptions, newLoadOptions, Some(outLoadOptions), keys, args.mkString(" "), schema)
+    CliParameters(refLoadOptions, newLoadOptions, Some(outLoadOptions), keys, args.mkString(" "), schema)
   }
 
-  def parseInputParameters(args: Array[String]): CliOptions = {
+  def parseInputParameters(args: Array[String]): CliParameters = {
     require(args.nonEmpty, "No arguments for reader passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
@@ -71,10 +71,10 @@ object CliOptionsParser {
     val refLoadOptions = getLoadOptions(finalOutMapWithDefaults.reference, referencePrefix)
     val newLoadOptions = getLoadOptions(finalOutMapWithDefaults.actual, actualPrefix)
 
-    CliOptions(refLoadOptions, newLoadOptions, None, keys, args.mkString(" "), schema)
+    CliParameters(refLoadOptions, newLoadOptions, None, keys, args.mkString(" "), schema)
   }
 
-  def parseOutputParameters(args: Array[String]): DataframeOptions = {
+  def parseOutputParameters(args: Array[String]): DataframeParameters = {
     require(args.nonEmpty, "No arguments for writer passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
@@ -127,8 +127,8 @@ object CliOptionsParser {
    *                  distinguishing from which option type (ref, new, out) the issue came.
    * @return Returns the DataframeOptions
    */
-  private[cliUtils] def getLoadOptions(mapOfOptions: Map[String, String], keyPrefix: String): DataframeOptions = {
-    Try(DataframeOptions.validateAndCreate(mapOfOptions)) match {
+  private[cliUtils] def getLoadOptions(mapOfOptions: Map[String, String], keyPrefix: String): DataframeParameters = {
+    Try(DataframeParameters.validateAndCreate(mapOfOptions)) match {
       case Success(value) => value
       case Failure(exception) =>
         val message = enrichMessage(exception.getMessage, keyPrefix)

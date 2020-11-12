@@ -20,7 +20,7 @@ import java.io.ByteArrayOutputStream
 import org.scalatest.FunSuite
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
-class CliOptionsParserSuite extends FunSuite {
+class CliParametersParserSuite extends FunSuite {
   test("Test generate help") {
     val outCapture = new ByteArrayOutputStream
     val expectedResult = """Dataset Comparison Tool
@@ -35,7 +35,7 @@ class CliOptionsParserSuite extends FunSuite {
                            |--schema                  optional   A schema path on HDFS. This will allow to cherry pick columns from the two data sets to compare
                            |others                    optional   Options like delimiter, header, rowTag, user, password, url, ... These are the specific options for specific formats used. For more information, check sparks documentation on what all the options for the format you are using
                            |""".stripMargin
-    Console.withOut(outCapture) { CliOptionsParser.generateHelp }
+    Console.withOut(outCapture) { CliParametersParser.generateHelp }
 
     assert(expectedResult == outCapture.toString())
   }
@@ -53,31 +53,31 @@ class CliOptionsParserSuite extends FunSuite {
       "--keys", "alfa,beta"
     )
 
-    val refDataframeOptions = DataframeOptions(
+    val refDataframeOptions = DataframeParameters(
       "specialFormat",
       Map("delimiter" -> ";"),
       "ref/path/alfa"
     )
-    val newDataframeOptions = DataframeOptions(
+    val newDataframeOptions = DataframeParameters(
       "jdbc",
       Map("something" -> "this", "else" -> "that", "dbtable" -> "table1"),
       "table1"
     )
 
-    val outDataframeOptions = DataframeOptions(
+    val outDataframeOptions = DataframeParameters(
       "parquet",
       Map.empty[String, String],
       "/some/out/path"
     )
 
-    val cliOptions = CliOptions(
+    val cliOptions = CliParameters(
       refDataframeOptions,
       newDataframeOptions,
       Some(outDataframeOptions),
       Set("alfa", "beta"),
       args.mkString(" "))
 
-    assert(cliOptions == CliOptionsParser.parse(args))
+    assert(cliOptions == CliParametersParser.parse(args))
   }
 
   test("Test missing out path") {
@@ -89,7 +89,7 @@ class CliOptionsParserSuite extends FunSuite {
     )
 
     val caught = intercept[MissingArgumentException] {
-      CliOptionsParser.parse(args)
+      CliParametersParser.parse(args)
     }
 
     assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--out-dbtable"""" == caught.getMessage)
@@ -105,7 +105,7 @@ class CliOptionsParserSuite extends FunSuite {
     val message = """DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--new-dbtable""""
 
     val caught = intercept[MissingArgumentException] {
-      CliOptionsParser.parse(args)
+      CliParametersParser.parse(args)
     }
 
     assert(message == caught.getMessage)
