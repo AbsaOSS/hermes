@@ -15,13 +15,6 @@
 
 package za.co.absa.hermes.e2eRunner
 
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
-
-object TestDefinitionJsonProtocol extends DefaultJsonProtocol {
-  implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat6(TestDefinition.apply)
-}
-
-
 /**
  * A representation of a test definition together with it's actual order
  * @param definition TestDefinition instance

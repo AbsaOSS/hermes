@@ -18,7 +18,7 @@ package za.co.absa.hermes.e2eRunner
 import scala.io.Source
 
 case class TestDefinitions(private val testDefinitions: Seq[TestDefinition])  {
-  def ensureOrderAndDependenciesCorrect() = {
+  def ensureOrderAndDependenciesCorrect(): Unit = {
     val output = getSorted.foldLeft((Seq.empty[String], Seq.empty[String])) { case (acc, td) =>
       if (td.dependsOn.forall(d => acc._2.contains(d))){
         (acc._1, acc._2 :+ td.name)
