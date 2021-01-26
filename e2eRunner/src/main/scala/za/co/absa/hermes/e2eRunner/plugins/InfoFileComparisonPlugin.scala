@@ -16,7 +16,7 @@
 package za.co.absa.hermes.e2eRunner.plugins
 
 import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
-import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult}
+import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, TestDefinition}
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
 import za.co.absa.hermes.infoFileComparison.InfoFileComparisonJob
 import za.co.absa.hermes.infoFileComparison._
@@ -63,7 +63,10 @@ case class InfoFileComparisonResult(arguments: Array[String],
 class InfoFileComparisonPlugin extends Plugin {
   override def name: String = "InfoFileComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int, testName: String): InfoFileComparisonResult = {
+  override def performAction(testDefinition: TestDefinition, actualOrder: Int): InfoFileComparisonResult = {
+    val args = testDefinition.args
+    val testName = testDefinition.name
+
     val parsedArgs = InfoComparisonArguments.getCmdLineArguments(args) match {
       case Success(value) => value.toStringMap
       case Failure(exception)  => throw exception

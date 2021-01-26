@@ -26,11 +26,11 @@ trait Plugin {
   /**
    * Perform action is the core method. Executes the plugin and returns a result as a subclass of PluginResult
    *
-   * @param args Args similar to main args.
+   * @param testDefinition TestDefinition instance
    * @param actualOrder When specifying the order in the test definition json, the number might not be the
    *                    same as the execution number. This number is automatically provided by the PluginManager.
    *                    PluginResult expects this number.
    * @return Returns a subclass of PluginResult.
    */
-  def performAction(args: Array[String], actualOrder: Int, testName: String): PluginResult
+  def performAction(testDefinition: TestDefinition, actualOrder: Int): PluginResult
 }

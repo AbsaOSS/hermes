@@ -18,7 +18,7 @@ package za.co.absa.hermes.e2eRunner.plugins
 import za.co.absa.hermes.e2eRunner.logging.{InfoResultLog, ResultLog}
 
 import scala.sys.process._
-import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult}
+import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, TestDefinition}
 import za.co.absa.hermes.utils.HelperFunctions
 
 case class BashJobsResult(arguments: Array[String],
@@ -51,10 +51,13 @@ class BashPlugin extends Plugin {
 
   override def name: String = "BashPlugin"
 
-  override def performAction(args: Array[String], actualOrder: Int, testName: String): BashJobsResult = {
+  override def performAction(testDefinition: TestDefinition, actualOrder: Int): BashJobsResult = {
     def runBashCmd(bashCmd: String): String = {
       (s"echo $bashCmd" #| "bash").!!
     }
+
+    val args = testDefinition.args
+    val testName = testDefinition.name
 
     scribe.info(s"Running bash with: ${args.mkString(" ")}")
     val (confTime, returnValue) = HelperFunctions.calculateTime { runBashCmd(args.mkString(" ")) }

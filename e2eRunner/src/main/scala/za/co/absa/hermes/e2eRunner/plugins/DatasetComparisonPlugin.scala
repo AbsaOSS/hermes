@@ -20,7 +20,7 @@ import za.co.absa.hermes.datasetComparison.cliUtils.CliParametersParser
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
 import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparator, DatasetComparisonJob}
 import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
-import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, SparkBase}
+import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, SparkBase, TestDefinition}
 import za.co.absa.hermes.utils.HelperFunctions
 
 case class DatasetComparisonResult(arguments: Array[String],
@@ -74,9 +74,13 @@ case class DatasetComparisonResult(arguments: Array[String],
 class DatasetComparisonPlugin extends Plugin with SparkBase {
   override def name: String = "DatasetComparison"
 
-  override def performAction(args: Array[String], actualOrder: Int, testName: String): DatasetComparisonResult = {
+  override def performAction(testDefinition: TestDefinition, actualOrder: Int): DatasetComparisonResult = {
+    val args = testDefinition.args
+    val testName = testDefinition.name
+
     implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
     val cliOptions = CliParametersParser.parseInputParameters(args)
+    val outOptions = CliParametersParser.parseOutputParameters(testDefinition.writeArgs.getOrElse(Array.empty))
     val optionalSchema = DatasetComparisonJob.getSchema(cliOptions.schemaPath)
     val dataFrameRef = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val dataFrameActual = Utils.loadDataFrame(cliOptions.actualDataParameters)
@@ -88,7 +92,13 @@ class DatasetComparisonPlugin extends Plugin with SparkBase {
     )
 
     val datasetResult: ComparisonResult = dsComparison.compare
+
+    val additionalInfo = Map(
+      "referenceOptions.path" -> cliOptions.referenceDataParameters.path,
+      "newOptions.path" -> cliOptions.actualDataParameters.path,
+      "outOptions.path" -> outOptions.path
+    )
     val datasetResultWithOptions = datasetResult.copy(passedOptions = args.mkString(" "))
-    DatasetComparisonResult(args, datasetResultWithOptions, actualOrder, testName, datasetResultWithOptions.passed)
+    DatasetComparisonResult(args, datasetResultWithOptions, actualOrder, testName, datasetResultWithOptions.passed, additionalInfo)
   }
 }
