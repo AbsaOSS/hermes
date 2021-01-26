@@ -116,7 +116,7 @@ object E2ERunnerJob {
   private def tryExecute(td: TestDefinition,
                          testOrder: Int,
                          plugin: Plugin): Try[PluginResult] = Try {
-    val result: PluginResult = plugin.performAction(td.args, testOrder, td.name)
+    val result: PluginResult = plugin.performAction(td, testOrder)
     if (td.writeArgs.isDefined) result.write(td.writeArgs.get)
     result
   }
