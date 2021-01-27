@@ -23,6 +23,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Column
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import za.co.absa.hermes.datasetComparison.ComparisonResult
+import za.co.absa.hermes.e2eRunner.TestDefinition
 import za.co.absa.hermes.utils.SparkTestBase
 
 class DatasetComparatorPluginTest extends FunSuite with BeforeAndAfterEach with SparkTestBase {
@@ -84,8 +85,13 @@ class DatasetComparatorPluginTest extends FunSuite with BeforeAndAfterEach with 
     val comparisonResult = ComparisonResult(9,9,0,0,9,schemaSelector,None,0,passedOptions,Map())
     val expectedDatasetComparisonResult = DatasetComparisonResult(args, comparisonResult, order, testName, shouldPass)
 
-    val result = plugin.performAction(args, order, testName).asInstanceOf[DatasetComparisonResult]
-    val resultOptionsOmitted = result.copy(returnedValue = result.returnedValue.copy(passedOptions = passedOptions))
+    val td = TestDefinition(testName, 0, "DatasetComparison", args, None, Some(Array("--out-path", "alfa")))
+
+    val result = plugin.performAction(td, order).asInstanceOf[DatasetComparisonResult]
+    val resultOptionsOmitted = result.copy(
+      returnedValue = result.returnedValue.copy(passedOptions = passedOptions),
+      additionalInfo = Map.empty
+    )
 
     assert(expectedDatasetComparisonResult == resultOptionsOmitted)
   }

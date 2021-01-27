@@ -16,6 +16,7 @@
 package za.co.absa.hermes.e2eRunner.plugins
 
 import org.scalatest.FunSuite
+import za.co.absa.hermes.e2eRunner.TestDefinition
 
 class BashPluginTest extends FunSuite {
   private val plugin = new BashPlugin()
@@ -27,13 +28,16 @@ class BashPluginTest extends FunSuite {
   test("Plugin - performAction") {
     val shouldPass = true
     val order = 111
-    val testName = "UnitTest"
-    val args = Array("echo", "Something Something")
+    val testName = "Test1"
+    val args = Array("echo", """ "alfa" """)
+    val td = TestDefinition(testName, 0, "BashPlugin", args, None, None)
 
-    val expectedResult = BashJobsResult(args, "Something Something\n", order, testName, shouldPass, Map.empty)
+    val expectedResult = BashJobsResult(args, "alfa\n", order, testName, shouldPass, Map.empty)
 
-    val result = plugin.performAction(args, order, testName)
+    val result = plugin.performAction(td, order)
       .copy(additionalInfo = Map.empty)
+
+    println(result)
 
     assert(expectedResult == result)
   }

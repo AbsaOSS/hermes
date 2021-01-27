@@ -63,3 +63,5 @@ _site
 .jekyll-metadata
 
 .metals
+
+.bsp

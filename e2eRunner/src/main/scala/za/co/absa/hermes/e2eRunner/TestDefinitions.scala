@@ -109,4 +109,8 @@ object TestDefinitions {
 
     TestDefinitions.fromString(testDefinitionString)
   }
+
+  def fromSeq(testDefinitions: Seq[TestDefinition]): TestDefinitions = {
+    TestDefinitions(testDefinitions)
+  }
 }

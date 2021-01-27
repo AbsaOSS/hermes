@@ -51,7 +51,7 @@ class TestDefinitionTest extends FunSuite {
 
   test("ensureOrderAndDependenciesCorrect") {
     Try { testDefinitions.ensureOrderAndDependenciesCorrect() } match {
-      case Success(value) =>
+      case Success(_) => succeed
       case Failure(value) if !value.isInstanceOf[TestDefinitionDependenciesOutOfOrder] =>
         fail(s"ensureOrderAndDependenciesCorrect threw unexpected error: $value")
     }

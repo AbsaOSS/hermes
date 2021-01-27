@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import za.co.absa.hermes.e2eRunner.TestDefinition
 import za.co.absa.hermes.infoFileComparison.ModelDifference
 
 class InfoFileComparisonPluginTest extends FunSuite with BeforeAndAfterEach {
@@ -57,15 +58,17 @@ class InfoFileComparisonPluginTest extends FunSuite with BeforeAndAfterEach {
     val newPath = s"file://${getClass.getResource("/InfoFileComparisonPlugin/info_file_wrong.json").getPath}"
     val outPath = s"file://target/test_output/info_comparison/negative/$timePrefix"
 
+
     val args = Array(
       "--new-path", newPath,
       "--ref-path", refPath,
       "--out-path", outPath
     )
+    val td = TestDefinition(testName, 0, "InfoFileComparison", args, None, None)
 
     val expectedResult = result.copy(arguments = args)
 
-    val actualResult = plugin.performAction(args, order, testName).asInstanceOf[InfoFileComparisonResult]
+    val actualResult = plugin.performAction(td, order).asInstanceOf[InfoFileComparisonResult]
       .copy(additionalInfo = Map.empty)
 
     assert(expectedResult == actualResult)

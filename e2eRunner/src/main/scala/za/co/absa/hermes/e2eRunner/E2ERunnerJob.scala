@@ -63,16 +63,6 @@ object E2ERunnerJob {
     logFinalResultsUsingScribe(results)
   }
 
-  private def logFinalResultsUsingScribe(results: Seq[PluginResult])(implicit loggingFunctions: LoggingFunctions): Unit = {
-    loggingFunctions.info("##################################################")
-    loggingFunctions.info("Invoking logging of test results")
-    loggingFunctions.info("##################################################")
-    results.foreach({ result =>
-      result.resultLog.log
-      loggingFunctions.info("##################################################")
-    })
-  }
-
   /**
    * Runs test definitions one by one
    *
@@ -101,6 +91,16 @@ object E2ERunnerJob {
           case Failure(exception) if failFast =>  throw TestFailedWithFailFastOn(td.name, order, exception)
         }
     }
+  }
+
+  private def logFinalResultsUsingScribe(results: Seq[PluginResult])(implicit loggingFunctions: LoggingFunctions): Unit = {
+    loggingFunctions.info("##################################################")
+    loggingFunctions.info("Invoking logging of test results")
+    loggingFunctions.info("##################################################")
+    results.foreach({ result =>
+      result.resultLog.log
+      loggingFunctions.info("##################################################")
+    })
   }
 
   private def canTestProceed(td: TestDefinition, previousResults: Seq[PluginResult]): Boolean = {

@@ -17,9 +17,22 @@ package za.co.absa.hermes.e2eRunner
 
 import org.scalatest.FunSuite
 import za.co.absa.atum.utils.SparkTestBase
+import za.co.absa.hermes.e2eRunner.logging.functions.Scribe
+import za.co.absa.hermes.e2eRunner.plugins.BashJobsResult
 
 class E2ERunnerJobSuite extends FunSuite with SparkTestBase {
-//  test("alfa") {
-//    E2ERunnerJob.main(Array(getClass.getResource("/TestDefinitionBase.json").toString))
-//  }
+  val pluginDefinitions: PluginDefinitions = PluginDefinitions()
+  test("runTests") {
+    val order = 111
+    val testName = "Test1"
+    val args = Array("echo", """ "alfa" """)
+    val td = TestDefinition(testName, order, "BashPlugin", args, None, None)
+    implicit val loggingFunctions: Scribe = Scribe(this.getClass)
+
+    val expectedResults = BashJobsResult(args, "alfa\n", 1, testName, true, Map.empty)
+    val results = E2ERunnerJob.runTests(TestDefinitions.fromSeq(Seq(td)), pluginDefinitions)
+      .head.asInstanceOf[BashJobsResult]
+      .copy(additionalInfo = Map.empty)
+    assert(expectedResults == results)
+  }
 }
