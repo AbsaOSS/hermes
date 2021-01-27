@@ -17,7 +17,7 @@ import sbt._
 
 object Dependencies {
   val baseDependencies = List(
-    "com.github.scopt" %% "scopt"     % "4.0.0-RC2",
+    "com.github.scopt" %% "scopt"     % "4.0.0",
     "com.outr"         %% "scribe"    % "2.7.3",
     "com.typesafe"     %  "config"    % "1.3.4",
     "io.spray"         %%  "spray-json" % "1.3.5",
