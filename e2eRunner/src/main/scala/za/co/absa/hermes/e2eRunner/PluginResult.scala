@@ -17,12 +17,32 @@ package za.co.absa.hermes.e2eRunner
 
 import za.co.absa.hermes.e2eRunner.logging.ResultLog
 
-abstract class PluginResult(arguments: Array[String],
-                            returnedValue: Any,
-                            order: Int,
-                            testName: String,
-                            passed: Boolean,
-                            additionalInfo: Map[String, String]) {
+trait PluginResult {
+
+  /**
+   * Passed Arguments to the Plugin implementation
+   */
+  val arguments: Array[String]
+  /**
+   * Value Returned by Plugin implementation
+   */
+  val returnedValue: Any
+  /**
+   * Actual order of the plugin that was ran
+   */
+  val order: Int
+  /**
+   * Name of the test
+   */
+  val testName: String
+  /**
+   * State of the test. Passed or failed
+   */
+  val passed: Boolean
+  /**
+   * Additional info passed to the result by the plugin implementation
+   */
+  val additionalInfo: Map[String, String]
 
   /**
    * This method should be used to write the plugin result in a form required.

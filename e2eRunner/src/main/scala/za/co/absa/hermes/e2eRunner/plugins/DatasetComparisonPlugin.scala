@@ -28,8 +28,7 @@ case class DatasetComparisonResult(arguments: Array[String],
                                    order: Int,
                                    testName: String,
                                    passed: Boolean,
-                                   additionalInfo: Map[String, String] = Map.empty)
-  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) with SparkBase {
+                                   additionalInfo: Map[String, String] = Map.empty) extends PluginResult with SparkBase {
 
   /**
    * This method should be used to write the plugin result in a form required.
@@ -57,7 +56,7 @@ case class DatasetComparisonResult(arguments: Array[String],
     if (passed) {
       InfoResultLog(
         s"""Test $testName ($order) finished. Expected and actual data sets are the same. Metrics written to
-         |${additionalInfo("outOptions.path")}/_METRICS""".stripMargin.replaceAll("[\\r\\n]", "")
+         | ${additionalInfo("outOptions.path")}/_METRICS""".stripMargin.replaceAll("[\\r\\n]", "")
       )
     } else {
       ErrorResultLog(

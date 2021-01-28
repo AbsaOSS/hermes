@@ -20,15 +20,16 @@ import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, ResultLog}
 
 
 case class FailedPluginResult(arguments: Array[String],
-                              returnedException: Throwable,
+                              returnedValue: Throwable,
                               order: Int,
                               testName: String,
-                              additionalInfo: Map[String, String] = Map.empty)
-  extends PluginResult(arguments, returnedException, order, testName, false, additionalInfo) {
+                              additionalInfo: Map[String, String] = Map.empty) extends PluginResult {
   /**
    * Implement this method to be able to log the result of the plugin execution at the end.
    */
   override def resultLog: ResultLog = {
-    ErrorResultLog(s"Test $testName ($order) failed on an exception", returnedException)
+    ErrorResultLog(s"Test $testName ($order) failed on an exception", returnedValue)
   }
+
+  override val passed: Boolean = false
 }

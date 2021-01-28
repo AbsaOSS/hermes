@@ -28,8 +28,7 @@ case class InfoFileComparisonResult(arguments: Array[String],
                                     order: Int,
                                     testName: String,
                                     passed: Boolean,
-                                    additionalInfo: Map[String, String])
-  extends PluginResult(arguments, returnedValue, order, testName, passed, additionalInfo) {
+                                    additionalInfo: Map[String, String]) extends PluginResult {
 
   /**
    * This method should be used to write the plugin result in a form required.
