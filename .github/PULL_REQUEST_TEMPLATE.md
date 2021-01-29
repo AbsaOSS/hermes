@@ -1,12 +1,3 @@
----
-name: BugFix PR
-about: Create a PR for a Bugfix
-title: 'ISSUE_NUMBER - Name'
-labels: ''
-assignees: ''
-
----
-
 ### Description
 
 ### Previous behaviour
