@@ -15,9 +15,6 @@
 
 package za.co.absa.hermes.datasetComparison.dataFrame
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.sql._
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
 
 case class Parameters(format: String, options: Map[String, String], path: String)
