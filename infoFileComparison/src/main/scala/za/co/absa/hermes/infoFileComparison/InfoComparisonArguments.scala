@@ -16,6 +16,7 @@
 package za.co.absa.hermes.infoFileComparison
 
 import scopt.OptionParser
+import za.co.absa.hermes.utils.CaseClassUtils
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,7 +28,7 @@ import scala.util.{Failure, Success, Try}
   */
 case class InfoComparisonArguments(newPath: String = "",
                                    refPath: String = "",
-                                   outPath: String = "")
+                                   outPath: String = "") extends CaseClassUtils
 
 object InfoComparisonArguments {
 

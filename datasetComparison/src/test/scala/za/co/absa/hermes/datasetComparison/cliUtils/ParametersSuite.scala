@@ -17,9 +17,10 @@ package za.co.absa.hermes.datasetComparison.cliUtils
 
 import org.scalatest.FunSuite
 import za.co.absa.hermes.datasetComparison.MissingArgumentException
+import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
 import za.co.absa.hermes.utils.SparkTestBase
 
-class DataframeOptionsSuite extends FunSuite with SparkTestBase {
+class ParametersSuite extends FunSuite with SparkTestBase {
   test("Test successful parse with path") {
     val map = Map(
       "format" -> "alfa",
@@ -28,32 +29,32 @@ class DataframeOptionsSuite extends FunSuite with SparkTestBase {
       "path" -> "some/path"
     )
 
-    val dfOptoons = DataframeOptions(
+    val dfOptoons = Parameters(
       "alfa",
       Map("option-one" -> "option-one-value", "option-two" -> "option-two-value"),
       "some/path"
     )
 
-    assert(dfOptoons == DataframeOptions.validateAndCreate(map))
+    assert(dfOptoons == Parameters.validateAndCreate(map))
   }
 
   test("Test successful parse with jdbc") {
     val map = Map("format" -> "jdbc", "dbtable" -> "table1")
 
-    val dfOptoons = DataframeOptions(
+    val dfOptoons = Parameters(
       "jdbc",
       Map("dbtable" -> "table1"),
       "table1"
     )
 
-    assert(dfOptoons == DataframeOptions.validateAndCreate(map))
+    assert(dfOptoons == Parameters.validateAndCreate(map))
   }
 
   test("Test unsuccessful parse missing format") {
     val map = Map("dbtable" -> "table1")
 
     val caught = intercept[MissingArgumentException] {
-      DataframeOptions.validateAndCreate(map)
+      Parameters.validateAndCreate(map)
     }
 
     assert("""Format is mandatory option. Use "--format"""" == caught.message)
@@ -63,7 +64,7 @@ class DataframeOptionsSuite extends FunSuite with SparkTestBase {
     val map = Map("format" -> "xml")
 
     val caught = intercept[MissingArgumentException] {
-      DataframeOptions.validateAndCreate(map)
+      Parameters.validateAndCreate(map)
     }
 
     assert("""Path is mandatory option for all format types except jdbc. Use "--path"""" == caught.message)
@@ -73,20 +74,20 @@ class DataframeOptionsSuite extends FunSuite with SparkTestBase {
     val map = Map("format" -> "jdbc")
 
     val caught = intercept[MissingArgumentException] {
-      DataframeOptions.validateAndCreate(map)
+      Parameters.validateAndCreate(map)
     }
 
     assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable"""" == caught.message)
   }
 
   test("Test load of dataframe") {
-    val dfOptions = DataframeOptions(
+    val dfOptions = Parameters(
       "csv",
       Map("header" -> "true", "delimiter" -> ","),
       getClass.getResource("/dataSample1.csv").toString
     )
 
-    val df = dfOptions.loadDataFrame
+    val df = Utils.loadDataFrame(dfOptions)
     assert(9L == df.count())
     assert("id first_name last_name email gender ip_address" == df.columns.mkString(" "))
   }

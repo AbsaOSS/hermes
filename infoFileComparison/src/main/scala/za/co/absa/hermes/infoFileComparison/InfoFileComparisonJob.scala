@@ -69,19 +69,28 @@ object InfoFileComparisonJob {
     }
   }
 
-  private def compare(newControlMeasure: ControlMeasure,
-                      refControlMeasure: ControlMeasure,
-                      config: InfoFileComparisonConfig): List[ModelDifference[_]] = {
-    refControlMeasure.compareWith(newControlMeasure, config)
+  def loadControlMeasures(path: String): ControlMeasure = {
+    val stream = path match {
+      case p if p.startsWith("file://") => new FileInputStream(p.stripPrefix("file://"))
+      case p                            => FileSystem.get(hadoopConfiguration).open(new Path(p))
+    }
+    val controlInfoJson = try IOUtils.readLines(stream).asScala.mkString("\n") finally stream.close()
+    ControlMeasuresParser.fromJson(controlInfoJson)
   }
 
-  private def saveDataToFile(data: String, path: String): Unit = {
+  def saveDataToFile(data: String, path: String): Unit = {
     path match {
       case p if p.startsWith("file://") =>
         File(p.stripPrefix("file://")).createIfNotExists(createParents = true).write(data)
       case p                            =>
         saveDataToHDFSFile(data, new Path(p))
     }
+  }
+
+  private def compare(newControlMeasure: ControlMeasure,
+                      refControlMeasure: ControlMeasure,
+                      config: InfoFileComparisonConfig): List[ModelDifference[_]] = {
+    refControlMeasure.compareWith(newControlMeasure, config)
   }
 
   private def saveDataToHDFSFile(data: String, path: Path): Unit = {
@@ -116,14 +125,5 @@ object InfoFileComparisonJob {
     conf.addResource(new Path(coreSiteXmlPath))
     conf.addResource(new Path(hdfsSiteXmlPath))
     conf
-  }
-
-  private def loadControlMeasures(path: String): ControlMeasure = {
-    val stream = path match {
-      case p if p.startsWith("file://") => new FileInputStream(p.stripPrefix("file://"))
-      case p                            => FileSystem.get(hadoopConfiguration).open(new Path(p))
-    }
-    val controlInfoJson = try IOUtils.readLines(stream).asScala.mkString("\n") finally stream.close()
-    ControlMeasuresParser.fromJson(controlInfoJson)
   }
 }

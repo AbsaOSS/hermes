@@ -20,77 +20,83 @@ import java.io.PrintWriter
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
-import za.co.absa.hermes.datasetComparison.cliUtils.CliOptions
-import za.co.absa.hermes.datasetComparison.config.TypesafeConfig
-
-import scala.util.{Failure, Success}
+import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
+import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
+import za.co.absa.hermes.datasetComparison.dataFrame.Utils
 
 object DatasetComparisonJob {
 
   def main(args: Array[String]): Unit = {
-    val cliOptions = CliOptions.parse(args)
+    val cliParameters = CliParametersParser.parse(args)
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
       .appName(
-        s"""Dataset comparison - '${cliOptions.referenceOptions.path}' and
-           | '${cliOptions.newOptions.path}'
+        s"""Dataset comparison - '${cliParameters.referenceDataParameters.path}' and
+           | '${cliParameters.actualDataParameters.path}'
            |""".stripMargin.replaceAll("[\\r\\n]", "")
       )
       .getOrCreate()
 
-    execute(cliOptions, None)
+    execute(cliParameters, None)
   }
 
   /**
     * Execute the comparison
     *
-    * @param cliOptions Provided configuration for the comparison
+    * @param cliParameters Provided configuration for the comparison
     * @param sparkSession Implicit spark session
     */
-  def execute(cliOptions: CliOptions, configPath: Option[String] = None)
+  def execute(cliParameters: CliParameters, configPath: Option[String] = None)
              (implicit sparkSession: SparkSession): Unit = {
-    val config = new TypesafeConfig(configPath).validate() match {
-      case Success(value) => value
-      case Failure(exception) => throw exception
-    }
-    val optionalSchema = cliOptions.schemaPath match {
-      case Some(schema) =>
-        val schemaSource = sparkSession.sparkContext.wholeTextFiles(schema).take(1)(0)._2
-        Some(DataType.fromJson(schemaSource).asInstanceOf[StructType])
-      case None => None
-    }
-    val dsComparison = new DatasetComparison(cliOptions, config, optionalSchema)
+    val config = getConfig(configPath)
+    val optionalSchema = getSchema(cliParameters.schemaPath)
+    val dataFrameRef = Utils.loadDataFrame(cliParameters.referenceDataParameters)
+    val dataFrameActual = Utils.loadDataFrame(cliParameters.actualDataParameters)
+    val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliParameters.keys, config, optionalSchema)
     val result = dsComparison.compare
 
-    val path: String = result.resultDF match {
-      case Some(df) => cliOptions.outOptions.writeNextDataFrame(df)
-      case None => cliOptions.outOptions.getUniqueFilePath("", sparkSession.sparkContext.hadoopConfiguration)
+    val finalPath = cliParameters.outDataParameters.map { outOptions =>
+      val path: String = result.resultDF match {
+        case Some(df) => Utils.writeNextDataFrame(df, outOptions)
+        case None => Utils.getUniqueFilePath(outOptions, "", sparkSession.sparkContext.hadoopConfiguration)
+      }
+      writeMetricsToFile(result, path)
+      path
     }
-
-    writeMetricsToFile(result, path)
 
     if (result.diffCount > 0) {
       throw DatasetsDifferException(
-          cliOptions.referenceOptions.path,
-          cliOptions.newOptions.path,
-          path,
+          cliParameters.referenceDataParameters.path,
+          cliParameters.actualDataParameters.path,
+          finalPath.getOrElse("Not Provided"),
           result.refRowCount,
           result.newRowCount
       )
     } else {
-      scribe.info(s"Expected and actual data sets are the same. Metrics written to $path")
+      scribe.info(s"Expected and actual data sets are the same. Metrics written to ${finalPath.getOrElse("Not Provided")}")
     }
   }
 
-  private def writeMetricsToFile(result: ComparisonResult, fileName: String)
-                                (implicit sparkSession: SparkSession): Unit = {
+  def getSchema(schemaPath: Option[String])(implicit sparkSession: SparkSession): Option[StructType] = {
+    schemaPath.map { path =>
+      val schemaSource = sparkSession.sparkContext.wholeTextFiles(path).take(1)(0)._2
+      DataType.fromJson(schemaSource).asInstanceOf[StructType]
+    }
+  }
+
+  def getConfig(configPath: Option[String]): DatasetComparisonConfig = {
+    new TypesafeConfig(configPath).validate().get
+  }
+
+  def writeMetricsToFile(result: ComparisonResult, fileName: String)
+                        (implicit sparkSession: SparkSession): Unit = {
     val path = new Path(fileName, "_METRICS")
     val fs = FileSystem.get(sparkSession.sparkContext.hadoopConfiguration)
     val fsOut = fs.create(path)
 
     try {
       val pw = new PrintWriter(fsOut, true)
-      pw.print(result.getJsonMetadata)
+      pw.print(result.getPrettyJson)
       pw.close()
     } finally {
       fsOut.close()

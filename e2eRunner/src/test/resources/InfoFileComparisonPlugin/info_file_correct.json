@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "sourceApplication": "Test PC",
+    "country": "CZ",
+    "historyType": "Snapshot",
+    "dataFilename": "ConformanceRules.json",
+    "sourceType": "Golden",
+    "version": 1,
+    "informationDate": "01-01-2019",
+    "additionalInfo": {
+      "raw_format": "json",
+      "std_application_id": "local-1568617193345",
+      "std_executors_num": "0",
+      "std_username": "user",
+      "std_records_succeeded": "21",
+      "std_records_failed": "0",
+      "std_errors_count": "0",
+      "std_output_dir_size": "160614",
+      "std_input_dir_size": "13094",
+      "std_output_dir": "/tmp/conformance-output/standardized-DeleteMe-115-2019-01-01-1",
+      "enceladus_info_version": "1",
+      "std_input_dir": "/raw/ConformanceRules/2019/01/01/v1",
+      "std_enceladus_version": "1.2.0-SNAPSHOT",
+      "std_cmd_line_args": "--menas-credentials-file /menas-credential.properties --dataset-name DeleteMe --dataset-version 115 --report-date 2019-01-01 --report-version 1 --raw-format json",
+      "std_size_ratio": "1226.62 %",
+      "std_record_count": "21",
+      "raw_record_count": "21",
+      "enceladus_info_date": "2019-01-01"
+    }
+  },
+  "runUniqueId": "bee8cc79-ecc6-44e8-b49c-ee53ba0bcb4c",
+  "checkpoints": [{
+    "name": "Source",
+    "processStartTime": "01-01-2019 08:00:00",
+    "processEndTime": "01-01-2019 08:05:00",
+    "workflowName": "Source",
+    "order": 1,
+    "controls": [{
+      "controlName": "recordCount",
+      "controlType": "count",
+      "controlCol": "id",
+      "controlValue": "21"
+    }]
+  }, {
+    "name": "Raw",
+    "software": "Atum",
+    "version": "0.0.0",
+    "processStartTime": "01-01-2019 08:05:00",
+    "processEndTime": "01-01-2019 08:10:00",
+    "workflowName": "Raw",
+    "order": 2,
+    "controls": [{
+      "controlName": "recordCount",
+      "controlType": "count",
+      "controlCol": "*",
+      "controlValue": "21"
+    }]
+  }, {
+    "name": "Standardization - End",
+    "processStartTime": "16-09-2019 06:59:59 +0000",
+    "processEndTime": "16-09-2019 07:00:03 +0000",
+    "workflowName": "Standardization",
+    "order": 3,
+    "controls": [{
+      "controlName": "recordCount",
+      "controlType": "count",
+      "controlCol": "*",
+      "controlValue": "21"
+    }]
+  }]
+}

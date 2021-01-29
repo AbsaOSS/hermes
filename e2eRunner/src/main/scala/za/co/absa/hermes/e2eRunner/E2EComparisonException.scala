@@ -17,3 +17,8 @@ package za.co.absa.hermes.e2eRunner
 
 final case class E2EComparisonException(msg: String)
   extends Exception(s"Some comparison(s) failed\n$msg")
+
+final case class NotAllRequestedPluginsDefined(pluginNames: Set[String])
+  extends Exception(
+    s"""Some requested test plugins were not found on a class path.
+       |These plugins were not found ${pluginNames.mkString(", ")}""".stripMargin)

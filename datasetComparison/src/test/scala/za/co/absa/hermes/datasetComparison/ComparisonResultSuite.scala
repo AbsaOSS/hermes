@@ -23,29 +23,33 @@ class ComparisonResultSuite extends FunSuite {
   test("testGetJsonMetadata") {
     val CR1 = ComparisonResult(10, 11, 14, 15, 12, List.empty[Column], None, 13, "--alfa beta")
     val result = """{
-                   |  "passed":"false",
-                   |  "referenceRowCount":"10",
-                   |  "refDuplicateCount":"14",
-                   |  "newRowCount":"11",
-                   |  "passedRowsCount":"12",
-                   |  "newDuplicateCount":"15",
-                   |  "numberOfDifferences":"13",
-                   |  "passedOptions":"--alfa beta"
+                   |  "additionalInfo": {
+                   |
+                   |  },
+                   |  "newDuplicateCount": 15,
+                   |  "newRowCount": 11,
+                   |  "numberOfDifferences": 13,
+                   |  "passed": false,
+                   |  "passedOptions": "--alfa beta",
+                   |  "passedRowsCount": 12,
+                   |  "refDuplicateCount": 14,
+                   |  "referenceRowCount": 10
                    |}""".stripMargin
 
-    assert(result == CR1.getJsonMetadata)
+    assert(result == CR1.getPrettyJson)
   }
 
   test("testGetMetadata") {
     val CR2 = ComparisonResult(0, 0, 0, 0, 0, List.empty[Column], None, 0, "--alfa beta")
     val result = Map(
-      "passed" -> "true",
-      "refDuplicateCount" -> "0",
-      "referenceRowCount" -> "0",
-      "newRowCount" -> "0",
-      "newDuplicateCount" -> "0",
-      "numberOfDifferences" -> "0",
-      "passedRowsCount" -> "0",
+      "passed" -> true,
+      "refDuplicateCount" -> 0,
+      "referenceRowCount" -> 0,
+      "newRowCount" -> 0,
+      "newDuplicateCount" -> 0,
+      "additionalInfo" -> Map(),
+      "numberOfDifferences" -> 0,
+      "passedRowsCount" -> 0,
       "passedOptions" -> "--alfa beta"
     )
 

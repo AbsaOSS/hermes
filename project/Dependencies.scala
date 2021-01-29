@@ -16,38 +16,59 @@
 import sbt._
 
 object Dependencies {
+
+  private val betterFilesVersion = "3.8.0"
+  private val classUtilsVersion = "1.5.0"
+  private val hadoopVersion = "2.7.7"
+  private val nettyAllVersion = "4.1.36.Final"
+  private val reflectionsVersion = "0.9.12"
+  private val scoptVersion = "4.0.0"
+  private val scribeVersion = "2.7.3"
+  private val sparkXmlVersion = "0.5.0"
+  private val sprayJsonVersion = "1.3.5"
+  private val typeSafeConfigVersion = "1.3.4"
+
+  private val atumVersion = "0.2.6"
+  private val commonsVersion = "0.0.14"
+  private val hofsVersion = "0.4.0"
+
+  private val scalatestVersion = "3.0.5"
+
+  def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "2.4.7")
+
   val baseDependencies = List(
-    "com.github.scopt" %% "scopt"     % "4.0.0-RC2",
-    "com.outr"         %% "scribe"    % "2.7.3",
-    "com.typesafe"     %  "config"    % "1.3.4",
-    "net.liftweb"      %% "lift-json" % "3.4.1",
-    "org.scalatest"    %% "scalatest" % "3.0.5"      % Test
+    "com.github.scopt" %% "scopt"       % scoptVersion,
+    "com.outr"         %% "scribe"      % scribeVersion,
+    "com.typesafe"     %  "config"      % typeSafeConfigVersion,
+    "io.spray"         %%  "spray-json" % sprayJsonVersion,
+    "org.scalatest"    %% "scalatest"   % scalatestVersion       % Test
+  )
+
+  val e2eDependencies = List(
+    "org.reflections" %  "reflections" % reflectionsVersion,
+    "org.clapper"     %% "classutil"   % classUtilsVersion
   )
 
   val datasetComparisonDependencies = List(
-    "org.apache.spark"  %% "spark-core"           % "2.4.4"        % Provided,
-    "org.apache.spark"  %% "spark-sql"            % "2.4.4"        % Provided,
-    "com.databricks"    %% "spark-xml"            % "0.5.0",
-    "org.apache.hadoop" %  "hadoop-hdfs"          % "2.7.7"        % Provided,
-    "org.apache.hadoop" %  "hadoop-client"        % "2.7.7"        % Provided,
-    "io.netty"          %  "netty-all"            % "4.1.36.Final",
-    "org.postgresql"    %  "postgresql"           % "42.2.9"       % Provided,
-    "org.xerial"        %  "sqlite-jdbc"          % "3.30.1"       % Provided,
-    "mysql"             %  "mysql-connector-java" % "8.0.19"       % Provided,
-    "com.oracle.ojdbc"  %  "ojdbc8"               % "19.3.0.0"     % Provided,
-    "org.apache.hive"   %  "hive-jdbc"            % "1.2.1"        % Provided,
-    "org.apache.spark"  %% "spark-avro"           % "2.4.4",
-    "za.co.absa"        %% "spark-hofs"           % "0.4.0"
+    "org.apache.spark"   %% "spark-core"           % sparkVersion     % Provided,
+    "org.apache.spark"   %% "spark-sql"            % sparkVersion     % Provided,
+    "org.apache.spark"   %% "spark-avro"           % sparkVersion,
+    "com.databricks"     %% "spark-xml"            % sparkXmlVersion,
+    "org.apache.hadoop"  %  "hadoop-hdfs"          % hadoopVersion    % Provided,
+    "org.apache.hadoop"  %  "hadoop-client"        % hadoopVersion    % Provided,
+    "io.netty"           %  "netty-all"            % nettyAllVersion,
+    "za.co.absa"         %% "spark-hofs"           % hofsVersion,
+    "za.co.absa.commons" %% "commons"              % commonsVersion
   )
 
   val compareInfoFileDependencies = List(
-    "za.co.absa"           %  "atum"         % "0.2.6",
-    "com.github.pathikrit" %% "better-files" % "3.8.0"
+    "za.co.absa"           %  "atum"         % atumVersion,
+    "com.github.pathikrit" %% "better-files" % betterFilesVersion
   )
 
   val utilsDependencies = List(
-    "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-    "org.apache.spark" %% "spark-sql"  % "2.4.4" % Provided,
-    "com.databricks"   %% "spark-xml"  % "0.5.0"
+    "org.apache.spark" %% "spark-core" % sparkVersion % Provided,
+    "org.apache.spark" %% "spark-sql"  % sparkVersion % Provided,
+    "com.databricks"   %% "spark-xml"  % sparkXmlVersion
   )
 }

@@ -19,7 +19,9 @@ package za.co.absa.hermes.infoFileComparison
 final case class InfoFilesDifferException(refPath: String,
                                           stdPath: String,
                                           outPath: String)
-  extends Exception("Expected and actual info files differ.\n" +
-    s"Reference path: $refPath\n" +
-    s"Actual dataset path: $stdPath\n" +
-    s"Difference written to: $outPath")
+  extends Exception(
+    s"""Expected and actual info files differ.
+       |Reference path: $refPath
+       |Actual dataset path: $stdPath
+       |Difference written to: $outPath""".stripMargin
+  )

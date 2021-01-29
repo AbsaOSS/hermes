@@ -73,6 +73,8 @@ lazy val datasetComparison = project
 lazy val e2eRunner = project
   .dependsOn(datasetComparison, infoFileComparison)
   .settings(
+    libraryDependencies ++= baseDependencies,
+    libraryDependencies ++= e2eDependencies,
     name := "e2e-runner",
     mainClass in assembly := Some("za.co.absa.hermes.e2eRunner.E2ERunnerJob"),
     test in assembly := {},
@@ -85,6 +87,7 @@ lazy val e2eRunner = project
   )
 
 lazy val infoFileComparison = project
+  .dependsOn(utils)
   .settings(
     name := "info-file-comparison",
     libraryDependencies ++= baseDependencies,

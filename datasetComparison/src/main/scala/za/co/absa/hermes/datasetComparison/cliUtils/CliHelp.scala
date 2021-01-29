@@ -20,6 +20,7 @@ case class CliHelpOptions(key: String, optional: String, text: String){
 }
 
 case class CliHelp(title: String, example: String, description: String, options: List[CliHelpOptions]) {
+
   override def toString: String =
     s"""$title
        |$description

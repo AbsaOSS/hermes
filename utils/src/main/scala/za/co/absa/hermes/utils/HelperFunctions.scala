@@ -201,4 +201,15 @@ object HelperFunctions {
 
   def richFormat(string: String, replacement: Map[String, String]): String =
     replacement.foldLeft(string)((res, entry) => res.replaceAllLiterally(s"{${entry._1}}", entry._2))
+
+
+  def appendOrdinalSuffix(num: Int): String = {
+    import scala.math.min
+
+    val suffixes = Array("th", "st", "nd", "rd", "th")
+    (num % 100) match {
+      case 11 | 12 | 13 => s"${num}th"
+      case _ => s"${num}${suffixes(min(num % 10, suffixes.length - 1 ))}"
+    }
+  }
 }

@@ -15,8 +15,38 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import net.liftweb.json.JsonDSL._
 import org.apache.spark.sql.{Column, DataFrame}
+import spray.json._
+
+object ComparisonResultProtocol extends DefaultJsonProtocol {
+  implicit object ComparisonResultFormat extends RootJsonFormat[ComparisonResult] {
+    def write(cr: ComparisonResult): JsObject = JsObject(
+      "referenceRowCount" -> JsNumber(cr.refRowCount),
+      "newRowCount" -> JsNumber(cr.newRowCount),
+      "newDuplicateCount" -> JsNumber(cr.newDuplicateCount),
+      "refDuplicateCount" -> JsNumber(cr.refDuplicateCount),
+      "passed" -> JsBoolean(cr.diffCount == 0),
+      "numberOfDifferences" -> JsNumber(cr.diffCount),
+      "passedRowsCount" -> JsNumber(cr.passedCount),
+      "passedOptions" -> JsString(cr.passedOptions),
+      "additionalInfo" -> JsObject(cr.additionalInfo.map(v => v._1 -> JsString(v._2)))
+    )
+
+    override def read(value: JsValue): ComparisonResult = {
+      val fields = Seq("referenceRowCount", "newRowCount", "newDuplicateCount", "refDuplicateCount",
+        "numberOfDifferences", "passedRowsCount", "passedOptions", "additionalInfo")
+      value.asJsObject.getFields(fields: _*) match {
+        case Seq(JsNumber(refRowCount), JsNumber(newRowCount), JsNumber(newDuplicateCount),
+        JsNumber(refDuplicateCount), JsNumber(diffCount), JsNumber(passedCount), JsString(passedOptions),
+        JsObject(additionalInfo)) =>
+          ComparisonResult(refRowCount.toLong, newRowCount.toLong, refDuplicateCount.toLong, newDuplicateCount.toLong,
+            passedCount.toLong, List.empty[Column], None, diffCount.toLong, passedOptions,
+            additionalInfo.map( value => value._1 -> value._2.toString()))
+        case _ => throw DeserializationException("ComparisonResult expected")
+      }
+    }
+  }
+}
 
 /**
  *
@@ -35,21 +65,28 @@ case class ComparisonResult(refRowCount: Long,
                             usedSchemaSelector: List[Column],
                             resultDF: Option[DataFrame],
                             diffCount: Long = 0,
-                            passedOptions: String = ""){
-  def getJsonMetadata: String = {
-    import net.liftweb.json._
-    prettyRender(getMetadata)
+                            passedOptions: String = "",
+                            additionalInfo: Map[String, String] = Map.empty){
+  import ComparisonResultProtocol._
+
+  def passed: Boolean = diffCount == 0
+
+  def getJsonMetadata: JsValue = {
+    (this: ComparisonResult).toJson
   }
 
-  def getMetadata: Map[String, String] = Map[String, String](
-      "referenceRowCount" -> refRowCount.toString,
-      "newRowCount" -> newRowCount.toString,
-      "newDuplicateCount" -> newDuplicateCount.toString,
-      "refDuplicateCount" -> refDuplicateCount.toString,
-      "passed" -> (diffCount == 0).toString,
-      "numberOfDifferences" -> diffCount.toString,
-      "passedRowsCount" -> passedCount.toString,
-      "passedOptions" -> passedOptions
+  def getPrettyJson: String = getJsonMetadata.prettyPrint
+
+  def getMetadata: Map[String, Any] = Map[String, Any](
+      "referenceRowCount" -> refRowCount,
+      "newRowCount" -> newRowCount,
+      "newDuplicateCount" -> newDuplicateCount,
+      "refDuplicateCount" -> refDuplicateCount,
+      "passed" -> passed,
+      "numberOfDifferences" -> diffCount,
+      "passedRowsCount" -> passedCount,
+      "passedOptions" -> passedOptions,
+      "additionalInfo" -> additionalInfo
     )
 }
 
