@@ -1,0 +1,27 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scala: [2.11.12]
+        spark: [2.4.7]
+    name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: coursier/cache-action@v5
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+      - name: Build and run tests
+        run: sbt ++${{matrix.scala}} test -DSPARK_VERSION=${{matrix.spark}}
