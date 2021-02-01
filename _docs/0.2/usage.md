@@ -1,10 +1,9 @@
 ---
 layout: docs
 title: Usage
-version: '0.2.0'
+version: '0.2'
 categories:
-    - '0.2.0'
-redirect_from: /docs/usage
+    - '0.2'
 ---
 #### Table of contents
 

@@ -1,10 +1,9 @@
 ---
 layout: docs
 title: Components
-version: '0.2.0'
+version: '0.2'
 categories:
-    - '0.2.0'
-redirect_from: /docs/components
+    - '0.2'
 ---
 #### Table of contents
 

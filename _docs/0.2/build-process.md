@@ -1,10 +1,9 @@
 ---
 layout: docs
 title: Build Process
-version: '0.2.0'
+version: '0.2'
 categories:
-    - '0.2.0'
-redirect_from: /docs/build-process
+    - '0.2'
 ---
 
 The whole project is sbt and scala based.
