@@ -19,7 +19,7 @@ redirect_from: /docs/usage/dataset-comparison
 All properties were scraped. Only properties that might come in hadny are the ones implemented atop scribe logging library. Check them out on their GitHub [page](https://github.com/outr/scribe)
 #### Parameters
 
-- `test-definition-path` - mandatory - path to json with test definitions. Format explanation bellow in [Test Definition JSON](#test-definition-json)
+- `test-definition-path` - mandatory - path to json with test definitions. Format explanation bellow in [Test Definition JSON](#test-definition-json).
 - `jar-path` - optional - path to additional jars to load plugins from. You can also use spark's `--jars` instead of this.
 - `fail-fast` - defaults to `false` - switch in case you want to kill the run on first failure.
 
@@ -27,9 +27,9 @@ All properties were scraped. Only properties that might come in hadny are the on
 
 Test definition JSON has a struct as base having two keys, `vars` and `runs`. 
 
-`vars` holds a struct used for representation of variables inside of runs. This is so you do not have to repeat yourself with, for example, dataset names or other parameters that are valid for more then one run. Key is the variable you put in other places of the JSON surounded by `#{` and `}#` and the value is the value you want to use in that place.
+`vars` holds a struct used for the representation of variables for multiple runs. This way, you do not have to repeat yourself with, for example, dataset names or other parameters that are valid for more than one run. Key is the variable you put in other places of the JSON surrounded by `#{` and `}#` and the value is the value you want to use in that place.
 
-`runs` holds an array of test definitions. Test definition is an object, having it's own case class TestDefinition holding the information about of test run. That is a plugin name, input arguments, order, etc. 
+`runs` holds an array of test definitions. Test definition is an object, having its own `case class TestDefinition` holding the information about a test run, i.e. a plugin name, input arguments, order, etc. 
 
 **JSON Structure**
 

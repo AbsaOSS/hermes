@@ -20,13 +20,13 @@ redirect_from: /docs/usage
 
 Dataset comparison can be run as a spark job or used as a library.
 
-Dataset Comparison used as a spark job example. _This example doesn't show spark argumetns_
+Dataset Comparison used as a spark job example. _This example doesn't show spark arguments_
 Example:
 
 ```shell
 spark-submit dataset-comparison.jar \
     --ref-format csv \
-    --ref-path /path/to/csv \
+    --ref-path /path/to/csv-dir \ // will pickup `data.csv` in the directory
     --ref-header true \
     --new-format parquet \
     --new-path /path/to/parquet \
@@ -60,7 +60,7 @@ For _INFO file placed in local repository use format of path `file://path/to/_IN
 
 #### E2E Runner
 
-E2E usage shifted the most since 0.2.2. Now it can be used to run any test that it has plugin for. It can be run as a spark job or a classic jar. On input expecting maximum of 3 arguments. Path to test definitions, jar-path to additional plugins and fail-fast switch
+E2E usage shifted the most since 0.2.2. Now it can be used to run any test that there is a plugin for. It can be run as a spark job or a classic jar. On input, it expects a maximum of 3 arguments: _path to test definitions_, _jar-path to additional plugins_, and _fail-fast switch_.
 
 ```shell
 spark-submit e2e-runner.jar \
@@ -73,12 +73,12 @@ spark-submit e2e-runner.jar \
 
 #### Plugins
 
-There are 3 built in Plugins. These are all out of the box usable with E2E Runner. 
+There are 3 built-in plugins. These are all out of the box usable with the E2E Runner. 
 
 - [BashPlugin]({{ site.baseurl }}/docs/{{ page.version }}/usage/plugins/bash-plugin)
 - [DatasetComparisonPlugin]({{ site.baseurl }}/docs/{{ page.version }}/usage/plugins/dataset-comparison-plugin)
 - [InfoFileComparisonPlugin]({{ site.baseurl }}/docs/{{ page.version }}/usage/plugins/info-file-comparison-plugin)
 
-Then there is an option of creating one for your specific needs following this [guide]({{ site.baseurl }}/docs/{{ page.version }}/usage/plugins/plugin-creation)
+Then there is an option of creating a plugin tailored for specific need(s) following this [guide]({{ site.baseurl }}/docs/{{ page.version }}/usage/plugins/plugin-creation)
 
 [gh-enceladus]: https://github.com/AbsaOSS/enceladus

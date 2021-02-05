@@ -26,24 +26,23 @@ redirect_from: /docs/components/dataset-comparison
 
 #### Features for spark-job
 
-- can load any data type/format that spark is able to load. It might be needed to add libraries to the class path
+- can load any data type/format that spark is able to load. For some of the formats to be supported additional  libraries might need to be added to the class path
 - input data referential or new (being tested) can have different formats
 - format of the diff file can be configured as well (default is `parquet`)
-- regardless of fail or pass of the data, a metrics file called `_METRICS` is wirtten to the destination
+- regardless of fail or pass status of the data comparison, a metrics file called `_METRICS` is wirtten to the destination
 
 #### Constraints
 
-- referential schema must be subset of the new (being verified) data
-- without provided key, the diff file does a comparison of a row as a whole. With keys, it compares precise data and shows paths to differences
+- referential schema must be a subset of the new (being verified) data
+- without a provided key, the diff file does a comparison of a row as a whole. With keys, it compares precise data and shows paths to differences
 
 #### Concepts
 
 ##### Schema Alignment
 
-Dataset comparison takes the referential data and tries to aling the new (being verified) data to the schema of the referential data. This means both sorting the columns and only selecting columns that are in the referential data.
+Dataset comparison takes the referential data and tries to align the new (being verified) data to the schema of the referential data. This means both sorting the columns and only selecting columns that are present in the referential data.
 
 ##### Provided Schema
 
 If schema is provided to dataset comparison, then the `Schema Alignment` is done against this provided schema for both referential and new data.
-
 

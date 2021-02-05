@@ -19,7 +19,7 @@ redirect_from: /docs/components/dataset-comparison
 #### Features
 
 - run all the tests in order as specified in the JSON 
-- extend LoggingFunctions for your own logs implementation
+- extend `LoggingFunctions` for your own logging implementation
 
 #### Features for spark-job
 
@@ -29,7 +29,7 @@ redirect_from: /docs/components/dataset-comparison
 
 #### JSON prescription features
 
-- order based 1st on the number and then alphabet
+- order based first on the number and then alphabet
 - there can be variables so you do not have to repeat yourself
 - tests can depend on each other
 

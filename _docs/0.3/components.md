@@ -18,9 +18,9 @@ Each of the components released by *Hermes* is a command line tool. All are `.ja
 
 #### Dataset Comparison
 
-General tool for data set comparison. Can be used a spark job or a library. For the library-like usage check method `execute` and `compare` in `DatasetComparisonJob` class in `za.co.absa.hermes.datasetComparison` package.
+General tool for data set comparison. Can be used as a spark job or a library. For the library-like usage, use methods `za.co.absa.hermes.datasetComparison.DatasetComparisonJob.{execute, compare}`.
 
-If used as a library you just provide 2 dataframes for comparison and optionall set of unique keys and schema.
+If used as a library just provide 2 dataframes for comparison and optionaly a set of unique keys and a schema.
 
 [More...]({{ site.baseurl }}/docs/{{ page.version }}/components/dataset-comparison)
 
@@ -28,13 +28,13 @@ If used as a library you just provide 2 dataframes for comparison and optionall 
 
 #### Info File Comparison
 
-A simple comparison tool for [Atum][gh-atum]'s _INFO file. Work on local FS and Hadoop.
+A simple comparison tool for [Atum][gh-atum]'s _INFO file. It works on local FS and Hadoop FS.
 
 ***
 
 #### E2E Runner
 
-E2E Runner is a tool that runs end to end tests based on the JSON input file. E2R Runner has a **plugin architecture** so the type of test depends on the plugins loaded. 
+E2E Runner is a tool that runs end-to-end tests based on the JSON input file. E2R Runner has a **plugin architecture** so the type of test depends on the plugins loaded. 
 
 Built in Plugins are
 - Bash command plugin

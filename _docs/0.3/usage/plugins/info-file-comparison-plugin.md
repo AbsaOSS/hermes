@@ -13,7 +13,7 @@ Info file comparison plugin executes a Hermeses Info File Comparison module
 
 Arguments (`args`) are expected in the same format as described in the [documentation]({{ site.baseurl }}/docs/{{ page.version }}/usage/info-file-comparison#parameters) about running an info file comparison.
 
-Write arguments (`writeArgs`) are for now empty and need to be defined empty. In next release we plan to split them from `args`
+Write arguments (`writeArgs`) have to be empty now. In future releases, it is planed to split them from `args`
 
 
 Example:
@@ -27,4 +27,3 @@ Example:
     "writeArgs": []
 }
 ```
-

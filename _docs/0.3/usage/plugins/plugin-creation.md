@@ -9,7 +9,7 @@ categories:
 redirect_from: /docs/usage/plugins/plugin-creation
 ---
 
-E2E Runner is also able to run any plugin on class path. The plugin needs to extend `za.co.absa.hermes.e2eRunner.Plugin` trait and the `performAction` method needs to return a `za.co.absa.hermes.e2eRunner.PluginRsult` implementation.
+E2E Runner is also able to run any plugin on the classpath. The plugin needs to extend `za.co.absa.hermes.e2eRunner.Plugin` trait and the `performAction` method must to return an implementation of `za.co.absa.hermes.e2eRunner.PluginResult`.
 
 #### Plugin implementation
 
