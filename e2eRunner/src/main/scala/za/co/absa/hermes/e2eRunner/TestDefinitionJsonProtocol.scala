@@ -17,6 +17,13 @@ package za.co.absa.hermes.e2eRunner
 
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
+import scala.util.matching.Regex
+
 object TestDefinitionJsonProtocol extends DefaultJsonProtocol {
   implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat6(TestDefinition.apply)
+
+  val VarsField = "vars"
+  val RunsField: String = "runs"
+  val VarsPattern: Regex = """(?<=#\{)\w*(?=\}#)""".r
+
 }

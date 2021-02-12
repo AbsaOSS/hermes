@@ -50,7 +50,7 @@ object E2ERunnerJob {
       s"""Loaded plugins are:
          |${pluginNames.mkString("\n")}""".stripMargin)
 
-    val testDefinitions = TestDefinitions.fromFile(cmd.testDefinition)
+    val testDefinitions = TestDefinitions.fromFile(cmd.testDefinition, cmd.extraVars)
     testDefinitions.ensureOrderAndDependenciesCorrect()
     loggingFunctions.info(s"Loaded ${testDefinitions.size} test definitions")
 
@@ -58,7 +58,7 @@ object E2ERunnerJob {
     validatePluginsToBeUsed(pluginNames, pluginsExpectedToUse)
 
     loggingFunctions.info("Running tests")
-    val results = runTests(testDefinitions, pluginDefinitions, cmd.failfast)
+    val results = runTests(testDefinitions, pluginDefinitions, cmd.failFast)
 
     logFinalResultsUsingScribe(results)
   }

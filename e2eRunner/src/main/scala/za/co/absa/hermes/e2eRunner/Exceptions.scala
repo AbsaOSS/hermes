@@ -33,3 +33,7 @@ case class TestDefinitionDependenciesOutOfOrder(dependencies: Seq[String])
   extends Exception(
     s"""These test dependencies are out of order:
        |${dependencies.mkString("\n")}""".stripMargin)
+
+case class FoundOrphanedVarsInTestDefinitionJson(vars: Set[String])
+  extends Exception(s"""These vars were found in runs object and with no corresponding values:
+                       |${vars.map(x => s"""- "$x"""").mkString("\n")}""".stripMargin)

@@ -32,7 +32,7 @@ class E2ERunnerConfigTest extends FunSuite {
 
     assert(randomPath == cmd.testDefinition)
     assert(cmd.jarPath.isEmpty)
-    assert(!cmd.failfast)
+    assert(!cmd.failFast)
   }
 
   test("GetCmdLineArguments - missing test definition") {
@@ -48,7 +48,8 @@ class E2ERunnerConfigTest extends FunSuite {
     val cmd = E2ERunnerConfig.getCmdLineArguments(Array(
       "--test-definition-path", randomPath,
       "--jar-path", "/some/path",
-      "--fail-fast", "false"
+      "--fail-fast", "false",
+      "--extra-vars", """some=value,some2=value with spaces"""
     )) match {
       case Success(value) => value
       case Failure(exception) => fail(exception)
@@ -57,7 +58,8 @@ class E2ERunnerConfigTest extends FunSuite {
     assert(randomPath == cmd.testDefinition)
     assert(cmd.jarPath.isDefined)
     assert("/some/path" == cmd.jarPath.get)
-    assert(!cmd.failfast)
+    assert(!cmd.failFast)
+    assert(Map("some" -> "value", "some2" -> "value with spaces") == cmd.extraVars)
   }
 
 }

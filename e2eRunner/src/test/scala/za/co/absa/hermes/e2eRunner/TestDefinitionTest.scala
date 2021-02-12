@@ -25,6 +25,16 @@ class TestDefinitionTest extends FunSuite {
     TestDefinitions.fromFile(getClass.getResource("/TestDefinitionBase.json").getFile)
   private val badTestDefinitions: TestDefinitions =
     TestDefinitions.fromFile(getClass.getResource("/TestDefinitionBadDependency.json").getFile)
+  private val testDefinitionsNoVars: TestDefinitions =
+    TestDefinitions.fromFile(getClass.getResource("/TestDefinitionNoVars.json").getFile)
+  private val testDefinitionsWithExtras: TestDefinitions = TestDefinitions.fromFile(
+    getClass.getResource("/TestDefinitionBase.json").getFile,
+    Map("prefix" -> "SomethingOther")
+  )
+  private val testDefinitionsNonSpecifiedVars: TestDefinitions = TestDefinitions.fromFile(
+    getClass.getResource("/TestDefinitionNonSpecifiedVars.json").getFile,
+    Map("prefix" -> "SomethingOther")
+  )
 
   test("size") {
     assert(3 == testDefinitions.size)
@@ -81,6 +91,45 @@ class TestDefinitionTest extends FunSuite {
     assert(expectedBashPluginDef.equals(bashPluginDef))
     assert(expectedDatasetComparisonJob.equals(datasetComparisonJob))
     assert(expectedInfoFileComparisonJob.equals(infoFileComparisonJob))
+  }
 
+  test("extraVars overwrite") {
+    val defsSorted: Seq[TestDefinition] = testDefinitionsWithExtras.getSorted
+    assert("SomethingOther".equals(defsSorted.head.args.head))
+    assert("SomethingOther".equals(defsSorted(1).args.head))
+  }
+
+  test("testDefinitionNoVars") {
+    val defsSorted: Seq[TestDefinition] = testDefinitionsNoVars.getSorted
+    val bashPluginDef = defsSorted(0)
+    val datasetComparisonJob = defsSorted(1)
+    val infoFileComparisonJob = defsSorted(2)
+
+    val expectedBashPluginDef = TestDefinition("Test1", 0, "BashPlugin", Array("RunThis", "-a", "b"), None, None)
+    val expectedDatasetComparisonJob = TestDefinition("Test3", 1, "DatasetComparison", Array("RunThis", "nothing", "extra"),
+      Some("Test1"), Some(Array("some", "args", "for", "output")))
+    val expectedInfoFileComparisonJob = TestDefinition("Test2", 1, "InfoComparison", Array("info", "file"), Some("Test1"), Some(Array.empty))
+
+    assert(expectedBashPluginDef.equals(bashPluginDef))
+    assert(expectedDatasetComparisonJob.equals(datasetComparisonJob))
+    assert(expectedInfoFileComparisonJob.equals(infoFileComparisonJob))
+  }
+
+  test("extra vars fills non specified vars") {
+    val defsSorted: Seq[TestDefinition] = testDefinitionsNonSpecifiedVars.getSorted
+    assert("SomethingOther".equals(defsSorted.head.args.head))
+    assert("SomethingOther".equals(defsSorted(1).args.head))
+  }
+
+  test("Non applied vars throw error") {
+    val expectedMessage = """These vars were found in runs object and with no corresponding values:
+                            |- "prefix"
+                            |- "alfa"
+                            |- """"".stripMargin
+    val error = intercept[FoundOrphanedVarsInTestDefinitionJson] {
+      TestDefinitions.fromFile(getClass.getResource("/TestDefinitionNonSpecifiedVarsBad.json").getFile)
+    }
+
+    assert(expectedMessage == error.getMessage)
   }
 }

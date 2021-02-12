@@ -16,11 +16,18 @@
 package za.co.absa.hermes.utils
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 
 trait SparkTestBase { self =>
   val config: Config = ConfigFactory.load()
   val sparkMaster: String = config.getString("utils.sparkTestBaseMaster")
+
+  System.setProperty("user.timezone", "UTC")
+
+  // Do not display INFO entries for tests
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
 
   implicit val spark: SparkSession = SparkSession.builder()
     .master(sparkMaster)
@@ -30,6 +37,7 @@ trait SparkTestBase { self =>
     .config("spark.driver.bindAddress", "127.0.0.1")
     .config("spark.driver.host", "127.0.0.1")
     .config("spark.sql.hive.convertMetastoreParquet", false)
+    .config("spark.sql.codegen.wholeStage", value = false)
     .config("fs.defaultFS","file:/")
     .getOrCreate()
 }

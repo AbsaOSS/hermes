@@ -27,7 +27,8 @@ import scala.util.{Failure, Success, Try}
   */
 case class E2ERunnerConfig(testDefinition: String = "",
                            jarPath: Option[String] = None,
-                           failfast: Boolean = false)
+                           failFast: Boolean = false,
+                           extraVars: Map[String, String] = Map.empty)
 
 object E2ERunnerConfig {
   /**
@@ -66,8 +67,14 @@ object E2ERunnerConfig {
 
     opt[Boolean]("fail-fast")
       .optional
-      .action((value, config) => { config.copy(failfast = value) })
+      .action((value, config) => { config.copy(failFast = value) })
       .text("Should tests exit if one of them has a non-zero exit")
+
+    opt[Map[String,String]]("extra-vars")
+      .optional
+      .action((value, config) => config.copy(extraVars = value) )
+      .valueName("k1=v1,k2=v2...")
+      .text("Extra variables that will be merged into the test definition json. Overwrites the ones from test-definition-path")
 
     help("help").text("prints this usage text")
   }

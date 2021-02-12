@@ -17,6 +17,7 @@ ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
+Test / javaOptions ++= List("-Xmx2G", "-XX:+UseG1GC")
 Test / parallelExecution := false
 
 import Dependencies._

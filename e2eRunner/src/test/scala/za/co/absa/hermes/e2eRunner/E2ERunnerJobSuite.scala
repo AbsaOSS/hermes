@@ -16,7 +16,7 @@
 package za.co.absa.hermes.e2eRunner
 
 import org.scalatest.FunSuite
-import za.co.absa.atum.utils.SparkTestBase
+import za.co.absa.hermes.utils.SparkTestBase
 import za.co.absa.hermes.e2eRunner.logging.functions.Scribe
 import za.co.absa.hermes.e2eRunner.plugins.BashJobsResult
 
