@@ -97,7 +97,7 @@ object TestDefinitions {
   private def applyVars(vars: Map[String, String], runsString: String) = {
     val remappedJson = vars.foldLeft(runsString) { case (acc, (k, v)) => acc.replaceAllLiterally(s"#{$k}#", v) }
     val extraVars = TestDefinitionJsonProtocol.VarsPattern.findAllIn(remappedJson)
-    if (extraVars.nonEmpty) throw FoundOrphanedVarsInTestDefinitionJson(extraVars.toSet)
+    if (extraVars.nonEmpty) throw UndefinedVariablesInTestDefinitionJson(extraVars.toSet)
     remappedJson
   }
 

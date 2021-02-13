@@ -126,7 +126,7 @@ class TestDefinitionTest extends FunSuite {
                             |- "prefix"
                             |- "alfa"
                             |- """"".stripMargin
-    val error = intercept[FoundOrphanedVarsInTestDefinitionJson] {
+    val error = intercept[UndefinedVariablesInTestDefinitionJson] {
       TestDefinitions.fromFile(getClass.getResource("/TestDefinitionNonSpecifiedVarsBad.json").getFile)
     }
 

@@ -22,8 +22,11 @@ import scala.util.matching.Regex
 object TestDefinitionJsonProtocol extends DefaultJsonProtocol {
   implicit val pluginDefinitionFormat: RootJsonFormat[TestDefinition] = jsonFormat6(TestDefinition.apply)
 
+  // Key for object holding the variables in the test definition json
   val VarsField = "vars"
+  // Key for object holding the test runs in the test definition json
   val RunsField: String = "runs"
-  val VarsPattern: Regex = """(?<=#\{)\w*(?=\}#)""".r
+  // Regex for validation and extractions of vars in the runs object in the test definition json
+  val VarsPattern: Regex = """(?<=#\{)[\w_]*(?=\}#)""".r
 
 }
