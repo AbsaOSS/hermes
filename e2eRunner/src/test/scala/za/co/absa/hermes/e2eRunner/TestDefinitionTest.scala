@@ -68,13 +68,12 @@ class TestDefinitionTest extends FunSuite {
   }
 
   test("ensureOrderAndDependenciesCorrect with bad input") {
-    val expectedMessage = """These test dependencies are out of order:
-                            |Test1""".stripMargin
-    val caught = intercept[TestDefinitionDependenciesOutOfOrder] {
+    val expectedCaughtDeps = Seq("Test1")
+    val TestDefinitionDependenciesOutOfOrder(caught) = intercept[TestDefinitionDependenciesOutOfOrder] {
       badTestDefinitions.ensureOrderAndDependenciesCorrect()
     }
 
-    assert(expectedMessage == caught.getMessage)
+    assert(expectedCaughtDeps == caught)
   }
 
   test("testDefinitionBase") {
@@ -122,14 +121,11 @@ class TestDefinitionTest extends FunSuite {
   }
 
   test("Non applied vars throw error") {
-    val expectedMessage = """These vars were found in runs object and with no corresponding values:
-                            |- "prefix"
-                            |- "alfa"
-                            |- """"".stripMargin
-    val error = intercept[UndefinedVariablesInTestDefinitionJson] {
+    val unusedVars = Set("prefix", "alfa", "")
+    val UndefinedVariablesInTestDefinitionJson(errorSet) = intercept[UndefinedVariablesInTestDefinitionJson] {
       TestDefinitions.fromFile(getClass.getResource("/TestDefinitionNonSpecifiedVarsBad.json").getFile)
     }
 
-    assert(expectedMessage == error.getMessage)
+    assert(unusedVars == errorSet)
   }
 }
