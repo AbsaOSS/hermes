@@ -26,8 +26,8 @@ trait SparkTestBase { self =>
   System.setProperty("user.timezone", "UTC")
 
   // Do not display INFO entries for tests
-  Logger.getLogger("org").setLevel(Level.ERROR)
-  Logger.getLogger("akka").setLevel(Level.ERROR)
+  Logger.getLogger("org").setLevel(Level.OFF)
+  Logger.getLogger("akka").setLevel(Level.OFF)
 
   implicit val spark: SparkSession = SparkSession.builder()
     .master(sparkMaster)
