@@ -1,0 +1,26 @@
+{
+  "runs" : [
+    {
+      "pluginName" : "BashPlugin",
+      "name": "Test1",
+      "order" : 0,
+      "args" : ["#{prefix}#", "-a", "b"]
+    },
+    {
+      "pluginName" : "InfoComparison",
+      "name": "Test2",
+      "order" : 1,
+      "args" : ["info", "file"],
+      "writeArgs": ["#{alfa}#"],
+      "dependsOn": "Test1"
+    },
+    {
+      "pluginName" : "DatasetComparison",
+      "name": "Test3",
+      "order" : 1,
+      "args" : ["#{}#", "nothing", "extra"],
+      "writeArgs": ["some", "args", "for", "output"],
+      "dependsOn": "Test1"
+    }
+  ]
+}

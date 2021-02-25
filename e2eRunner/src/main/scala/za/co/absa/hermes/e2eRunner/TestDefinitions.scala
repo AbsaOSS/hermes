@@ -76,38 +76,51 @@ object TestDefinitions {
   import TestDefinitionJsonProtocol._
   import spray.json._
 
+  private def getVarsFromJson(parsedJson: JsValue): Map[String, String] = {
+    parsedJson
+      .asJsObject
+      .getFields(TestDefinitionJsonProtocol.VarsField)
+      .headOption
+      .map(x => x.convertTo[Map[String, String]])
+      .getOrElse(Map.empty)
+  }
+
+  private def getRunsFromJson(parsedJson: JsValue) = {
+    parsedJson
+      .asJsObject
+      .getFields(TestDefinitionJsonProtocol.RunsField)
+      .headOption
+      .getOrElse(throw TestDefinitionJsonMalformed("Runs key not defined"))
+      .toString
+  }
+
+  private def applyVars(vars: Map[String, String], runsString: String) = {
+    val remappedJson = vars.foldLeft(runsString) { case (acc, (k, v)) => acc.replaceAllLiterally(s"#{$k}#", v) }
+    val extraVars = TestDefinitionJsonProtocol.VarsPattern.findAllIn(remappedJson)
+    if (extraVars.nonEmpty) throw UndefinedVariablesInTestDefinitionJson(extraVars.toSet)
+    remappedJson
+  }
+
   /**
    * Parses the TestDefinitions from json string.
    *
    * @param jsonString JsonString with test definitions
    * @return Returns a Sequence of TestDefinitions. These are not ordered or filtered in any way.
    */
-  def fromString(jsonString: String): TestDefinitions = {
+  def fromString(jsonString: String, extraVars: Map[String, String] = Map.empty): TestDefinitions = {
     val parsedJson: JsValue = jsonString.parseJson
-    val maybeVars: Option[JsValue] = parsedJson.asJsObject.getFields("vars").headOption
+    val vars: Map[String, String] = getVarsFromJson(parsedJson) ++ extraVars
+    val runsString: String = getRunsFromJson(parsedJson)
+    val formattedJson = applyVars(vars, runsString)
 
-    val maybeRuns = parsedJson.asJsObject.getFields("runs").headOption
-    val runsString = if (maybeRuns.isEmpty) { throw TestDefinitionJsonMalformed("Runs key not defined")}
-    else { maybeRuns.get.toString() }
-
-    val formattedJson = if (maybeVars.isDefined) {
-      scribe.info("""Loaded "vars" key from test definitions""")
-      val varsMap = maybeVars.get.convertTo[Map[String, String]]
-      val remappedJson = varsMap.foldLeft(runsString) { case (acc, (k,v)) => acc.replaceAllLiterally(s"#{$k}#", v) }
-      remappedJson.parseJson
-    } else {
-      scribe.info("""Could not find "vars" key in test definitions""")
-      parsedJson
-    }
-
-    TestDefinitions(formattedJson.convertTo[Seq[TestDefinition]])
+    TestDefinitions(formattedJson.parseJson.convertTo[Seq[TestDefinition]])
   }
 
-  def fromFile(path: String): TestDefinitions = {
+  def fromFile(path: String, extraVars: Map[String, String] = Map.empty): TestDefinitions = {
     val testDefinitionSource = Source.fromFile(path)
     val testDefinitionString = try testDefinitionSource.mkString finally { testDefinitionSource.close() }
 
-    TestDefinitions.fromString(testDefinitionString)
+    TestDefinitions.fromString(testDefinitionString, extraVars)
   }
 
   def fromSeq(testDefinitions: Seq[TestDefinition]): TestDefinitions = {
