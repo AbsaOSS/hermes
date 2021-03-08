@@ -17,11 +17,6 @@ ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
 ThisBuild / scalaVersion := "2.11.12"
 
-// License info for sbt-header plugin
-organizationName := "ABSA Group Limited"
-startYear := Some(2019)
-licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
-
 Test / javaOptions ++= List("-Xmx2G", "-XX:+UseG1GC")
 Test / parallelExecution := false
 
