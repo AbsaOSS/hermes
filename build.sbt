@@ -53,7 +53,8 @@ lazy val hermes = (project in file("."))
     publishArtifact := false,
     publish := {},
     publishLocal := {}
-  ).aggregate(datasetComparison, e2eRunner, infoFileComparison, utils)
+  )
+  .aggregate(datasetComparison, e2eRunner, infoFileComparison, utils)
 
 lazy val datasetComparison = project
   .dependsOn(utils)
@@ -70,6 +71,7 @@ lazy val datasetComparison = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val e2eRunner = project
   .dependsOn(datasetComparison, infoFileComparison)
@@ -86,6 +88,7 @@ lazy val e2eRunner = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val infoFileComparison = project
   .dependsOn(utils)
@@ -102,6 +105,7 @@ lazy val infoFileComparison = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val utils = project
   .settings(
@@ -115,3 +119,4 @@ lazy val utils = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .enablePlugins(AutomateHeaderPlugin)
