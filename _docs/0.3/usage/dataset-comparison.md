@@ -115,7 +115,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
                        (implicit sparkSession: SparkSession)
 ```
 
-You create an instance of `DatasetComparator` and then invoke the parametrless `compare` method. This method returns a `ComparisonResult`.
+Create an instance of `DatasetComparator` and then invoke the parametrless `compare` method. This method returns a `ComparisonResult`.
 
 **Prescription of ComparisonResult case class**
 
