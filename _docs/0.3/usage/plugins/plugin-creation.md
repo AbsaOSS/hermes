@@ -29,7 +29,7 @@ class MyPlugin extends Plugin {
    * Perform action is the core method. Executes the plugin and returns a result as a subclass of PluginResult
    *
    * @param testDefinition TestDefinition instance
-   * @param actualOrder When specifying the order in the test definition json, the number might not be the
+   * @param actualOrder When specifying the order in the test definition JSON, the number might not be the
    *                    same as the execution number. This number is automatically provided by the PluginManager.
    *                    PluginResult expects this number.
    * @return Returns an implementation of PluginResult.
@@ -64,7 +64,7 @@ case class MyPluginResult(arguments: Array[String],
   /**
    * This method should be used to write the plugin result in a form required.
    *
-   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition json
+   * @param writeArgs Arguments provided from the "writeArgs" key from the test definition JSON
    */
   override def write(writeArgs: Array[String]): Unit = {
     import java.io._

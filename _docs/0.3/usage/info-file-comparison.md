@@ -43,5 +43,5 @@ info-file-comparison {
 | Key | Description |
 |:---|:---|
 | versionMetaKeys | Keys from additional data in info file that you want to log as versions. These are not going to be compared by the tool, but both versions will be printed out |
-| ignoredMetaKeys | Keys from additional data in info file that you want to completely ignore. These are going to be logged out |
+| ignoredMetaKeys | Keys from additional data in info file that you want to ignore completely. These are going to be logged using scribe |
 | bufferSizeDefaultValue | This is Hadoop configuration's `io.file.buffer.size` for writing the results to Hadoop |

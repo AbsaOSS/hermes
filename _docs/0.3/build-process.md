@@ -7,17 +7,17 @@ categories:
 redirect_from: /docs/build-process
 ---
 
-The whole project is sbt and scala based.
+The whole project is SBT and Scala based.
 
 #### Dependencies
 
-The projects is known to work with:
+The tools are known to work with:
 
 - Java 8
 - Scala 2.11.12
 - Spark 2.4.X
 
-_A cross compilation is in the works_
+_A cross-compilation is in the works_
 
 #### Test
 
