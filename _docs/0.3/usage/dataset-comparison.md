@@ -50,17 +50,17 @@ dataset-comparison {
 Dataset Comparison can receive the following parameters:
 
 - `keys`
-- `out-path`. 
-- input general ones
-- input specific ones
+- `schema`
+- input/output general ones
+- input/output specific ones
  
 All should be prefixed with `--` as is standard in command line tools to denote parameter/key followed by its value.
 
-- General parameters will be applied to both reference and new data. These have no prefix
-- Specific parameters differentiate if you want to use them for the reference or the new data source. They are prefixed either with `ref-` or `new-`. They override the general ones.
+- General parameters will be applied to both reference, new and out data. These have no prefix. So `--format` or `--rowTag` is enough. Only exception is `out-format`. It is by default set to `parquet` and needs to be explicitly overwritten as described in the next point.
+- Specific parameters differentiate if you want to use them for the reference data, new data or output. They are prefixed either with `ref-`, `new-` or `out-`. They override the general ones. 
 - `keys` is a list of strings delimited by a `,` (comma) that represent the primary key(s)
-- `out-path` is a path to a directory that will be created by the job, and will hold the diff dataframe and `_METRICS` file
-
+- `schema` is a path to schema used for cherrypicking the dataframes. Will be read using Spark's `HadoopConfiguration`.
+- 
 Input parameters (be it general or specific) are governed by the spark datasource formats and options. Imagine having a scala spark code:
 
 ```scala
@@ -71,7 +71,7 @@ sparkSession
     .load(<path provided>)
 ```
 
-In the same way, provide the Dataset Comparison spark job with `format`, but prefix it with `--`, `path`, but prefix it if either `--ref-` or `--new-`, depending on the origin. Optionally, add a `--header` option if you chose `CSV` format or `--rowTag`, if you chose `XML`.
+In the same way, provide the Dataset Comparison spark job with `format`, but prefix it with `--`, `path`, but prefix it if either `--ref-`, `--new-` or `--out`, depending on the origin and direction. Optionally, add a `--header` option if you chose `csv` format or `--rowTag`, if you chose `XML`.
 
 Now how to use it all together:
 
