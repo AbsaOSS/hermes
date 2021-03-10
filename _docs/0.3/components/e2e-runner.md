@@ -23,7 +23,7 @@ redirect_from: /docs/components/dataset-comparison
 
 #### Features for spark-job
 
-- load all plugins on the class path 
+- load all plugins on the classpath 
 - load JSON prescription of tests
 - fail fast or let all tests execute switch
 

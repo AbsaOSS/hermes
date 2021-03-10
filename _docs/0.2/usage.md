@@ -85,18 +85,18 @@ sparkSession
     .load(<path provided>)
 ```
 
-Same way you would provide the Dataset Comparison spark job with `format`, but prefix it with `--`, `path`, but prefix it if either `--ref-` or `--new-`, dependeing on the origing. Maybe add a `--header` option, if you chose `CSV` format or `--rowTag`, if you chose `XML`.
+Same way you would provide the Dataset Comparison spark job with `format`, but prefix it with `--`, `path`, but prefix it if either `--ref-` or `--new-`, depending on the origin. Maybe add a `--header` option, if you chose `CSV` format or `--rowTag`, if you chose `XML`.
 
 Now how to use it all together:
 
 - `--format`, `--new-format`, `--ref-format` for choosing the format type. This can be `parquet`, `csv`, `xml`, `jdbc`, etc.
-- `--ref-path`, `--new-path` and `--out-path` define paths on HDFS of reference data path, newly created data path and diff output path, repspectively. In case of usage of `jdbc` format these can be replaced by `--ref-dbtable` and `--ned-dbtable`
+- `--ref-path`, `--new-path` and `--out-path` define paths on HDFS of reference data path, newly created data path and diff output path, respectively. In case of usage of `jdbc` format these can be replaced by `--ref-dbtable` and `--ned-dbtable`
 - `--keys` to specifie the primary key(s) of the table, e.g. `--keys ID1, ID2`. These can be only top level columns.
 - format specific keys prefixed with `--`, so `--header`, `--rowTag`, `--user`, etc.
 
 **Mandatory fields** are logically the paths/dbtables, format (at least the general one) and any format specific keys that are prescribed by the format used.
 
-**NOTE** if you want to use `jdbc` format or others, requiring specific drivers, you should have appropriate drivers on a class path.
+**NOTE** if you want to use `jdbc` format or others, requiring specific drivers, you should have appropriate drivers on a classpath.
 
 ***
 

@@ -26,7 +26,7 @@ redirect_from: /docs/components/dataset-comparison
 
 #### Features for spark-job
 
-- can load any data type/format that Apache Spark is able to load. For some of the formats to be supported additional  libraries might need to be added to the class path
+- can load any data type/format that Apache Spark is able to load. For some of the formats to be supported, additional libraries might need to be added to the classpath
 - input data referential or new (being tested) can have different formats
 - format of the diff file can be configured as well (default is `parquet`)
 - regardless of fail or pass status of the data comparison, a metrics file called `_METRICS` is wirtten to the destination
@@ -44,5 +44,4 @@ Dataset comparison takes the referential data and tries to align the new (being 
 
 ##### Provided schema
 
-If a schema is provided for a dataset comparison, then the `Schema Alignment` is done against this provided schema for both referential and new data.
-
+If a schema is provided for a dataset comparison, then _schema alignment_ is done against this provided schema for both referential and new data.

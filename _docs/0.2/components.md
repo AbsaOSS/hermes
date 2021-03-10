@@ -16,14 +16,14 @@ Each of the components released by *Hermes* is a command line tool. All are `.ja
 
 #### Dataset Comparison
 
-General tool for data set comparison. Can be used a spark job or a library. For the library-like usage check method `execute` and `compare` in `DatasetComparisonJob` class in `za.co.absa.hermes.datasetComparison` package.
+General tool for data set comparison. It can be used as an Apache Spark job or a library. For the library-like usage check method `execute` and `compare` in `DatasetComparisonJob` class in `za.co.absa.hermes.datasetComparison` package.
 
-If used as a library you just provide 2 dataframes for comparison. But features in case of usage as a spark job are:
+If used as a library you just provide 2 DataFrames for comparison. But features in case of usage as a spark job are:
 
-- can load any data type/format that spark is able to load. It might be needed to add libraries to the class path
+- can load any data type/format that spark is able to load. It might be needed to add libraries to the classpath
 - input data referential or new (being tested) can have different formats
 - if keys are provided, the tool is specific in its output, providing paths to differences and showing the diff data.
-- regardless of fail or pass of the data, a metrics file called _METRICS is wirtten to the destination
+- regardless of fail or pass of the data, a metrics file called _METRICS is written to the destination
 
 ***
 
@@ -35,7 +35,7 @@ A simple comparison tool for [Atum][gh-atum]'s _INFO file. Work on local FS and 
 
 #### E2E Runner
 
-E2E Runner is a tool that runs a "full" end to end tests for [Enceladus][gh-enceladus] project and this module was created specificaly for this project. It runs it's spark-jobs and then modules previously mentioned. This is opensourced just to follow the strategy of our organization and to show the possibilities of usage.
+E2E Runner is a tool that runs a "full" end-to-end tests for [Enceladus][gh-enceladus] project and this module was created specificaly for this project. It runs it's spark-jobs and then modules previously mentioned. This is opensourced just to follow the strategy of our organization and to show the possibilities of usage.
 
 [gh-atum]: https://github.com/AbsaOSS/atum
 [gh-enceladus]: https://github.com/AbsaOSS/enceladus
