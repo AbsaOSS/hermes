@@ -1,5 +1,6 @@
 name: Hermes
 description: E2E Testing tool
+github: [metadata]
 
 collections:
   docs:
