@@ -30,7 +30,7 @@ Test definition JSON has a struct as a base having two keys, `vars` and `runs`.
 
 `vars` holds a struct used for the representation of variables inside of runs. This is so you do not have to repeat yourself with, for example, dataset names or other parameters that are valid for more than one run. Key is the variable you put in other places of the JSON surrounded by `#{` and `}#`, and the value is the value you want to use in that place.
 
-`runs` holds an array of test definitions. Test definition is an object, having its own case class TestDefinition holding the information about of test run. That is a plugin name, input arguments, order, etc. 
+`runs` holds an array of test definitions. Test definition is an object, having its own case class TestDefinition holding the information about the test run. That is a plugin name, input arguments, order, etc. 
 
 **JSON Structure**
 
@@ -38,9 +38,9 @@ Test definition JSON has a struct as a base having two keys, `vars` and `runs`.
 {
   // Struct holding the variables. Optional
   "vars": {
-    // Here `prefix` is a key that will be somewhere in runs as `#{prefix}#` and the 
+    // Here `someKey` is a key that will be somewhere in runs as `#{someKey}#` and the 
     // value will be inputted there instead of it
-    "prefix": "Some Random PreFIX stuff"
+    "someKey": "Some Random someKey stuff"
   },
   // Struct holding array of test definitions. Mandatory
   "runs" : [
@@ -53,9 +53,9 @@ Test definition JSON has a struct as a base having two keys, `vars` and `runs`.
       // Order of the run. Order is used to sort runs by. If there are multiple same order elements,
       // name is used to sort them further in alphabetical order.
       "order" : 1,
-      // Input arguments for the plugin. The first argument will be replaced by var `prefix`.
+      // Input arguments for the plugin. The first argument will be replaced by var `someKey`.
       // Second is a simple string
-      "args" : ["#{prefix}#", "fileName"],
+      "args" : ["#{someKey}#", "fileName"],
       // Arguments, but for the execution of write of plugin result. Optional
       "writeArgs": [],
       // If the test depends on a different test. Will automatically fail if dependee failed. Optional
