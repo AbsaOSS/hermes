@@ -4,6 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,12 +16,11 @@
 
 package za.co.absa.hermes.infoFileComparison
 
-import java.io.{File, FileInputStream}
+import java.io.File
 
-import org.apache.commons.io.IOUtils
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import za.co.absa.atum.model.ControlMeasure
-import za.co.absa.atum.persistence.ControlMeasuresParser
+import za.co.absa.atum.utils.SerializationUtils
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils.ControlMeasureOps
 import za.co.absa.hermes.utils.FileReader
 
@@ -30,13 +30,14 @@ class AtumModelUtilsSuite  extends FunSuite with BeforeAndAfterEach {
   private val fileThree = new File(getClass.getResource("/info_file_wrong.json").getFile).getAbsolutePath
 
   private val controlInfoJsonOne = FileReader.readFileAsString(fileOne)
-  private val controlMeasureOne: ControlMeasure = ControlMeasuresParser.fromJson(controlInfoJsonOne)
+  println(controlInfoJsonOne)
+  private val controlMeasureOne: ControlMeasure = SerializationUtils.fromJson[ControlMeasure](controlInfoJsonOne)
 
   private val controlInfoJsonTwo = FileReader.readFileAsString(fileTwo)
-  private val controlMeasureTwo: ControlMeasure = ControlMeasuresParser.fromJson(controlInfoJsonTwo)
+  private val controlMeasureTwo: ControlMeasure = SerializationUtils.fromJson[ControlMeasure](controlInfoJsonTwo)
 
   private val controlInfoJsonThree = FileReader.readFileAsString(fileThree)
-  private val controlMeasureThree: ControlMeasure = ControlMeasuresParser.fromJson(controlInfoJsonThree)
+  private val controlMeasureThree: ControlMeasure = SerializationUtils.fromJson[ControlMeasure](controlInfoJsonThree)
 
   private val config = InfoFileComparisonConfig.fromTypesafeConfig()
 
