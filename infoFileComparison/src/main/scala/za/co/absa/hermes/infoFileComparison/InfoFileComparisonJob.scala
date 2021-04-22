@@ -17,7 +17,6 @@
 package za.co.absa.hermes.infoFileComparison
 
 import java.io.FileInputStream
-
 import better.files.File
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.io.IOUtils
@@ -25,9 +24,9 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission.FsPermission
 import org.apache.hadoop.fs.{FileSystem, Path}
 import za.co.absa.atum.model.ControlMeasure
-import za.co.absa.atum.persistence.ControlMeasuresParser
-import za.co.absa.atum.utils.ARMImplicits
+import za.co.absa.atum.utils.SerializationUtils
 import za.co.absa.hermes.infoFileComparison.AtumModelUtils._
+import za.co.absa.hermes.utils.FileReader
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
@@ -76,7 +75,7 @@ object InfoFileComparisonJob {
       case p                            => FileSystem.get(hadoopConfiguration).open(new Path(p))
     }
     val controlInfoJson = try IOUtils.readLines(stream).asScala.mkString("\n") finally stream.close()
-    ControlMeasuresParser.fromJson(controlInfoJson)
+    SerializationUtils.fromJson[ControlMeasure](controlInfoJson)
   }
 
   def saveDataToFile(data: String, path: String): Unit = {
@@ -95,24 +94,16 @@ object InfoFileComparisonJob {
   }
 
   private def saveDataToHDFSFile(data: String, path: Path): Unit = {
-    import ARMImplicits._
-
     val fs = FileSystem.get(hadoopConfiguration)
     val overwrite = true
     val progress = null // scalastyle:ignore null
     val permission = new FsPermission("777")
     val bufferSize = hadoopConfiguration.getInt("io.file.buffer.size", bufferSizeDefaultValue)
+    val replication = fs.getDefaultReplication(path)
+    val blockSize = fs.getDefaultBlockSize(path)
 
-    for (fos <- fs.create(
-            path,
-            permission,
-            overwrite,
-            bufferSize,
-            fs.getDefaultReplication(path),
-            fs.getDefaultBlockSize(path),
-            progress)
-         ){
-      fos.write(data.getBytes)
+    FileReader.usingFile(fs.create(path, permission, overwrite, bufferSize, replication, blockSize, progress)) {
+      x => x.write(data.getBytes)
     }
   }
 

@@ -28,7 +28,7 @@ object Dependencies {
   private val sprayJsonVersion = "1.3.5"
   private val typeSafeConfigVersion = "1.3.4"
 
-  private val atumVersion = "0.2.6"
+  private val atumModelVersion = "3.5.0"
   private val commonsVersion = "0.0.14"
   private val hofsVersion = "0.4.0"
 
@@ -45,24 +45,28 @@ object Dependencies {
   )
 
   val e2eDependencies = List(
+    "org.apache.spark"     %% "spark-core"   % sparkVersion     % Provided,
+    "org.apache.spark"     %% "spark-sql"    % sparkVersion     % Provided,
     "org.reflections" %  "reflections" % reflectionsVersion,
     "org.clapper"     %% "classutil"   % classUtilsVersion
   )
 
   val datasetComparisonDependencies = List(
-    "org.apache.spark"   %% "spark-core"           % sparkVersion     % Provided,
-    "org.apache.spark"   %% "spark-sql"            % sparkVersion     % Provided,
-    "org.apache.spark"   %% "spark-avro"           % sparkVersion,
-    "com.databricks"     %% "spark-xml"            % sparkXmlVersion,
-    "org.apache.hadoop"  %  "hadoop-hdfs"          % hadoopVersion    % Provided,
-    "org.apache.hadoop"  %  "hadoop-client"        % hadoopVersion    % Provided,
-    "io.netty"           %  "netty-all"            % nettyAllVersion,
-    "za.co.absa"         %% "spark-hofs"           % hofsVersion,
-    "za.co.absa.commons" %% "commons"              % commonsVersion
+    "org.apache.spark"   %% "spark-core"    % sparkVersion     % Provided,
+    "org.apache.spark"   %% "spark-sql"     % sparkVersion     % Provided,
+    "org.apache.spark"   %% "spark-avro"    % sparkVersion,
+    "com.databricks"     %% "spark-xml"     % sparkXmlVersion,
+    "org.apache.hadoop"  %  "hadoop-hdfs"   % hadoopVersion    % Provided,
+    "org.apache.hadoop"  %  "hadoop-client" % hadoopVersion    % Provided,
+    "io.netty"           %  "netty-all"     % nettyAllVersion,
+    "za.co.absa"         %% "spark-hofs"    % hofsVersion,
+    "za.co.absa.commons" %% "commons"       % commonsVersion
   )
 
   val compareInfoFileDependencies = List(
-    "za.co.absa"           %  "atum"         % atumVersion,
+    "org.apache.spark"     %% "spark-core"   % sparkVersion     % Provided,
+    "org.apache.spark"     %% "spark-sql"    % sparkVersion     % Provided,
+    "za.co.absa"           %% "atum-model"   % atumModelVersion,
     "com.github.pathikrit" %% "better-files" % betterFilesVersion
   )
 
