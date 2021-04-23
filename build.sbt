@@ -15,7 +15,12 @@
 
 ThisBuild / organization := "za.co.absa.hermes"
 ThisBuild / name         := "hermes"
-ThisBuild / scalaVersion := "2.11.12"
+
+lazy val scala211 = "2.11.12"
+lazy val scala212 = "2.12.12"
+
+ThisBuild / scalaVersion := scala211
+ThisBuild / crossScalaVersions := Seq(scala211, scala212)
 
 Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 

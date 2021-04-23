@@ -200,10 +200,7 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
   }
 
   test("Compare nested structures with errors") {
-    val path: URL = getClass.getResource("/json_output.txt")
-    val lines: List[String] = FileReader.usingFile(Source.fromURL(path)) { _.getLines().toList }
-    val outCapture = new ByteArrayOutputStream
-
+    val expexted = Array("WrappedArray(legs_0_conditions_0_checks_0_checkNums_5)", "WrappedArray(legs_0_legid)")
     val refPath = getClass.getResource("/json_orig").toString
     val newPath = getClass.getResource("/json_changed").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
@@ -220,11 +217,9 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
       DatasetComparisonJob.main(args)
     }
     val df = spark.read.format("parquet").load(outPath)
+    val actual: Array[String] = df.select("errCol").collect().flatMap(_.toSeq).map(_.toString)
 
-    Console.withOut(outCapture) { df.show(false) }
-    val result = new String(outCapture.toByteArray).replace("\r\n", "\n").split("\n").toList
-
-    assert(lines == result)
+    assert(actual sameElements expexted)
   }
 
   test("Key based compare of xml files with compound keys") {
