@@ -13,16 +13,18 @@ Hermes is an E2E testing tool created mainly for the use in [ABSA OSS][gh-absa] 
 
 ## To Build
 
+Use either of the commands below. Depending on your versions.
 ```bash
-sbt assembly
+sbt ++2.11.12 assembly -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 assembly -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 assembly -DSPARK_VERSION=3.1.1
 ```
 
 Known to work with:
 
-- Spark 2.4.4
-- Java 1.8.0_191-b12
-- Scala 2.11.12
-- Hadoop 2.7.5
+- Spark 2.4 and 3.1
+- Java 1.8
+- Scala 2.11.12 and 2.12.12
 
 ## Dataset Comparison
 
