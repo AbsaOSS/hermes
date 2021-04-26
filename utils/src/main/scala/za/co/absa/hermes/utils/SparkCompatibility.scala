@@ -26,6 +26,6 @@ object SparkCompatibility {
   def checkVersion(sparkVersion: String): Unit = {
     val version = asSemVer(sparkVersion)
     require(version >= minSparkVersionIncluded && version < maxSparkVersionExcluded,
-      s"Spark's version must be more then $minSparkVersionIncluded (including) and less then (excluding) $maxSparkVersionExcluded")
+      s"Spark version must be more than $minSparkVersionIncluded (including) and less than (excluding) $maxSparkVersionExcluded")
   }
 }
