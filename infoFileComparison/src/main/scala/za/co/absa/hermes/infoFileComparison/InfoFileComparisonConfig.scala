@@ -18,7 +18,15 @@ package za.co.absa.hermes.infoFileComparison
 
 import com.typesafe.config.{Config, ConfigFactory}
 
-case class InfoFileComparisonConfig(versionMetaKeys: List[String], keysToIgnore: List[String])
+case class InfoFileComparisonConfig(versionMetaKeys: List[String], keysToIgnore: List[String]) {
+  def getLoggableString: String = {
+    s"""Effective InfoFileComparison configuration:
+       | Meta Keys (indicating versions) only to be printed:
+       |  ${versionMetaKeys.mkString("\n  ")}
+       | Meta Keys to be ignored:
+       |  ${keysToIgnore.mkString("\n  ")}""".stripMargin
+  }
+}
 
 object InfoFileComparisonConfig {
   def fromTypesafeConfig(path: Option[String] = None): InfoFileComparisonConfig = {

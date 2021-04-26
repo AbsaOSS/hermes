@@ -43,4 +43,12 @@ abstract class DatasetComparisonConfig {
       _expectedPrefix <- validateColumnName(expectedPrefix, "expectedPrefix")
     } yield this
   }
+
+  def getLoggableString: String = {
+    s"""Effective DatasetComparison configuration:
+       | Error Column Name (errorColumnName) -> "$errorColumnName"
+       | Prefix of original columns (expectedPrefix) -> "$expectedPrefix"
+       | Prefix of new columns (actualPrefix) -> "$actualPrefix"
+       | Allow duplicities in dataframes (allowDuplicates) -> "$allowDuplicates"""".stripMargin
+  }
 }
