@@ -17,12 +17,15 @@ Hermes is an E2E testing tool created mainly for the use in [ABSA OSS][gh-absa] 
 sbt assembly
 ```
 
-Known to work with:
+## Known to work with:
 
-- Spark 2.4.4
+- Spark 2.4.2 - 3.1.1 [1]
 - Java 1.8.0_191-b12
-- Scala 2.11.12
-- Hadoop 2.7.5
+- Scala 2.11.12 and 2.12.12
+
+[1] There are now spark version guards to protect from false positives. 
+If there is someone willing to test for older versions, we are happy to extend these.
+These are applicable only to use as a spark-job not as a library
 
 ## Dataset Comparison
 
