@@ -17,17 +17,20 @@
 package za.co.absa.hermes.datasetComparison
 
 import java.io.PrintWriter
-
 import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.SPARK_VERSION
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.datasetComparison.dataFrame.Utils
+import za.co.absa.hermes.utils.SparkCompatibility
 
 object DatasetComparisonJob {
 
   def main(args: Array[String]): Unit = {
+    SparkCompatibility.checkVersion(SPARK_VERSION)
+
     val cliParameters = CliParametersParser.parse(args)
 
     implicit val sparkSession: SparkSession = SparkSession.builder()
