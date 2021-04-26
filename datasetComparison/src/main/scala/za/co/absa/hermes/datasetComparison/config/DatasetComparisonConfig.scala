@@ -49,7 +49,6 @@ abstract class DatasetComparisonConfig {
        | Error Column Name (errorColumnName) -> "$errorColumnName"
        | Prefix of original columns (expectedPrefix) -> "$expectedPrefix"
        | Prefix of new columns (actualPrefix) -> "$actualPrefix"
-       | Allow duplicities in dataframes (allowDuplicates) -> "$allowDuplicates"
-       |""".stripMargin
+       | Allow duplicities in dataframes (allowDuplicates) -> "$allowDuplicates"""".stripMargin
   }
 }

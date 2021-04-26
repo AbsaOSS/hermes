@@ -56,6 +56,7 @@ object InfoFileComparisonJob {
     val newControlMeasure = loadControlMeasures(cmd.newPath)
     val refControlMeasure = loadControlMeasures(cmd.refPath)
     val config = InfoFileComparisonConfig.fromTypesafeConfig(configPath)
+    scribe.info(config.getLoggableString)
 
     val diff: List[ModelDifference[_]] = compare(newControlMeasure, refControlMeasure, config)
 
