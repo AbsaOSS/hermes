@@ -21,7 +21,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 case class InfoFileComparisonConfig(versionMetaKeys: List[String], keysToIgnore: List[String]) {
   def getLoggableString: String = {
     s"""Effective InfoFileComparison configuration:
-       | Meta Keys indicating version that are only to be printed:
+       | Meta Keys (indicating versions) only to be printed:
        |  ${versionMetaKeys.mkString("\n  ")}
        | Meta Keys to be ignored:
        |  ${keysToIgnore.mkString("\n  ")}""".stripMargin
