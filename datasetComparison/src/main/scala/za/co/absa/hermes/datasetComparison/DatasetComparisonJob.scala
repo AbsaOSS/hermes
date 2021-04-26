@@ -86,7 +86,9 @@ object DatasetComparisonJob {
   }
 
   def getConfig(configPath: Option[String]): DatasetComparisonConfig = {
-    new TypesafeConfig(configPath).validate().get
+    val config = new TypesafeConfig(configPath).validate().get
+    scribe.info(config.getLoggableString)
+    config
   }
 
   def writeMetricsToFile(result: ComparisonResult, fileName: String)
