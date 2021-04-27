@@ -31,7 +31,6 @@ Depending on your versions of scala or spark use one of:
 
 For so called _Fat JAR_, depending on your versions of scala or spark, use one of:
 
-
 `sbt ++2.11.12 -DSPARK_VERSION=2.4.7 assembly`
 `sbt ++2.12.12 -DSPARK_VERSION=2.4.7 assembly`
 `sbt ++2.12.12 -DSPARK_VERSION=3.1.1 assembly`
