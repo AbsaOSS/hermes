@@ -13,8 +13,11 @@ Hermes is an E2E testing tool created mainly for the use in [ABSA OSS][gh-absa] 
 
 ## To Build
 
+Use either of the commands below. Depending on your versions.
 ```bash
-sbt assembly
+sbt ++2.11.12 assembly -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 assembly -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 assembly -DSPARK_VERSION=3.1.1
 ```
 
 ## Known to work with:
