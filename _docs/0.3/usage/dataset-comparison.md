@@ -87,7 +87,23 @@ Now how to use it all together:
 
 #### Usage as library
 
-For usage as library use class `za.co.absa.hermes.datasetComparison.DatasetComparator`. 
+Add DatasetComparison dependency to your package manager. 
+
+```scala
+libraryDependencies += "za.co.absa.hermes" %% "dataset-comparison" % "X.Y.Z"
+```
+
+Then import `DatasetComparator`
+
+```scala
+import za.co.absa.hermes.datasetComparison.DatasetComparator
+```
+
+Finally create new `DatasetComparator` and call compare. Do not forget that an implicit spark session is needed. More details about the class bellow.
+
+```scala
+val cr: ComparisonResult  = new DatasetComparator(df1, df2).compare
+```
 
 **Prescription of DatasetComparator class**:
 
