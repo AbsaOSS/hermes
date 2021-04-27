@@ -200,7 +200,7 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
   }
 
   test("Compare nested structures with errors") {
-    val expexted = Array("WrappedArray(legs_0_conditions_0_checks_0_checkNums_5)", "WrappedArray(legs_0_legid)")
+    val expected = Array("WrappedArray(legs_0_conditions_0_checks_0_checkNums_5)", "WrappedArray(legs_0_legid)")
     val refPath = getClass.getResource("/json_orig").toString
     val newPath = getClass.getResource("/json_changed").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
