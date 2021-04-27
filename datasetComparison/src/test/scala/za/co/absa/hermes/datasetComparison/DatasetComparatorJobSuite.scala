@@ -219,7 +219,7 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
     val df = spark.read.format("parquet").load(outPath)
     val actual: Array[String] = df.select("errCol").collect().flatMap(_.toSeq).map(_.toString)
 
-    assert(actual sameElements expexted)
+    assert(actual sameElements expected)
   }
 
   test("Key based compare of xml files with compound keys") {
