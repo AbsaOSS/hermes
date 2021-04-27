@@ -21,6 +21,7 @@ lazy val scala212 = "2.12.12"
 
 ThisBuild / scalaVersion := scala211
 ThisBuild / crossScalaVersions := Seq(scala211, scala212)
+ThisBuild / releaseCrossBuild := true
 
 Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 
