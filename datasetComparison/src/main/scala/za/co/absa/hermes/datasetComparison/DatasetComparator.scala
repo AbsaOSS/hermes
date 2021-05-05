@@ -265,12 +265,12 @@ class DatasetComparator(dataFrameReference: DataFrame,
    * @return Returns a DataFrame with key column appended
    */
   private def addKeyColumn(selector: List[Column], df: DataFrame, cmpUniqueColumn: String): DataFrame = {
-    val concatenatedColumns = if (keys.nonEmpty) {
-      for(i <- keys.map(col).toSeq; p <- Seq(lit("|"), i)) yield p
+    val columnsToConcatenate = if (keys.nonEmpty) {
+      keys.map(col(_).cast("string")).toSeq
     } else {
-      for(i <- selector; p <- Seq(lit("|"), i)) yield p
+      selector.map(_.cast("string"))
     }
-    df.withColumn(cmpUniqueColumn, md5(concat(concatenatedColumns: _*)))
+    df.withColumn(cmpUniqueColumn, md5(concat_ws("|", columnsToConcatenate: _*)))
   }
 
   /**
