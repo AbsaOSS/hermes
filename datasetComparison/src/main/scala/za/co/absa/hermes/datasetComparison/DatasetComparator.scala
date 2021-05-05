@@ -18,7 +18,7 @@ package za.co.absa.hermes.datasetComparison
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame}
 import za.co.absa.commons.spark.SchemaUtils
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
@@ -42,8 +42,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
                         dataFrameActual: DataFrame,
                         keys: Set[String] = Set.empty[String],
                         config: DatasetComparisonConfig = new TypesafeConfig(None),
-                        optionalSchema: Option[StructType] = None)
-                       (implicit sparkSession: SparkSession) {
+                        optionalSchema: Option[StructType] = None){
 
   /**
    * Case class created for the single purpose of holding a pair of reference and tested data in any form together.

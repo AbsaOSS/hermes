@@ -18,7 +18,7 @@ package za.co.absa.hermes.datasetComparison.config
 
 import com.typesafe.config.{Config, ConfigFactory}
 
-class TypesafeConfig(path: Option[String]) extends DatasetComparisonConfig {
+case class TypesafeConfig(path: Option[String]) extends DatasetComparisonConfig {
   private val conf: Config = path match {
     case Some(x) => ConfigFactory.load(x)
     case None    => ConfigFactory.load()

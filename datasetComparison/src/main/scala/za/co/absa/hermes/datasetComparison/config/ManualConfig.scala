@@ -16,9 +16,11 @@
 
 package za.co.absa.hermes.datasetComparison.config
 
-class ManualConfig(
-  val errorColumnName: String,
-  val actualPrefix: String,
-  val expectedPrefix: String,
-  val allowDuplicates: Boolean
-) extends DatasetComparisonConfig {}
+import com.typesafe.config.ConfigFactory
+
+case class ManualConfig(
+  errorColumnName: String,
+  actualPrefix: String,
+  expectedPrefix: String,
+  allowDuplicates: Boolean
+) extends DatasetComparisonConfig
