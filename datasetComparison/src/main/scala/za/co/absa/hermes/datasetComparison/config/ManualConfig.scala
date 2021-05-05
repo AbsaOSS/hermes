@@ -16,8 +16,6 @@
 
 package za.co.absa.hermes.datasetComparison.config
 
-import com.typesafe.config.ConfigFactory
-
 case class ManualConfig(
   errorColumnName: String,
   actualPrefix: String,
