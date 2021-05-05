@@ -16,7 +16,6 @@
 
 package za.co.absa.hermes.datasetComparison
 
-import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
@@ -44,6 +43,21 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
       "--delimiter", ",",
       "--new-path", getClass.getResource("/dataSample1.csv").toString,
       "--ref-path", getClass.getResource("/dataSample2.csv").toString,
+      "--out-path", outPath
+    )
+
+    DatasetComparisonJob.main(args)
+
+    assert(Files.exists(Paths.get(outPath,"_METRICS")))
+  }
+
+  test("Compare the same datasets by generic way - complex structure") {
+    val outPath = s"target/test_output/comparison_job/positive/$timePrefix"
+
+    val args = Array(
+      "--format", "json",
+      "--new-path", getClass.getResource("/dataSample2.json").toString,
+      "--ref-path", getClass.getResource("/dataSample2.json").toString,
       "--out-path", outPath
     )
 
