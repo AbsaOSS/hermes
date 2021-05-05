@@ -36,7 +36,6 @@ import za.co.absa.hermes.utils.HelperFunctions
  * @param optionalSchema Optional schema to cherry-pick columns form the two dataframes to compare. For example, if you
  *                       have a timestamp column that will never be the same, you provide a schema without that timestamp
  *                       and it will not be compared.
- * @param sparkSession Implicit spark session.
  */
 class DatasetComparator(dataFrameReference: DataFrame,
                         dataFrameActual: DataFrame,
