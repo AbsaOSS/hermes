@@ -22,7 +22,6 @@ import org.apache.spark.SPARK_VERSION
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
-import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.datasetComparison.dataFrame.Utils
 import za.co.absa.hermes.utils.SparkCompatibility
 
@@ -89,7 +88,7 @@ object DatasetComparisonJob {
   }
 
   def getConfig(configPath: Option[String]): DatasetComparisonConfig = {
-    val config = new TypesafeConfig(configPath).validate().get
+    val config = DatasetComparisonConfig.fromTypeSafeConfig(configPath).validate().get
     scribe.info(config.getLoggableString)
     config
   }

@@ -20,7 +20,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame}
 import za.co.absa.commons.spark.SchemaUtils
-import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
 
 /**
@@ -40,7 +39,7 @@ import za.co.absa.hermes.utils.HelperFunctions
 class DatasetComparator(dataFrameReference: DataFrame,
                         dataFrameActual: DataFrame,
                         keys: Set[String] = Set.empty[String],
-                        config: DatasetComparisonConfig = new TypesafeConfig(None),
+                        config: DatasetComparisonConfig = DatasetComparisonConfig.default,
                         optionalSchema: Option[StructType] = None){
 
   /**
