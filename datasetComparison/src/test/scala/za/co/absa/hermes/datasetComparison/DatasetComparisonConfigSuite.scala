@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison.config
+package za.co.absa.hermes.datasetComparison
 
 import org.scalatest.FunSuite
 
-class TypeSafeConfigSuite extends FunSuite {
+class DatasetComparisonConfigSuite extends FunSuite {
+  test("Manual Config Correct") {
+    val conf = DatasetComparisonConfig("errCol", "_actual", "_expected", false)
+    assert(conf.validate().isSuccess)
+    assert("errCol" == conf.errorColumnName)
+    assert("_actual" == conf.actualPrefix)
+    assert("_expected" == conf.expectedPrefix)
+    assert(!conf.allowDuplicates)
+  }
+
+  test("Manual Config Bad Column Name") {
+    val conf = DatasetComparisonConfig("errCol", "_actua l", "_expected", false)
+    assert(conf.validate().isFailure)
+  }
+
   test("Default Config Loaded") {
-    val conf = new TypesafeConfig(None)
+    val conf = DatasetComparisonConfig.default
     assert("errCol" == conf.errorColumnName)
     assert("actual" == conf.actualPrefix)
     assert("expected" == conf.expectedPrefix)
@@ -28,7 +42,7 @@ class TypeSafeConfigSuite extends FunSuite {
   }
 
   test("Config with provided path loaded") {
-    val conf = new TypesafeConfig(Some("confData/application.conf"))
+    val conf = DatasetComparisonConfig.fromTypeSafeConfig(Some("confData/application.conf"))
 
     assert("errCol2" == conf.errorColumnName)
     assert("actual2" == conf.actualPrefix)

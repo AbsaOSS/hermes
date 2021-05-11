@@ -18,9 +18,8 @@ package za.co.absa.hermes.datasetComparison
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame}
 import za.co.absa.commons.spark.SchemaUtils
-import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
 
 /**
@@ -36,14 +35,12 @@ import za.co.absa.hermes.utils.HelperFunctions
  * @param optionalSchema Optional schema to cherry-pick columns form the two dataframes to compare. For example, if you
  *                       have a timestamp column that will never be the same, you provide a schema without that timestamp
  *                       and it will not be compared.
- * @param sparkSession Implicit spark session.
  */
 class DatasetComparator(dataFrameReference: DataFrame,
                         dataFrameActual: DataFrame,
                         keys: Set[String] = Set.empty[String],
-                        config: DatasetComparisonConfig = new TypesafeConfig(None),
-                        optionalSchema: Option[StructType] = None)
-                       (implicit sparkSession: SparkSession) {
+                        config: DatasetComparisonConfig = DatasetComparisonConfig.default,
+                        optionalSchema: Option[StructType] = None){
 
   /**
    * Case class created for the single purpose of holding a pair of reference and tested data in any form together.

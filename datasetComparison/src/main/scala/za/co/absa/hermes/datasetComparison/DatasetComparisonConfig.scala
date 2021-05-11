@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package za.co.absa.hermes.datasetComparison.config
+package za.co.absa.hermes.datasetComparison
 
+import com.typesafe.config.{Config, ConfigFactory}
 import scala.util.{Failure, Success, Try}
 
-abstract class DatasetComparisonConfig {
-  val errorColumnName: String
-  val actualPrefix: String
-  val expectedPrefix: String
-  val allowDuplicates: Boolean
+case class DatasetComparisonConfig(errorColumnName: String,
+                                   actualPrefix: String,
+                                   expectedPrefix: String,
+                                   allowDuplicates: Boolean) {
 
   def validate(): Try[DatasetComparisonConfig]  = {
 
@@ -38,9 +38,9 @@ abstract class DatasetComparisonConfig {
     }
 
     for {
-      _errColumnName <- validateColumnName(errorColumnName, "errorColumnName")
-      _actualPrefix <- validateColumnName(actualPrefix, "actualPrefix")
-      _expectedPrefix <- validateColumnName(expectedPrefix, "expectedPrefix")
+      _ <- validateColumnName(errorColumnName, "errorColumnName")
+      _ <- validateColumnName(actualPrefix, "actualPrefix")
+      _ <- validateColumnName(expectedPrefix, "expectedPrefix")
     } yield this
   }
 
@@ -51,4 +51,22 @@ abstract class DatasetComparisonConfig {
        | Prefix of new columns (actualPrefix) -> "$actualPrefix"
        | Allow duplicities in dataframes (allowDuplicates) -> "$allowDuplicates"""".stripMargin
   }
+}
+
+object DatasetComparisonConfig {
+  def fromTypeSafeConfig(path: Option[String] = None): DatasetComparisonConfig = {
+    val conf: Config = path match {
+      case Some(x) => ConfigFactory.load(x)
+      case None    => ConfigFactory.load()
+    }
+
+    val errorColumnName: String = conf.getString("dataset-comparison.errColumn")
+    val actualPrefix: String = conf.getString("dataset-comparison.actualPrefix")
+    val expectedPrefix: String = conf.getString("dataset-comparison.expectedPrefix")
+    val allowDuplicates: Boolean = conf.getBoolean("dataset-comparison.allowDuplicates")
+
+    DatasetComparisonConfig(errorColumnName, actualPrefix, expectedPrefix, allowDuplicates)
+  }
+
+  def default: DatasetComparisonConfig = fromTypeSafeConfig()
 }
