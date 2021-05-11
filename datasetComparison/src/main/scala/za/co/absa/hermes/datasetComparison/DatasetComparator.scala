@@ -265,11 +265,12 @@ class DatasetComparator(dataFrameReference: DataFrame,
    * @return Returns a DataFrame with key column appended
    */
   private def addKeyColumn(selector: List[Column], df: DataFrame, cmpUniqueColumn: String): DataFrame = {
-    if (keys.nonEmpty) {
-      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", keys.map(col).toSeq: _*)))
+    val columnsToConcatenate = if (keys.nonEmpty) {
+      keys.map(col(_).cast("string")).toSeq
     } else {
-      df.withColumn(cmpUniqueColumn, md5(concat_ws("|", selector: _*)))
+      selector.map(_.cast("string"))
     }
+    df.withColumn(cmpUniqueColumn, md5(concat_ws("|", columnsToConcatenate: _*)))
   }
 
   /**
