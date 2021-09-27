@@ -59,25 +59,25 @@ object DatasetComparisonJob {
     val dsComparison = new DatasetComparator(dataFrameRef, dataFrameActual, cliParameters.keys, config, optionalSchema)
     val result = dsComparison.compare
 
-    val finalPath = cliParameters.outDataParameters.map { outOptions =>
-      val path: String = result.resultDF match {
+    val resolver = cliParameters.outDataParameters.map { outOptions =>
+      val pr = result.resultDF match {
         case Some(df) => Utils.writeNextDataFrame(df, outOptions)
         case None => Utils.getUniqueFilePath(outOptions, "", sparkSession.sparkContext.hadoopConfiguration)
       }
-      writeMetricsToFile(result, path)
-      path
+      writeMetricsToFile(result, pr)
+      pr
     }
 
     if (result.diffCount > 0) {
       throw DatasetsDifferException(
           cliParameters.referenceDataParameters.path,
           cliParameters.actualDataParameters.path,
-          finalPath.getOrElse("Not Provided"),
+          resolver.map(_.fullPath).getOrElse("Not Provided"),
           result.refRowCount,
           result.newRowCount
       )
     } else {
-      scribe.info(s"Expected and actual data sets are the same. Metrics written to ${finalPath.getOrElse("Not Provided")}")
+      scribe.info(s"Expected and actual data sets are the same. Metrics written to ${resolver.map(_.fullPath).getOrElse("Not Provided")}")
     }
   }
 
@@ -94,11 +94,10 @@ object DatasetComparisonJob {
     config
   }
 
-  def writeMetricsToFile(result: ComparisonResult, fileName: String)
+  def writeMetricsToFile(result: ComparisonResult, pathResolver: PathResolver)
                         (implicit sparkSession: SparkSession): Unit = {
-    val path = new Path(fileName, "_METRICS")
-    val fs = FileSystem.get(sparkSession.sparkContext.hadoopConfiguration)
-    val fsOut = fs.create(path)
+    val path = new Path(pathResolver.basePath, "_METRICS")
+    val fsOut = pathResolver.fs.create(path)
 
     try {
       val pw = new PrintWriter(fsOut, true)

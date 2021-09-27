@@ -19,7 +19,7 @@ package za.co.absa.hermes.e2eRunner.plugins
 import org.apache.spark.sql.SparkSession
 import za.co.absa.hermes.datasetComparison.cliUtils.CliParametersParser
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
-import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparator, DatasetComparisonJob}
+import za.co.absa.hermes.datasetComparison.{ComparisonResult, DatasetComparator, DatasetComparisonJob, PathResolver}
 import za.co.absa.hermes.e2eRunner.logging.{ErrorResultLog, InfoResultLog, ResultLog}
 import za.co.absa.hermes.e2eRunner.{Plugin, PluginResult, SparkBase, TestDefinition}
 import za.co.absa.hermes.utils.HelperFunctions
@@ -47,7 +47,9 @@ case class DatasetComparisonResult(arguments: Array[String],
       )
     }
 
-    DatasetComparisonJob.writeMetricsToFile(returnedValue, outDFOptions.path)
+
+    val pr = PathResolver.pathStringToFsWithPath(outDFOptions.path, spark.sparkContext.hadoopConfiguration)
+    DatasetComparisonJob.writeMetricsToFile(returnedValue, pr)
   }
 
   /**

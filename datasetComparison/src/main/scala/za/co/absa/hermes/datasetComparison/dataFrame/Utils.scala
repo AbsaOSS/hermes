@@ -17,8 +17,8 @@
 package za.co.absa.hermes.datasetComparison.dataFrame
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, SparkSession}
+import za.co.absa.hermes.datasetComparison.PathResolver
 
 object Utils {
   private def setOptions(dfReader: DataFrameReader, parameters: Parameters): DataFrameReader =
@@ -35,24 +35,13 @@ object Utils {
     if (parameters.format == "jdbc") dfWriter.save()
     else dfWriter.save(endPath)
 
-  def getUniqueFilePath(parameters: Parameters, extraPath: String, conf: Configuration): String = {
-    val fs = FileSystem.get(conf)
-    val basePath = s"${parameters.path}$extraPath"
+  def getUniqueFilePath(parameters: Parameters, extraPath: String, conf: Configuration): PathResolver = {
+    val pathResolver: PathResolver = PathResolver.pathStringToFsWithPath(s"${parameters.path}$extraPath", conf)
 
-    @scala.annotation.tailrec
-    def appendNumberAndTest(namePt1: String,
-                            namePt2: String,
-                            condition: String => Boolean,
-                            count: Int = 1): String = {
-      val newName = s"${namePt1}_run$count$namePt2"
-      if (condition(newName)) { appendNumberAndTest(namePt1, namePt2, condition, count + 1) }
-      else newName
-    }
-
-    if (fs.exists(new Path(basePath))) {
-      appendNumberAndTest(parameters.path, extraPath, { x: String => fs.exists(new Path(x)) })
+    if (pathResolver.fsExists) {
+      pathResolver.getPathWithTimestamp
     } else {
-      basePath
+      pathResolver
     }
   }
 
@@ -70,11 +59,11 @@ object Utils {
   }
 
   def writeNextDataFrame(df: DataFrame, parameters: Parameters, pathSuffix: String = "")
-                        (implicit spark: SparkSession): String = {
-    val uniqueFilePath: String = getUniqueFilePath(parameters, pathSuffix, spark.sparkContext.hadoopConfiguration)
+                        (implicit spark: SparkSession): PathResolver = {
+    val pathResolver = getUniqueFilePath(parameters, pathSuffix, spark.sparkContext.hadoopConfiguration)
     val dfWriter =  df.write.format(parameters.format)
     val withOptions = setOptions(dfWriter, parameters)
-    save(withOptions, parameters, uniqueFilePath)
-    uniqueFilePath
+    save(withOptions, parameters, pathResolver.fullPath)
+    pathResolver
   }
 }
