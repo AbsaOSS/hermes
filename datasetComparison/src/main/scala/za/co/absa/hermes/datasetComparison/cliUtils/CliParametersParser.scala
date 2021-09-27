@@ -29,7 +29,7 @@ private case class OptionsTrio(reference: Map[String, String],
     OptionsTrio(
       genericMap ++ reference,
       genericMap ++ actual,
-      genericMap ++ output
+      (genericMap - "format") ++ output
     )
   }
 
