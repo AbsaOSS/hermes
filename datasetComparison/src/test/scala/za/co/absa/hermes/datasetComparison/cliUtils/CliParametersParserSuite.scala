@@ -86,15 +86,15 @@ class CliParametersParserSuite extends FunSuite {
     val args = Array(
       "--ref-format", "specialFormat",
       "--format", "jdbc",
-      "--new-dbtable", "table1",
-      "--ref-path", "ref/path/alfa"
+      "--ref-path", "ref/path/alfa",
+      "--out-path", "something"
     )
 
     val caught = intercept[MissingArgumentException] {
       CliParametersParser.parse(args)
     }
 
-    assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--out-dbtable"""" == caught.getMessage)
+    assert("""DB table name is mandatory option for format type jdbc. Use "--dbtable" or "--new-dbtable"""" == caught.getMessage)
   }
 
   test("Test no dbtable for jdbc") {
