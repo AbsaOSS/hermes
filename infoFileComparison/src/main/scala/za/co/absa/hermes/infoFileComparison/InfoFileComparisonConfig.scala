@@ -35,12 +35,12 @@ object InfoFileComparisonConfig {
       case None    => ConfigFactory.load()
     }
 
-    import collection.JavaConversions._
+    import collection.JavaConverters._
 
-    val versionMetaKeys = conf.getStringList("info-file-comparison.atum-models.versionMetaKeys").toList
-    val keysToIgnore = conf.getStringList("info-file-comparison.atum-models.ignoredMetaKeys").toList
+    val versionMetaKeys = conf.getStringList("info-file-comparison.atum-models.versionMetaKeys").asScala.toList
+    val keysToIgnore = conf.getStringList("info-file-comparison.atum-models.ignoredMetaKeys").asScala.toList
     InfoFileComparisonConfig(versionMetaKeys, keysToIgnore)
   }
 
-  def empty: InfoFileComparisonConfig = InfoFileComparisonConfig(List.empty[String], List.empty[String])
+  val empty: InfoFileComparisonConfig = InfoFileComparisonConfig(List.empty[String], List.empty[String])
 }

@@ -20,11 +20,12 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.types.{StringType, StructType}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import za.co.absa.hermes.datasetComparison.cliUtils.CliParameters
-import za.co.absa.hermes.datasetComparison.config.ManualConfig
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
 import za.co.absa.hermes.utils.SparkTestBase
 
 class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
+  private val manualConfig = DatasetComparisonConfig("errCol", "actual", "expected", true)
+
   test("Test a positive comparison") {
     val cliOptions = new CliParameters(
       Parameters("csv", Map("delimiter" -> ","), getClass.getResource("/dataSample2.csv").toString),
@@ -36,13 +37,6 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
 
     val df1 = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val df2 = Utils.loadDataFrame(cliOptions.actualDataParameters)
-
-    val manualConfig = new ManualConfig(
-      "errCol",
-      "actual",
-      "expected",
-      true
-    )
 
     val expectedResult = ComparisonResult(
       10, 10, 0, 0, 10,
@@ -74,13 +68,6 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
 
     val df1 = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val df2 = Utils.loadDataFrame(cliOptions.actualDataParameters)
-
-    val manualConfig = new ManualConfig(
-      "errCol",
-      "actual",
-      "expected",
-      true
-    )
 
     val expectedResult = ComparisonResult(
       10, 10, 0, 0, 10,
@@ -117,13 +104,6 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
     val df1 = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val df2 = Utils.loadDataFrame(cliOptions.actualDataParameters)
 
-    val manualConfig = new ManualConfig(
-      "errCol",
-      "actual",
-      "expected",
-      true
-    )
-
     val schema = new StructType()
       .add("_c01", StringType, true)
       .add("_c1", StringType, true)
@@ -147,13 +127,6 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
 
     val df1 = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val df2 = Utils.loadDataFrame(cliOptions.actualDataParameters)
-
-    val manualConfig = new ManualConfig(
-      "errCol",
-      "actual",
-      "expected",
-      true
-    )
 
     val result = new DatasetComparator(df1, df2, cliOptions.keys, manualConfig).compare
     assert(9 == result.refRowCount)
