@@ -31,7 +31,7 @@ jobs:
         exclude:
           - scala: 2.11.12
             spark: 3.1.1
-    uses: AbsaOSS/reusable-workflows/.github/workflows/sbt/run_test.yml@develop
+    uses: AbsaOSS/reusable-workflows/.github/workflows/sbt_run_test.yml@develop
     with:
       scala_version: ${{ matrix.scala_version }}
       spark_version: ${{ matrix.spark_version }}
