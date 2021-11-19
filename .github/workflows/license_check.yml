@@ -23,4 +23,4 @@ on:
 
 jobs:
   license-test:
-    uses: AbsaOSS/reusable-workflows/sbt/license_check.yml
+    uses: AbsaOSS/reusable-workflows/sbt/license_check.yml@develop
