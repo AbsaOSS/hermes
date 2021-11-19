@@ -23,7 +23,6 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -32,14 +31,7 @@ jobs:
         exclude:
           - scala: 2.11.12
             spark: 3.1.1
-    name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - uses: coursier/cache-action@v5
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
-        with:
-          java-version: "adopt@1.8"
-      - name: Build and run tests
-        run: sbt ++${{matrix.scala}} test -DSPARK_VERSION=${{matrix.spark}}
+    uses: AbsaOSS/reusable-workflows/sbt/run_test.yml
+    with:
+      scala_version: ${{ matrix.scala_version }}
+      spark_version: ${{ matrix.spark_version }}
