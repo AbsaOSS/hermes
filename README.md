@@ -1,4 +1,6 @@
 # Enceladus TestUtils
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAbsaOSS%2Fhermes.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FAbsaOSS%2Fhermes?ref=badge_shield)
+
 
 - [Enceladus TestUtils](#enceladus-testutils)
   - [To Build](#to-build)
@@ -114,3 +116,6 @@ spark-submit \
 [gh-absa]: https://github.com/AbsaOSS
 [gh-pages]: https://absaoss.github.io/hermes/
 [atum]: https://github.com/AbsaOSS/atum
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAbsaOSS%2Fhermes.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAbsaOSS%2Fhermes?ref=badge_large)
