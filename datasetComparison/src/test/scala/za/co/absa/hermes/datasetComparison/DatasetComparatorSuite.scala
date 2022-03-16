@@ -23,7 +23,6 @@ import za.co.absa.hermes.datasetComparison.cliUtils.CliParameters
 import za.co.absa.hermes.datasetComparison.config.ManualConfig
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
 import za.co.absa.hermes.utils.SparkTestBase
-import za.co.absa.spark.commons.implicits.StructTypeImplicits.StructTypeEnhancements
 
 class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
   test("Test a positive comparison") {
