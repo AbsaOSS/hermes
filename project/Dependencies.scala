@@ -31,19 +31,21 @@ object Dependencies {
   private val atumModelVersion = "3.5.0"
   private val commonsVersion = "0.0.14"
   private val hofsVersion = "0.4.0"
-  private val absaCommonsVersion = "0.0.27"
+  private val absaCommonsVersion = "1.0.1"
+  private val absaSparkCommonsVersion = "0.2.0"
 
   private val scalatestVersion = "3.0.5"
 
   def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "2.4.7")
 
   val baseDependencies = List(
-    "com.github.scopt"   %% "scopt"       % scoptVersion,
-    "com.outr"           %% "scribe"      % scribeVersion,
-    "com.typesafe"       %  "config"      % typeSafeConfigVersion,
-    "io.spray"           %%  "spray-json" % sprayJsonVersion,
-    "org.scalatest"      %% "scalatest"   % scalatestVersion       % Test,
-    "za.co.absa.commons" %% "commons"     % absaCommonsVersion
+    "com.github.scopt"   %% "scopt"         % scoptVersion,
+    "com.outr"           %% "scribe"        % scribeVersion,
+    "com.typesafe"       %  "config"        % typeSafeConfigVersion,
+    "io.spray"           %%  "spray-json"   % sprayJsonVersion,
+    "org.scalatest"      %% "scalatest"     % scalatestVersion       % Test,
+    "za.co.absa.commons" %% "commons"       % absaCommonsVersion,
+    "za.co.absa"         %% "spark-commons" % absaSparkCommonsVersion
   )
 
   val e2eDependencies = List(

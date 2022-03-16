@@ -19,9 +19,9 @@ package za.co.absa.hermes.datasetComparison
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
-import za.co.absa.commons.spark.SchemaUtils
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.utils.HelperFunctions
+import za.co.absa.spark.commons.implicits.StructTypeImplicits.StructTypeEnhancements
 
 /**
  * Class that is the brain of the DatasetComparison module. This class should be used in case of using DatasetComparison
@@ -71,7 +71,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
       case None => checkSchemas(testedDF)
     }
 
-    val selector = SchemaUtils.getDataFrameSelector(optionalSchema.getOrElse(testedDF.reference.schema))
+    val selector = optionalSchema.getOrElse(testedDF.reference.schema).getDataFrameSelector()
     val dfsColumnsSorted = ComparisonPair(
       testedDF.reference.select(selector: _*),
       testedDF.actual.select(selector: _*)
@@ -149,9 +149,9 @@ class DatasetComparator(dataFrameReference: DataFrame,
     val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
 
-    if (!SchemaUtils.equivalentSchemas(expectedSchema, actualSchema)) {
-      val diffSchema = SchemaUtils.diffSchema(expectedSchema, actualSchema) ++
-        SchemaUtils.diffSchema(actualSchema, expectedSchema)
+    if (!expectedSchema.isEquivalent(actualSchema)) {
+      val diffSchema = expectedSchema.diffSchema(actualSchema) ++
+        actualSchema.diffSchema(expectedSchema)
       throw SchemasDifferException(diffSchema.mkString("\n"))
     }
   }
@@ -165,10 +165,9 @@ class DatasetComparator(dataFrameReference: DataFrame,
   def checkSchemas(testedDF: ComparisonPair[DataFrame], schema: StructType): Unit = {
     val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
-
-    if (!(SchemaUtils.isSubset(schema, actualSchema) && SchemaUtils.isSubset(schema, expectedSchema))) {
-      val diffSchema = SchemaUtils.diffSchema(schema, actualSchema) ++
-        SchemaUtils.diffSchema(schema, expectedSchema)
+    if (!schema.isSubset(actualSchema) && !schema.isSubset(expectedSchema)) {
+      val diffSchema = schema.diffSchema(actualSchema) ++
+        schema.diffSchema(expectedSchema)
       throw BadProvidedSchema(diffSchema.mkString("\n"))
     }
   }
