@@ -165,7 +165,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
   def checkSchemas(testedDF: ComparisonPair[DataFrame], schema: StructType): Unit = {
     val expectedSchema: StructType = getSchemaWithoutMetadata(testedDF.reference.schema)
     val actualSchema: StructType = getSchemaWithoutMetadata(testedDF.actual.schema)
-    if (!schema.isSubset(actualSchema) && !schema.isSubset(expectedSchema)) {
+    if (!schema.isSubset(actualSchema) || !schema.isSubset(expectedSchema)) {
       val diffSchema = schema.diffSchema(actualSchema) ++
         schema.diffSchema(expectedSchema)
       throw BadProvidedSchema(diffSchema.mkString("\n"))
