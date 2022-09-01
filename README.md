@@ -77,7 +77,7 @@ Other configurations are Spark dependant and are out of scope of this README.
 
 ## Info File Comparison
 
-[Autm][atum]'s (and it's derivatives) Info file comparison. Ran as part of the E2E Runner. Can be run as a plain old jar file.
+[Atum][atum]'s (and it's derivatives) Info file comparison. Ran as part of the E2E Runner. Can be run as a plain old jar file.
 
 ### Running
 
