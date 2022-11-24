@@ -27,6 +27,7 @@ Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+import com.github.sbt.jacoco.report.JacocoReportSettings
 
 val mergeStrategy: Def.SettingsDefinition = assemblyMergeStrategy in assembly := {
   case PathList("META-INF", _) => MergeStrategy.discard
@@ -48,6 +49,15 @@ releaseProcess := Seq[ReleaseStep](
   setNextVersion,
   commitNextVersion,
   pushChanges
+)
+
+lazy val commonJacocoReportSettings: JacocoReportSettings = JacocoReportSettings(
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
+lazy val commonJacocoExcludes: Seq[String] = Seq(
+//  "za.co.absa.hermes.utils.SparkCompatibility*", // class and related objects
+//  "za.co.absa.hermes.utils.FileReader" // class only
 )
 
 lazy val hermes = (project in file("."))
@@ -76,6 +86,10 @@ lazy val datasetComparison = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:dataset-comparison_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoExcludes := commonJacocoExcludes
+  )
   .enablePlugins(AutomateHeaderPlugin)
 
 lazy val e2eRunner = project
@@ -92,6 +106,10 @@ lazy val e2eRunner = project
       art.withClassifier(Some("assembly"))
     },
     addArtifact(artifact in (Compile, assembly), assembly)
+  )
+  .settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:e2e-runner_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)
 
@@ -110,6 +128,10 @@ lazy val infoFileComparison = project
     },
     addArtifact(artifact in (Compile, assembly), assembly)
   )
+  .settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:info-file-comparison_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoExcludes := commonJacocoExcludes
+  )
   .enablePlugins(AutomateHeaderPlugin)
 
 lazy val utils = project
@@ -123,5 +145,9 @@ lazy val utils = project
       art.withClassifier(Some("assembly"))
     },
     addArtifact(artifact in (Compile, assembly), assembly)
+  )
+  .settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:utils_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)
