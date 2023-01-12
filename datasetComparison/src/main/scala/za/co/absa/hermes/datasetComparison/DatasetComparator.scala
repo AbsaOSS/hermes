@@ -123,7 +123,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
     val joinedData: DataFrame = joinTwoDataFrames(dataFrames, cmpUniqueColumn)
 
     // Flatten data
-    val flatteningFormula = HelperFunctions.flattenSchema(dataFrames.reference)
+    val flatteningFormula = HelperFunctions.flattenSchema(dataFrames.reference, dataFrames.actual)
     val flatExpected: DataFrame = dataFrames.reference.select(flatteningFormula: _*)
     val flatActual: DataFrame = dataFrames.actual.select(flatteningFormula: _*)
 
