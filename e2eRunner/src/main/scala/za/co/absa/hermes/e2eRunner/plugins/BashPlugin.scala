@@ -52,11 +52,11 @@ class BashPlugin extends Plugin {
   override def name: String = "BashPlugin"
 
   override def performAction(testDefinition: TestDefinition, actualOrder: Int): BashJobsResult = {
-    def runBashCmd(bashCmd: String): String = {
+    def runCmd(cmd: String): String = {
       if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-        (s"cmd /C ${bashCmd.replace("'", "\"")}").!!
+        (s"cmd /C ${cmd.replace("'", "\"")}").!!
       } else {
-        (s"echo $bashCmd" #| "bash").!!
+        (s"echo $cmd" #| "bash").!!
       }
     }
 
@@ -64,7 +64,7 @@ class BashPlugin extends Plugin {
     val testName = testDefinition.name
 
     scribe.info(s"Running command with: ${args.mkString(" ")}")
-    val (confTime, returnValue) = HelperFunctions.calculateTime { runBashCmd(args.mkString(" ")) }
+    val (confTime, returnValue) = HelperFunctions.calculateTime { runCmd(args.mkString(" ")) }
     val additionalInfo = Map("elapsedTimeInMilliseconds" -> confTime.toString)
     BashJobsResult(args, returnValue, actualOrder, testName, passed = true, additionalInfo)
   }
