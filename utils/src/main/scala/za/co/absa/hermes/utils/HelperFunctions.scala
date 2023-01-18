@@ -48,8 +48,14 @@ object HelperFunctions {
 
     def calculateMaxArrayLength(path: String, structField: Option[StructField] = None): Int = {
       val fullPath = path + structField.map(_.name).getOrElse("")
-      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*))
-        .map(_.agg(max(expr(s"size($fullPath)"))).collect()(0).getInt(0))
+      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*)).map(
+        _
+          .agg(max(expr(s"size($fullPath)")))
+          .collect()
+          .headOption
+          .map(_.getInt(0))
+          .getOrElse(0)
+      )
       maxLengths.max
     }
 
