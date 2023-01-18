@@ -46,6 +46,13 @@ object HelperFunctions {
     val fields = new mutable.ListBuffer[Column]()
     val stringFields = new mutable.ListBuffer[String]()
 
+    def calculateMaxArrayLength(path: String, structField: Option[StructField] = None): Int = {
+      val fullPath = path + structField.map(_.name).getOrElse("")
+      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*))
+        .map(_.agg(max(expr(s"size($fullPath)"))).collect()(0).getInt(0))
+      maxLengths.max
+    }
+
     /**
       * Aggregating arrays of primitives by projecting it's columns
       *
@@ -55,9 +62,7 @@ object HelperFunctions {
       * @param arrayType ArrayType
       */
     def flattenStructArray(path: String, fieldNamePrefix: String, structField: StructField, arrayType: ArrayType): Unit = {
-      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*))
-        .map(_.agg(max(expr(s"size($path${structField.name})"))).collect()(0)(0).toString.toInt)
-      val maxLength = maxLengths.max
+      val maxLength = calculateMaxArrayLength(path, Some(structField))
       var i = 0
       while (i < maxLength) {
         val newFieldNamePrefix = s"$fieldNamePrefix${i}_"
@@ -76,9 +81,7 @@ object HelperFunctions {
     }
 
     def flattenNestedArrays(path: String, fieldNamePrefix: String, arrayType: ArrayType): Unit = {
-      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*))
-        .map(_.agg(max(expr(s"size($path)"))).collect()(0)(0).toString.toInt)
-      val maxLength = maxLengths.max
+      val maxLength = calculateMaxArrayLength(path)
       var i = 0
       while (i < maxLength) {
         val newFieldNamePrefix = s"$fieldNamePrefix${i}_"
