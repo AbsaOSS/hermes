@@ -38,11 +38,26 @@ object HelperFunctions {
     * especially on a vary big dataframes.
     *
     * @param df A dataframe
+   *  @param dfsForArraysLength DataFrames with the same schema as `df` that are used to
+   *                             flatten arrays with maximum length among `df` and `dfsForArraysLengths`.
     * @return A new dataframe with flat schema.
     */
-  def flattenSchema(df: DataFrame): List[Column] = {
+  def flattenSchema(df: DataFrame, dfsForArraysLength: DataFrame*): List[Column] = {
     val fields = new mutable.ListBuffer[Column]()
     val stringFields = new mutable.ListBuffer[String]()
+
+    def calculateMaxArrayLength(path: String, structField: Option[StructField] = None): Int = {
+      val fullPath = path + structField.map(_.name).getOrElse("")
+      val maxLengths = (Seq(df) ++ Seq(dfsForArraysLength: _*)).map(
+        _
+          .agg(max(expr(s"size($fullPath)")))
+          .collect()
+          .headOption
+          .map(_.getInt(0))
+          .getOrElse(0)
+      )
+      maxLengths.max
+    }
 
     /**
       * Aggregating arrays of primitives by projecting it's columns
@@ -53,9 +68,9 @@ object HelperFunctions {
       * @param arrayType ArrayType
       */
     def flattenStructArray(path: String, fieldNamePrefix: String, structField: StructField, arrayType: ArrayType): Unit = {
-      val maxInd = df.agg(max(expr(s"size($path${structField.name})"))).collect()(0)(0).toString.toInt
+      val maxLength = calculateMaxArrayLength(path, Some(structField))
       var i = 0
-      while (i < maxInd) {
+      while (i < maxLength) {
         val newFieldNamePrefix = s"$fieldNamePrefix${i}_"
         arrayType.elementType match {
           case st: StructType =>
@@ -72,9 +87,9 @@ object HelperFunctions {
     }
 
     def flattenNestedArrays(path: String, fieldNamePrefix: String, arrayType: ArrayType): Unit = {
-      val maxIndexes = df.agg(max(expr(s"size($path)"))).collect()(0)(0).toString.toInt
+      val maxLength = calculateMaxArrayLength(path)
       var i = 0
-      while (i < maxIndexes) {
+      while (i < maxLength) {
         val newFieldNamePrefix = s"$fieldNamePrefix${i}_"
         arrayType.elementType match {
           case st: StructType =>
