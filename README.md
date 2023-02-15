@@ -17,12 +17,12 @@ Use either of the commands below. Depending on your versions.
 ```bash
 sbt ++2.11.12 assembly -DSPARK_VERSION=2.4.7
 sbt ++2.12.12 assembly -DSPARK_VERSION=2.4.7
-sbt ++2.12.12 assembly -DSPARK_VERSION=3.1.1
+sbt ++2.12.12 assembly -DSPARK_VERSION=3.2.2
 ```
 
 ## Known to work with:
 
-- Spark 2.4.2 - 3.1.1 [1]
+- Spark 2.4.2 - 3.2.2 [1]
 - Java 1.8.0_191-b12
 - Scala 2.11.12 and 2.12.12
 
