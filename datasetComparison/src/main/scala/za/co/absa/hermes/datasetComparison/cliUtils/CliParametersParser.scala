@@ -69,7 +69,7 @@ object CliParametersParser {
       else throw new IllegalArgumentException("Single unknown argument provided. Printed help")
     }
 
-    val (schema, keys, datetimeRebaseMode, trioWithDefaultsMerged) = genericTrioParse(args)
+    val (schema, keys, datetimeRebaseMode, trioWithDefaultsMerged) = genericQuartettoParse(args)
     val finalOutMapWithDefaults = trioWithDefaultsMerged.copy(output = outputDefaults ++ trioWithDefaultsMerged.output)
 
     val refLoadOptions = getLoadOptions(finalOutMapWithDefaults.reference, referencePrefix)
@@ -83,7 +83,7 @@ object CliParametersParser {
     require(args.nonEmpty, "No arguments for reader passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
-    val (schema, keys, datetimeRebaseMode, finalOutMapWithDefaults) = genericTrioParse(args)
+    val (schema, keys, datetimeRebaseMode, finalOutMapWithDefaults) = genericQuartettoParse(args)
 
     val refLoadOptions = getLoadOptions(finalOutMapWithDefaults.reference, referencePrefix)
     val newLoadOptions = getLoadOptions(finalOutMapWithDefaults.actual, actualPrefix)
@@ -104,7 +104,7 @@ object CliParametersParser {
     getLoadOptions(finalOutMapWithDefaults, outputPrefix)
   }
 
-  private[cliUtils] def genericTrioParse(args: Array[String]): (Option[String], Set[String], String, OptionsTrio) = {
+  private[cliUtils] def genericQuartettoParse(args: Array[String]): (Option[String], Set[String], String, OptionsTrio) = {
     val mapOfAllOptions = arrayToMap(args)
 
     val schema = mapOfAllOptions.get("schema")
