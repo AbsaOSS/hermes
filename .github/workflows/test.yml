@@ -28,10 +28,10 @@ jobs:
       fail-fast: false
       matrix:
         scala: [2.11.12, 2.12.12]
-        spark: [2.4.7, 3.1.1]
+        spark: [2.4.7, 3.2.2]
         exclude:
           - scala: 2.11.12
-            spark: 3.1.1
+            spark: 3.2.2
     name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
     steps:
       - name: Checkout code
