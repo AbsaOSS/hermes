@@ -23,4 +23,5 @@ case class CliParameters(referenceDataParameters: Parameters,
                          outDataParameters: Option[Parameters],
                          keys: Set[String],
                          rawOptions: String,
+                         datetimeRebaseMode: String,
                          schemaPath: Option[String] = None)

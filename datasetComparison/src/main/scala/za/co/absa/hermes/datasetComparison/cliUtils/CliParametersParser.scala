@@ -69,26 +69,26 @@ object CliParametersParser {
       else throw new IllegalArgumentException("Single unknown argument provided. Printed help")
     }
 
-    val (schema, keys, trioWithDefaultsMerged) = genericTrioParse(args)
+    val (schema, keys, datetimeRebaseMode, trioWithDefaultsMerged) = genericTrioParse(args)
     val finalOutMapWithDefaults = trioWithDefaultsMerged.copy(output = outputDefaults ++ trioWithDefaultsMerged.output)
 
     val refLoadOptions = getLoadOptions(finalOutMapWithDefaults.reference, referencePrefix)
     val newLoadOptions = getLoadOptions(finalOutMapWithDefaults.actual, actualPrefix)
     val outLoadOptions = getLoadOptions(finalOutMapWithDefaults.output, outputPrefix)
 
-    CliParameters(refLoadOptions, newLoadOptions, Some(outLoadOptions), keys, args.mkString(" "), schema)
+    CliParameters(refLoadOptions, newLoadOptions, Some(outLoadOptions), keys, args.mkString(" "), datetimeRebaseMode, schema)
   }
 
   def parseInputParameters(args: Array[String]): CliParameters = {
     require(args.nonEmpty, "No arguments for reader passed")
     require(args.length % 2 == 0, "Number of arguments must be even")
 
-    val (schema, keys, finalOutMapWithDefaults) = genericTrioParse(args)
+    val (schema, keys, datetimeRebaseMode, finalOutMapWithDefaults) = genericTrioParse(args)
 
     val refLoadOptions = getLoadOptions(finalOutMapWithDefaults.reference, referencePrefix)
     val newLoadOptions = getLoadOptions(finalOutMapWithDefaults.actual, actualPrefix)
 
-    CliParameters(refLoadOptions, newLoadOptions, None, keys, args.mkString(" "), schema)
+    CliParameters(refLoadOptions, newLoadOptions, None, keys, args.mkString(" "), datetimeRebaseMode, schema)
   }
 
   def parseOutputParameters(args: Array[String]): Parameters = {
@@ -104,7 +104,7 @@ object CliParametersParser {
     getLoadOptions(finalOutMapWithDefaults, outputPrefix)
   }
 
-  private[cliUtils] def genericTrioParse(args: Array[String]): (Option[String], Set[String], OptionsTrio) = {
+  private[cliUtils] def genericTrioParse(args: Array[String]): (Option[String], Set[String], String, OptionsTrio) = {
     val mapOfAllOptions = arrayToMap(args)
 
     val schema = mapOfAllOptions.get("schema")
@@ -112,12 +112,17 @@ object CliParametersParser {
       case Some(x) => x.split(",").toSet
       case None => Set.empty[String]
     }
+    val datetimeRebaseMode = mapOfAllOptions.get("datetimeRebaseMode") match {
+      case Some(x) if x == "LEGACY" => "LEGACY"
+      case Some(x) if x == "CORRECTED" => "CORRECTED"
+      case _ => "EXCEPTION"
+    }
 
     val (rawTrio, genericMap) = getMapOfOptions(mapOfAllOptions)
 
     val trioWithoutPrefix = rawTrio.dropOptionPrefix
     val trioWithDefaultsMerged = trioWithoutPrefix.mergeWithProvidedDefaults(genericMap)
-    (schema, keys, trioWithDefaultsMerged)
+    (schema, keys, datetimeRebaseMode, trioWithDefaultsMerged)
   }
 
   private[cliUtils] def dropOptionPrefix(refMap: Map[String, String]): Map[String, String] = {
