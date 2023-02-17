@@ -112,11 +112,7 @@ object CliParametersParser {
       case Some(x) => x.split(",").toSet
       case None => Set.empty[String]
     }
-    val datetimeRebaseMode = mapOfAllOptions.get("datetimeRebaseMode") match {
-      case Some(x) if x == "LEGACY" => "LEGACY"
-      case Some(x) if x == "CORRECTED" => "CORRECTED"
-      case _ => "EXCEPTION"
-    }
+    val datetimeRebaseMode = mapOfAllOptions.getOrElse("datetimeRebaseMode", "EXCEPTION")
 
     val (rawTrio, genericMap) = getMapOfOptions(mapOfAllOptions)
 

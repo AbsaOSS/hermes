@@ -214,7 +214,8 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
   }
 
   test("Compare nested structures with errors") {
-    val expected = Array("WrappedArray(legs_0_conditions_0_checks_0_checkNums_5)", "WrappedArray(legs_0_legid)")
+    // added 'sorted' to solve difference in ordering between spark 2.4.7 vs 3.2.2
+    val expected = Array("WrappedArray(legs_0_legid)", "WrappedArray(legs_0_conditions_0_checks_0_checkNums_5)").sorted
     val refPath = getClass.getResource("/json_orig").toString
     val newPath = getClass.getResource("/json_changed").toString
     val outPath = s"target/test_output/comparison_job/negative/$timePrefix"
@@ -231,7 +232,7 @@ class DatasetComparatorJobSuite extends FunSuite with SparkTestBase with BeforeA
       DatasetComparisonJob.main(args)
     }
     val df = spark.read.format("parquet").load(outPath)
-    val actual: Array[String] = df.select("errCol").collect().flatMap(_.toSeq).map(_.toString)
+    val actual: Array[String] = df.select("errCol").collect().flatMap(_.toSeq).map(_.toString).sorted
 
     assert(actual sameElements expected)
   }
