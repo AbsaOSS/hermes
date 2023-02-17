@@ -32,6 +32,8 @@ jobs:
         exclude:
           - scala: 2.11.12
             spark: 3.2.2
+          - scala: 2.12.12
+            spark: 2.4.7
     name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
     steps:
       - name: Checkout code
