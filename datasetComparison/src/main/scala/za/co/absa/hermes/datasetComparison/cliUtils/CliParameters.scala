@@ -23,5 +23,4 @@ case class CliParameters(referenceDataParameters: Parameters,
                          outDataParameters: Option[Parameters],
                          keys: Set[String],
                          rawOptions: String,
-                         datetimeRebaseMode: String = "EXCEPTION",
                          schemaPath: Option[String] = None)

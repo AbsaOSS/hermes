@@ -18,7 +18,7 @@ package za.co.absa.hermes.datasetComparison
 
 import java.io.PrintWriter
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.{SPARK_VERSION, SparkConf}
+import org.apache.spark.SPARK_VERSION
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
@@ -39,9 +39,6 @@ object DatasetComparisonJob {
            | '${cliParameters.actualDataParameters.path}'
            |""".stripMargin.replaceAll("[\\r\\n]", "")
       )
-      .config(new SparkConf()
-        .set("spark.sql.legacy.parquet.datetimeRebaseModeInRead", cliParameters.datetimeRebaseMode)
-        .set("spark.sql.legacy.parquet.datetimeRebaseModeInWrite", cliParameters.datetimeRebaseMode))
       .getOrCreate()
 
     execute(cliParameters, None)

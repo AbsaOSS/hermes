@@ -16,7 +16,6 @@
 
 package za.co.absa.hermes.e2eRunner.plugins
 
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import za.co.absa.hermes.datasetComparison.cliUtils.CliParametersParser
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
@@ -84,9 +83,7 @@ class DatasetComparisonPlugin extends Plugin with SparkBase {
     val cliOptions = CliParametersParser.parseInputParameters(args)
     val outOptions = CliParametersParser.parseOutputParameters(testDefinition.writeArgs.getOrElse(Array.empty))
 
-    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin", Option(new SparkConf()
-      .set("spark.sql.legacy.parquet.datetimeRebaseModeInRead", cliOptions.datetimeRebaseMode)
-      .set("spark.sql.legacy.parquet.datetimeRebaseModeInWrite", cliOptions.datetimeRebaseMode)))
+    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
 
     val optionalSchema = DatasetComparisonJob.getSchema(cliOptions.schemaPath)
     val dataFrameRef = Utils.loadDataFrame(cliOptions.referenceDataParameters)

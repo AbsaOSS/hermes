@@ -74,7 +74,6 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
       Some(Parameters("parquet", Map.empty[String, String], "path/to/nowhere")),
       Set.empty[String],
       "--bogus raw-options",
-      "EXCEPTION",
       Some(getClass.getResource("/dataSample1Schema.json").toString)
     )
 
