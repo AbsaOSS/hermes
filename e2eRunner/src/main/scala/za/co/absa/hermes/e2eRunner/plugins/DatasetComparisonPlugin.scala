@@ -80,11 +80,9 @@ class DatasetComparisonPlugin extends Plugin with SparkBase {
     val args = testDefinition.args
     val testName = testDefinition.name
 
+    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
     val cliOptions = CliParametersParser.parseInputParameters(args)
     val outOptions = CliParametersParser.parseOutputParameters(testDefinition.writeArgs.getOrElse(Array.empty))
-
-    implicit val spark: SparkSession = sparkSession("DatasetComparisonPlugin")
-
     val optionalSchema = DatasetComparisonJob.getSchema(cliOptions.schemaPath)
     val dataFrameRef = Utils.loadDataFrame(cliOptions.referenceDataParameters)
     val dataFrameActual = Utils.loadDataFrame(cliOptions.actualDataParameters)
