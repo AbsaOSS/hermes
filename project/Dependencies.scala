@@ -28,7 +28,7 @@ object Dependencies {
   private val sprayJsonVersion = "1.3.5"
   private val typeSafeConfigVersion = "1.3.4"
 
-  private val atumModelVersion = "3.5.0"
+  private val atumModelVersion = "3.9.0"
   private val commonsVersion = "0.0.14"
   private val hofsVersion = "0.4.0"
   private val absaCommonsVersion = "1.0.1"
@@ -36,7 +36,7 @@ object Dependencies {
 
   private val scalatestVersion = "3.0.5"
 
-  def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "2.4.7")
+  def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "3.2.2")
 
   val baseDependencies = List(
     "com.github.scopt"   %% "scopt"         % scoptVersion,

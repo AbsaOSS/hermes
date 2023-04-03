@@ -123,7 +123,7 @@ class DatasetComparator(dataFrameReference: DataFrame,
     val joinedData: DataFrame = joinTwoDataFrames(dataFrames, cmpUniqueColumn)
 
     // Flatten data
-    val flatteningFormula = HelperFunctions.flattenSchema(dataFrames.reference)
+    val flatteningFormula = HelperFunctions.flattenSchema(dataFrames.reference, dataFrames.actual)
     val flatExpected: DataFrame = dataFrames.reference.select(flatteningFormula: _*)
     val flatActual: DataFrame = dataFrames.actual.select(flatteningFormula: _*)
 
@@ -219,17 +219,14 @@ class DatasetComparator(dataFrameReference: DataFrame,
    * @return DataFrame with errors in error column
    */
   private def findDifferences(columns: Array[String], joinedFlatDataWithErrCol: DataFrame): DataFrame = {
-    val tmpColumnName: String = generateUniqueColumnName(columns, "HermesDatasetComparisonTmp")
-    columns.foldLeft(joinedFlatDataWithErrCol) { (data, column) =>
-      data.withColumnRenamed(config.errorColumnName, tmpColumnName)
-        .withColumn(config.errorColumnName, concat(
-          when(col(s"${config.actualPrefix}_$column") === col(s"${config.expectedPrefix}_$column") or
-            (col(s"${config.expectedPrefix}_$column").isNull and
-              col(s"${config.actualPrefix}_$column").isNull),
-            lit(Array[String]()))
-            .otherwise(array(lit(column))), col(tmpColumnName)))
-        .drop(tmpColumnName)
+    val errorsPerColumn = columns.map { column =>
+      when(
+        col(s"${config.actualPrefix}_$column") <=> col(s"${config.expectedPrefix}_$column"),
+        lit(Array[String]())
+      ).otherwise(array(lit(column)))
     }
+    val errorColumn = concat(errorsPerColumn.reverse: _*)
+    joinedFlatDataWithErrCol.withColumn(config.errorColumnName, errorColumn)
   }
 
   /**

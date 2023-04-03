@@ -16,6 +16,8 @@
 
 package za.co.absa.hermes.datasetComparison
 
+import scala.collection.JavaConverters._
+
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.types.{StringType, StructType}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -23,6 +25,9 @@ import za.co.absa.hermes.datasetComparison.cliUtils.CliParameters
 import za.co.absa.hermes.datasetComparison.config.ManualConfig
 import za.co.absa.hermes.datasetComparison.dataFrame.{Parameters, Utils}
 import za.co.absa.hermes.utils.SparkTestBase
+
+case class A(id: String, b: List[B])
+case class B(name: String, amount: Int)
 
 class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndAfterAll {
   test("Test a positive comparison") {
@@ -103,6 +108,56 @@ class DatasetComparatorSuite extends FunSuite with SparkTestBase with BeforeAndA
     val cmpResult = new DatasetComparator(df1, df2, cliOptions.keys, manualConfig, Some(schema)).compare
 
     assert(expectedResult == cmpResult)
+  }
+
+  test("Test a negative comparison when array in reference data has more elements than in new data") {
+    val referenceData = Seq(A("0", List(B("name0", 0), B("name01", 1))), A("1", List(B("name1", 0), B("name11", 1))))
+    val newData = Seq(A("0", List(B("name0", 0))), A("1", List(B("name1", 0))))
+    val referenceDf = spark.createDataFrame(referenceData)
+    val newDf = spark.createDataFrame(newData)
+
+    val manualConfig = new ManualConfig(
+      "errCol",
+      "actual",
+      "expected",
+      true
+    )
+
+    val cmpResult = new DatasetComparator(referenceDf, newDf, Set("id"), manualConfig).compare
+
+    assert(!cmpResult.passed)
+    assert(cmpResult.resultDF.isDefined)
+    assert(cmpResult.diffCount === 2)
+
+    val actualErrCol = cmpResult.resultDF.get.select("errCol").collect().map(_.getList[String](0).asScala.toSet)
+    val expectedErrCol = Array(Set("b_1_name", "b_1_amount"), Set("b_1_name", "b_1_amount"))
+
+    assert(actualErrCol === expectedErrCol)
+  }
+
+  test("Test a negative comparison when array in reference data has less elements than in new data") {
+    val referenceData = Seq(A("0", List(B("name0", 0))), A("1", List(B("name1", 0))))
+    val newData = Seq(A("0", List(B("name0", 0), B("name01", 1))), A("1", List(B("name1", 0), B("name11", 1))))
+    val referenceDf = spark.createDataFrame(referenceData)
+    val newDf = spark.createDataFrame(newData)
+
+    val manualConfig = new ManualConfig(
+      "errCol",
+      "actual",
+      "expected",
+      true
+    )
+
+    val cmpResult = new DatasetComparator(referenceDf, newDf, Set("id"), manualConfig).compare
+
+    assert(!cmpResult.passed)
+    assert(cmpResult.resultDF.isDefined)
+    assert(cmpResult.diffCount === 2)
+
+    val actualErrCol = cmpResult.resultDF.get.select("errCol").collect().map(_.getList[String](0).asScala.toSet)
+    val expectedErrCol = Array(Set("b_1_name", "b_1_amount"), Set("b_1_name", "b_1_amount"))
+
+    assert(actualErrCol === expectedErrCol)
   }
 
   test("Test a negative comparison with wrong provided schema") {

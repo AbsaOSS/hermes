@@ -24,12 +24,12 @@ import org.apache.spark.sql.types.{DataType, StructType}
 import za.co.absa.hermes.datasetComparison.cliUtils.{CliParameters, CliParametersParser}
 import za.co.absa.hermes.datasetComparison.config.{DatasetComparisonConfig, TypesafeConfig}
 import za.co.absa.hermes.datasetComparison.dataFrame.Utils
-import za.co.absa.hermes.utils.SparkCompatibility
+import za.co.absa.spark.commons.SparkVersionGuard
 
 object DatasetComparisonJob {
 
   def main(args: Array[String]): Unit = {
-    SparkCompatibility.checkVersion(SPARK_VERSION)
+    SparkVersionGuard.fromDefaultSparkCompatibilitySettings.ensureSparkVersionCompatibility(SPARK_VERSION)
 
     val cliParameters = CliParametersParser.parse(args)
 

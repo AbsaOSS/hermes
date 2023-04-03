@@ -22,7 +22,7 @@ import java.io.File
 import za.co.absa.hermes.e2eRunner.logging.LoggingFunctions
 import za.co.absa.hermes.e2eRunner.logging.functions.Scribe
 import za.co.absa.hermes.e2eRunner.plugins.FailedPluginResult
-import za.co.absa.hermes.utils.SparkCompatibility
+import za.co.absa.spark.commons.SparkVersionGuard
 
 import scala.util.{Failure, Success, Try}
 
@@ -35,7 +35,7 @@ object E2ERunnerJob {
   ).getPath
 
   def main(args: Array[String]): Unit = {
-    SparkCompatibility.checkVersion(SPARK_VERSION)
+    SparkVersionGuard.fromDefaultSparkCompatibilitySettings.ensureSparkVersionCompatibility(SPARK_VERSION)
 
     val cmd = E2ERunnerConfig.getCmdLineArguments(args) match {
       case Success(value) => value
