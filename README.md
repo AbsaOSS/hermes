@@ -30,8 +30,9 @@ If there is someone willing to test for older versions, we are happy to extend t
 These are applicable only to use as a spark-job not as a library
 
 ## How to generate Code coverage report
-```sbt
-sbt jacoco
+```
+sbt ++2.11.12 jacoco -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 jacoco -DSPARK_VERSION=3.2.2
 ```
 Code coverage will be generated on path:
 ```

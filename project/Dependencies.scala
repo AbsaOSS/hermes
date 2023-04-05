@@ -17,24 +17,25 @@ import sbt._
 
 object Dependencies {
 
-  private val betterFilesVersion = "3.8.0"
-  private val classUtilsVersion = "1.5.0"
+  private val betterFilesVersion = "3.9.2"
+  private val classUtilsVersion = "1.5.1"
   private val hadoopVersion = "2.7.7"
   private val nettyAllVersion = "4.1.36.Final"
-  private val reflectionsVersion = "0.9.12"
-  private val scoptVersion = "4.0.0"
-  private val scribeVersion = "2.7.3"
-  private val sparkXmlVersion = "0.5.0"
-  private val sprayJsonVersion = "1.3.5"
-  private val typeSafeConfigVersion = "1.3.4"
+  private val reflectionsVersion = "0.10.2"
+  private val scoptVersion = "4.1.0"
+  private val scribeVersion = "2.8.6"
+  private val sparkXmlVersion = "0.13.0"
+  private val sprayJsonVersion = "1.3.6"
+  private val typeSafeConfigVersion = "1.4.2"
+  private val snappyVersion = "1.1.9.1"
 
   private val atumModelVersion = "3.9.0"
-  private val commonsVersion = "0.0.14"
+  private val commonsVersion = "1.3.3"
   private val hofsVersion = "0.4.0"
-  private val absaCommonsVersion = "1.0.1"
+  private val absaCommonsVersion = "1.3.3"
   private val absaSparkCommonsVersion = "0.2.0"
 
-  private val scalatestVersion = "3.0.5"
+  private val scalatestVersion = "3.1.4"
 
   def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "3.2.2")
 
@@ -42,7 +43,7 @@ object Dependencies {
     "com.github.scopt"   %% "scopt"         % scoptVersion,
     "com.outr"           %% "scribe"        % scribeVersion,
     "com.typesafe"       %  "config"        % typeSafeConfigVersion,
-    "io.spray"           %%  "spray-json"   % sprayJsonVersion,
+    "io.spray"           %% "spray-json"    % sprayJsonVersion,
     "org.scalatest"      %% "scalatest"     % scalatestVersion       % Test,
     "za.co.absa.commons" %% "commons"       % absaCommonsVersion,
     "za.co.absa"         %% "spark-commons" % absaSparkCommonsVersion
@@ -51,8 +52,8 @@ object Dependencies {
   val e2eDependencies = List(
     "org.apache.spark"     %% "spark-core"   % sparkVersion     % Provided,
     "org.apache.spark"     %% "spark-sql"    % sparkVersion     % Provided,
-    "org.reflections" %  "reflections" % reflectionsVersion,
-    "org.clapper"     %% "classutil"   % classUtilsVersion
+    "org.reflections"      %  "reflections"  % reflectionsVersion,
+    "org.clapper"          %% "classutil"    % classUtilsVersion
   )
 
   val datasetComparisonDependencies = List(
@@ -64,7 +65,9 @@ object Dependencies {
     "org.apache.hadoop"  %  "hadoop-client" % hadoopVersion    % Provided,
     "io.netty"           %  "netty-all"     % nettyAllVersion,
     "za.co.absa"         %% "spark-hofs"    % hofsVersion,
-    "za.co.absa.commons" %% "commons"       % commonsVersion
+    "za.co.absa.commons" %% "commons"       % commonsVersion,
+    // for M1 chip required 1.1.8.4+, latest spark 2.4(.8) depend on 1.1.8.2
+    "org.xerial.snappy"  %  "snappy-java"    % snappyVersion    % Provided
   )
 
   val compareInfoFileDependencies = List(
