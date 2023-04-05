@@ -29,6 +29,17 @@ sbt ++2.12.12 assembly -DSPARK_VERSION=3.2.2
 If there is someone willing to test for older versions, we are happy to extend these.
 These are applicable only to use as a spark-job not as a library
 
+## How to generate Code coverage report
+```
+sbt ++2.11.12 jacoco -DSPARK_VERSION=2.4.7
+sbt ++2.12.12 jacoco -DSPARK_VERSION=3.2.2
+```
+Code coverage will be generated on path:
+```
+{project-root}/{module}/target/scala-{scala_version}/jacoco/report/html
+```
+
+
 ## Dataset Comparison
 
 Spark job for the comparison of data sets. As it leverages spark, there are almost no limitations to data sources and size of the data.
