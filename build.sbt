@@ -19,7 +19,7 @@ ThisBuild / name         := "hermes"
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.12"
 
-ThisBuild / scalaVersion := scala211
+ThisBuild / scalaVersion := scala212
 ThisBuild / crossScalaVersions := Seq(scala211, scala212)
 ThisBuild / releaseCrossBuild := true
 
@@ -87,7 +87,7 @@ lazy val datasetComparison = project
     addArtifact(artifact in (Compile, assembly), assembly)
   )
   .settings(
-    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:dataset-comparison_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:dataset-comparison Jacoco Report - scala:${scalaVersion.value}"),
     jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)
@@ -108,7 +108,7 @@ lazy val e2eRunner = project
     addArtifact(artifact in (Compile, assembly), assembly)
   )
   .settings(
-    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:e2e-runner_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:e2e-runner Jacoco Report - scala:${scalaVersion.value}"),
     jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)
@@ -129,7 +129,7 @@ lazy val infoFileComparison = project
     addArtifact(artifact in (Compile, assembly), assembly)
   )
   .settings(
-    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:info-file-comparison_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:info-file-comparison Jacoco Report - scala:${scalaVersion.value}"),
     jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)
@@ -147,7 +147,7 @@ lazy val utils = project
     addArtifact(artifact in (Compile, assembly), assembly)
   )
   .settings(
-    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:utils_scala_${scalaVersion.value} Jacoco Report"),
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"hermes:utils Jacoco Report - scala:${scalaVersion.value}"),
     jacocoExcludes := commonJacocoExcludes
   )
   .enablePlugins(AutomateHeaderPlugin)

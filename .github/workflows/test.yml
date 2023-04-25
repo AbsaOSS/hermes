@@ -24,16 +24,30 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        scala: [2.11.12, 2.12.12]
+#        spark: [2.4.7, 3.2.2]
+#        exclude:
+#          - scala: 2.11.12
+#            spark: 3.2.2
+#          - scala: 2.12.12
+#            spark: 2.4.7
     strategy:
       fail-fast: false
       matrix:
-        scala: [2.11.12, 2.12.12]
-        spark: [2.4.7, 3.2.2]
-        exclude:
+        include:
           - scala: 2.11.12
-            spark: 3.2.2
-          - scala: 2.12.12
+            scalaShort: "2.11"
             spark: 2.4.7
+            overall: 87.0
+            changed: 80.0
+          - scala: 2.12.12
+            scalaShort: "2.12"
+            spark: 3.2.2
+            overall: 87.0
+            changed: 80.0
     name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
     steps:
       - name: Checkout code
@@ -44,4 +58,28 @@ jobs:
         with:
           java-version: "adopt@1.8"
       - name: Build and run tests
-        run: sbt ++${{matrix.scala}} test -DSPARK_VERSION=${{matrix.spark}}
+        run: sbt ++${{matrix.scala}} jacoco -DSPARK_VERSION=${{matrix.spark}}
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.3
+        with:
+          paths: >
+            ${{ github.workspace }}/datasetComparison/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml,
+            ${{ github.workspace }}/e2eRunner/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml,
+            ${{ github.workspace }}/infoFileComparison/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml,
+            ${{ github.workspace }}/utils/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: ${{ matrix.overall }}
+          min-coverage-changed-files: ${{ matrix.changed }}
+          title: JaCoCo code coverage report - scala ${{ matrix.scala }}
+          update-comment: true
+      - name: Get the Coverage info
+        run: |
+          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+      - name: Fail PR if changed files coverage is less than ${{ matrix.changed }}%
+        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Changed files coverage is less than ${{ matrix.changed }}%!')
