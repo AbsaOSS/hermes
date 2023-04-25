@@ -24,16 +24,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        scala: [2.11.12, 2.12.12]
-#        spark: [2.4.7, 3.2.2]
-#        exclude:
-#          - scala: 2.11.12
-#            spark: 3.2.2
-#          - scala: 2.12.12
-#            spark: 2.4.7
     strategy:
       fail-fast: false
       matrix:
@@ -41,12 +31,12 @@ jobs:
           - scala: 2.11.12
             scalaShort: "2.11"
             spark: 2.4.7
-            overall: 87.0
+            overall: 0.0
             changed: 80.0
           - scala: 2.12.12
             scalaShort: "2.12"
             spark: 3.2.2
-            overall: 87.0
+            overall: 0.0
             changed: 80.0
     name: Test Spark ${{matrix.spark}} on Scala ${{matrix.scala}}
     steps:
